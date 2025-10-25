@@ -28,7 +28,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
               ),
             ),
             Container(
-              height: 120,
+              height: 140,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 padding: EdgeInsets.symmetric(horizontal: 16),
@@ -39,29 +39,56 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   final item = AppData.foodItems
                       .where((item) => !item.isFavorite)
                       .toList()[index];
-                  return Container(
-                    width: 100,
-                    margin: EdgeInsets.only(right: 12),
-                    decoration: BoxDecoration(
-                      color: Colors.amber.shade100,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(item.image, style: TextStyle(fontSize: 30)),
-                        SizedBox(height: 8),
-                        Text(
-                          item.name,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              FoodDetailScreen(foodItem: item),
                         ),
-                      ],
+                      );
+                    },
+                    child: Container(
+                      width: 120,
+                      margin: EdgeInsets.only(right: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.shade100,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: item.image.endsWith('.png')
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.asset(
+                                      item.image,
+                                      fit: BoxFit.cover,
+                                      width: double.infinity,
+                                    ),
+                                  )
+                                : Text(item.image,
+                                    style: TextStyle(fontSize: 30)),
+                          ),
+                          SizedBox(height: 8),
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 4.0),
+                            child: Text(
+                              item.name,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 },
@@ -106,33 +133,46 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                               color: Colors.grey[200],
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Center(
-                              child: Text(
-                                item.image,
-                                style: TextStyle(fontSize: 24),
-                              ),
-                            ),
+                            child: item.image.endsWith('.png')
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.asset(
+                                      item.image,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  )
+                                : Center(
+                                    child: Text(
+                                      item.image,
+                                      style: TextStyle(fontSize: 24),
+                                    ),
+                                  ),
                           ),
                           title: Text(
                             item.name,
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          subtitle: Text('${item.category} • \$${item.price}'),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.star, size: 16, color: Colors.amber),
-                              Text('${item.rating}'),
-                              SizedBox(width: 8),
-                              IconButton(
-                                icon: Icon(Icons.favorite, color: Colors.red),
-                                onPressed: () {
-                                  setState(() {
-                                    item.isFavorite = false;
-                                  });
-                                },
-                              ),
-                            ],
+                          subtitle: Text(
+                            '${item.category} • Rs ${item.price.toStringAsFixed(2)}',
+                          ),
+                          trailing: FittedBox(
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.star,
+                                    size: 16, color: Colors.amber),
+                                Text('${item.rating}'),
+                                SizedBox(width: 8),
+                                IconButton(
+                                  icon: Icon(Icons.favorite, color: Colors.red),
+                                  onPressed: () {
+                                    setState(() {
+                                      item.isFavorite = false;
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
                           ),
                           onTap: () {
                             Navigator.push(

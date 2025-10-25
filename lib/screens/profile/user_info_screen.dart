@@ -1,90 +1,148 @@
 import 'package:flutter/material.dart';
 import '../../models/app_data.dart';
 
-class UserInfoScreen extends StatelessWidget {
+class UserInfoScreen extends StatefulWidget {
+  @override
+  _UserInfoScreenState createState() => _UserInfoScreenState();
+}
+
+class _UserInfoScreenState extends State<UserInfoScreen> {
+  late TextEditingController nameController;
+  late TextEditingController emailController;
+  late TextEditingController passwordController;
+  late TextEditingController phoneController;
+
+  @override
+  void initState() {
+    super.initState();
+    nameController = TextEditingController(text: AppData.currentUser.name);
+    emailController = TextEditingController(text: AppData.currentUser.email);
+    passwordController = TextEditingController(text: ""); // hidden, not saved here
+    phoneController = TextEditingController(text: "+230 5123 4567"); // example
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    phoneController.dispose();
+    super.dispose();
+  }
+
+  void _saveProfile() {
+    setState(() {
+      AppData.currentUser.name = nameController.text;
+      AppData.currentUser.email = emailController.text;
+      // In real app: handle password securely + phone field
+    });
+
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('User Info')),
-      body: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Card(
-              child: Padding(
-                padding: EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    CircleAvatar(
-                      radius: 40,
-                      backgroundColor: Colors.amber,
-                      child: Text(
-                        AppData.currentUser.name[0],
-                        style: TextStyle(fontSize: 32, color: Colors.black),
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      AppData.currentUser.name,
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      AppData.currentUser.email,
-                      style: TextStyle(color: Colors.grey[600]),
-                    ),
-                  ],
-                ),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          'Edit Profile',
+          style: TextStyle(
+            color: Colors.red.shade900,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.check, color: Colors.black),
+            onPressed: _saveProfile,
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            children: [
+              // Profile Picture
+              Stack(
+                alignment: Alignment.bottomRight,
+                children: [
+                  CircleAvatar(
+                    radius: 60,
+                    backgroundImage: AssetImage("assets/images/profile.png"),
+                  ),
+                  CircleAvatar(
+                    radius: 18,
+                    backgroundColor: Colors.white,
+                    child: Icon(Icons.camera_alt, size: 20, color: Colors.grey),
+                  ),
+                ],
               ),
-            ),
-            SizedBox(height: 24),
-            Card(
-              child: Padding(
-                padding: EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Statistics',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    _buildStatRow(
-                      'Total Orders',
-                      '${AppData.currentUser.totalOrders}',
-                    ),
-                    _buildStatRow(
-                      'Total Spent',
-                      '\$${AppData.currentUser.totalSpent.toStringAsFixed(2)}',
-                    ),
-                    _buildStatRow(
-                      'Loyalty Points',
-                      '${AppData.currentUser.loyaltyPoints}',
-                    ),
-                    _buildStatRow('Member Since', 'January 2024'),
-                  ],
-                ),
-              ),
-            ),
-          ],
+              const SizedBox(height: 24),
+
+              // Name field
+              _buildTextField("Name", nameController, Colors.brown.shade600),
+
+              // Email field
+              _buildTextField("Email", emailController, Color(0xFF2F2740)),
+
+              // Password field
+              _buildTextField("Password", passwordController, Colors.brown.shade600,
+                  obscure: true, hint: "********"),
+
+              // Phone field
+              _buildTextField("Phone Number", phoneController, Colors.brown.shade600,
+                  hint: "+ 230 5123 4567"),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildStatRow(String label, String value) {
+  Widget _buildTextField(
+    String label,
+    TextEditingController controller,
+    Color bgColor, {
+    bool obscure = false,
+    String? hint,
+  }) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: TextStyle(color: Colors.grey[600])),
-          Text(value, style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(label,
+              style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  color: Colors.red.shade900)),
+          const SizedBox(height: 6),
+          Container(
+            decoration: BoxDecoration(
+              color: bgColor,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: TextField(
+              controller: controller,
+              obscureText: obscure,
+              style: TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                hintText: hint,
+                hintStyle: TextStyle(color: Colors.white70),
+                border: InputBorder.none,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              ),
+            ),
+          ),
         ],
       ),
     );

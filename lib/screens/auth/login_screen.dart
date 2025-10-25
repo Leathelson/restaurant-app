@@ -56,7 +56,8 @@ class _LoginScreenState extends State<LoginScreen> {
     final w = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      resizeToAvoidBottomInset: false, // 👈 prevents bg from moving with keyboard
+      resizeToAvoidBottomInset:
+          false, // 👈 prevents bg from moving with keyboard
       body: Stack(
         children: [
           // background image stays fixed
@@ -114,7 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   // emblem circle
                   Center(
                     child: Container(
-                      width: 150,   // bigger circle
+                      width: 150, // bigger circle
                       height: 150,
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.06),
@@ -127,19 +128,18 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Center(
                         child: Image.asset(
                           'assets/images/emblem.png',
-                          width: 120,   // bigger emblem
+                          width: 120, // bigger emblem
                           height: 120,
                           fit: BoxFit.contain,
                           errorBuilder: (_, __, ___) => Icon(
                             Icons.local_dining,
                             color: Colors.white70,
-                            size: 64,   // bigger fallback icon too
+                            size: 64, // bigger fallback icon too
                           ),
                         ),
                       ),
                     ),
                   ),
-
 
                   const SizedBox(height: 28),
 

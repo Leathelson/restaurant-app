@@ -76,7 +76,7 @@ class Reservation {
 }
 
 class AppData {
-  static User currentUser = User(name: "John Doe", email: "john@example.com");
+  static User currentUser = User(name: "William Dafuk", email: "william@dafuk.com");
   static List<CartItem> cart = [];
   static List<Order> orders = [];
   static List<Reservation> reservations = [];
@@ -85,41 +85,41 @@ class AppData {
   static List<FoodItem> foodItems = [
     FoodItem(
       id: "1",
-      name: "Truffle Risotto",
+      name: "Grilled Sirloin Steak",
       category: "Starters",
-      price: 28.99,
-      image: "🍚",
+      price: 1200.00,
+      image: "assets/images/food1.png",
       rating: 4.8,
-      description: "Creamy arborio rice with black truffle shavings",
+      description: "MEAT LOVERS DELIGHT! Juicy grilled sirloin steak with herbs",
       isFavorite: true,
     ),
     FoodItem(
       id: "2",
-      name: "Wagyu Beef Steak",
+      name: "East Coast Citrus-Garlic",
       category: "Non-Veg",
-      price: 89.99,
-      image: "🥩",
+      price: 1000.00,
+      image: "assets/images/food2.png",
       rating: 4.9,
-      description: "Premium A5 Wagyu beef, perfectly grilled",
+      description: "East Coast style citrus-garlic shrimp platter",
     ),
-    FoodItem(
-      id: "3",
-      name: "Lobster Thermidor",
-      category: "Non-Veg",
-      price: 65.99,
-      image: "🦞",
-      rating: 4.7,
-      description: "Fresh lobster in rich cream sauce",
-    ),
-    FoodItem(
-      id: "4",
-      name: "Caviar Appetizer",
-      category: "Starters",
-      price: 45.99,
-      image: "🥄",
-      rating: 4.6,
-      description: "Beluga caviar with traditional accompaniments",
-    ),
+    // FoodItem(
+    //   id: "3",
+    //   name: "Lobster Thermidor",
+    //   category: "Non-Veg",
+    //   price: 65.99,
+    //   image: "🦞",
+    //   rating: 4.7,
+    //   description: "Fresh lobster in rich cream sauce",
+    // ),
+    // FoodItem(
+    //   id: "4",
+    //   name: "Caviar Appetizer",
+    //   category: "Starters",
+    //   price: 45.99,
+    //   image: "🥄",
+    //   rating: 4.6,
+    //   description: "Beluga caviar with traditional accompaniments",
+    // ),
   ];
 
   static List<String> categories = ["Starters", "Non-Veg", "Desserts", "Beverages"];
