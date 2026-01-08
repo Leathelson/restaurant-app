@@ -4,6 +4,8 @@ import '../dashboard/dashboard_screen.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
@@ -40,19 +42,19 @@ class _LoginScreenState extends State<LoginScreen> {
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => DashboardScreen()),
+        MaterialPageRoute(builder: (context) => const DashboardScreen()),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Please enter email and password")),
+        const SnackBar(content: Text("Please enter email and password")),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final gold = const Color(0xFFB37C1E);
-    final goldCard = const Color(0xFF906224);
+    const gold = Color(0xFFB37C1E);
+    const goldCard = Color(0xFF906224);
     final w = MediaQuery.of(context).size.width;
 
     return Scaffold(
@@ -90,7 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 children: [
                   const SizedBox(height: 8),
-                  Text(
+                  const Text(
                     'Log In',
                     style: TextStyle(
                       color: Colors.white,
@@ -131,7 +133,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           width: 120, // bigger emblem
                           height: 120,
                           fit: BoxFit.contain,
-                          errorBuilder: (_, __, ___) => Icon(
+                          errorBuilder: (_, __, ___) => const Icon(
                             Icons.local_dining,
                             color: Colors.white70,
                             size: 64, // bigger fallback icon too
@@ -187,7 +189,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         onTap: () {
                           // TODO: forgot password flow
                         },
-                        child: Text(
+                        child: const Text(
                           'forgot password',
                           style: TextStyle(
                             color: Colors.redAccent,
@@ -232,10 +234,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (c) => RegisterScreen()),
+                        MaterialPageRoute(builder: (c) => const RegisterScreen()),
                       );
                     },
-                    child: Text(
+                    child: const Text(
                       'Don\'t have an account? Register',
                       style: TextStyle(color: gold),
                     ),

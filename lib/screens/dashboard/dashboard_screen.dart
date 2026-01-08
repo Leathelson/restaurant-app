@@ -5,6 +5,8 @@ import '../profile/profile_screen.dart';
 import '../search/search_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
+  const DashboardScreen({super.key});
+
   @override
   _DashboardScreenState createState() => _DashboardScreenState();
 }
@@ -64,17 +66,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
           IconButton(
             icon: CircleAvatar(
               radius: 18,
-              backgroundImage: AssetImage('assets/images/profile.png'),
+              backgroundImage: const AssetImage('assets/images/profile.png'),
               backgroundColor: Colors.grey[200],
             ),
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (c) => ProfileScreen()),
+                MaterialPageRoute(builder: (c) => const ProfileScreen()),
               );
             },
           ),
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
         ],
       ),
       body: SingleChildScrollView(
@@ -98,13 +100,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (c) => SearchScreen()),
+                          MaterialPageRoute(builder: (c) => const SearchScreen()),
                         );
                       },
-                      child: Row(
+                      child: const Row(
                         children: [
                           Icon(Icons.search, color: Colors.white70),
-                          const SizedBox(width: 8),
+                          SizedBox(width: 8),
                           Text(
                             'Search',
                             style: TextStyle(
@@ -157,7 +159,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         );
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("No food details available")),
+                          const SnackBar(content: Text("No food details available")),
                         );
                       }
                     },
@@ -167,7 +169,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(18),
                         border: Border.all(color: gold.withOpacity(0.18)),
-                        boxShadow: [
+                        boxShadow: const [
                           BoxShadow(
                             color: Colors.black12,
                             blurRadius: 8,
@@ -180,7 +182,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         children: [
                           // image area with rounded top corners
                           ClipRRect(
-                            borderRadius: BorderRadius.vertical(
+                            borderRadius: const BorderRadius.vertical(
                                 top: Radius.circular(18)),
                             child: Image.asset(
                               item['image']!,
@@ -197,7 +199,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               children: [
                                 Text(
                                   item['name']!,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontWeight: FontWeight.w700,
                                     fontSize: 14,
                                   ),
@@ -217,7 +219,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       ),
                                     ),
                                     Container(
-                                      decoration: BoxDecoration(
+                                      decoration: const BoxDecoration(
                                         color: Colors.white,
                                         shape: BoxShape.circle,
                                         boxShadow: [
@@ -228,7 +230,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                         ],
                                       ),
                                       padding: const EdgeInsets.all(6),
-                                      child: Icon(
+                                      child: const Icon(
                                         Icons.favorite_border,
                                         color: Colors.redAccent,
                                         size: 18,
@@ -289,7 +291,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(28),
                       border: Border.all(color: gold.withOpacity(0.18)),
-                      boxShadow: [
+                      boxShadow: const [
                         BoxShadow(
                           color: Colors.black12,
                           blurRadius: 6,
@@ -312,17 +314,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             children: [
                               Text(
                                 fav['name'] as String,
-                                style: TextStyle(fontWeight: FontWeight.w700),
+                                style: const TextStyle(fontWeight: FontWeight.w700),
                               ),
                               const SizedBox(height: 6),
                               Row(
                                 children: [
-                                  Icon(Icons.star,
+                                  const Icon(Icons.star,
                                       size: 16, color: Colors.amber),
-                                  SizedBox(width: 6),
+                                  const SizedBox(width: 6),
                                   Text(
                                     fav['rating'].toString(),
-                                    style: TextStyle(fontSize: 13),
+                                    style: const TextStyle(fontSize: 13),
                                   )
                                 ],
                               )

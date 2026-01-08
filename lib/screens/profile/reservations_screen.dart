@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import '../../models/app_data.dart';
 
 class ReservationsScreen extends StatefulWidget {
+  const ReservationsScreen({super.key});
+
   @override
   _ReservationsScreenState createState() => _ReservationsScreenState();
 }
 
 class _ReservationsScreenState extends State<ReservationsScreen> {
   DateTime selectedDate = DateTime.now();
-  TimeOfDay selectedTime = TimeOfDay(hour: 19, minute: 0); // default 7:00 PM
+  TimeOfDay selectedTime = const TimeOfDay(hour: 19, minute: 0); // default 7:00 PM
   int guests = 2;
   int duration = 2;
 
@@ -49,7 +51,7 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Reservation confirmed")),
+      const SnackBar(content: Text("Reservation confirmed")),
     );
 
     Navigator.pop(context); // go back to reservations list
@@ -57,15 +59,15 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final gold = const Color(0xFFB37C1E);
+    const gold = Color(0xFFB37C1E);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Reservation"),
+        title: const Text("Reservation"),
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black87),
+          icon: const Icon(Icons.arrow_back, color: Colors.black87),
           onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
@@ -78,7 +80,7 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
             GestureDetector(
               onTap: _selectDate,
               child: Container(
-                padding: EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
                 decoration: BoxDecoration(
                   color: Colors.orange.shade50,
                   borderRadius: BorderRadius.circular(12),
@@ -86,12 +88,12 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.calendar_today, color: gold),
-                    SizedBox(width: 12),
+                    const Icon(Icons.calendar_today, color: gold),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}",
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                       ),
                     ),
                   ],
@@ -105,19 +107,19 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
             GestureDetector(
               onTap: _selectTime,
               child: Container(
-                padding: EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
                 decoration: BoxDecoration(
                   color: Colors.black87,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
                   children: [
-                    Text("Select Time",
+                    const Text("Select Time",
                         style: TextStyle(color: Colors.white, fontSize: 16)),
-                    Spacer(),
+                    const Spacer(),
                     Text(
                       selectedTime.format(context),
-                      style: TextStyle(
+                      style: const TextStyle(
                           color: Colors.white, fontWeight: FontWeight.w600),
                     ),
                   ],
@@ -144,10 +146,10 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
             // Display final summary
             Text(
               "${_formatDate(selectedDate)}, ${selectedTime.format(context)}",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
 
-            Spacer(),
+            const Spacer(),
 
             // Confirm & Cancel buttons
             Padding(
@@ -163,10 +165,10 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
                         backgroundColor: gold,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(28)),
-                        padding: EdgeInsets.symmetric(vertical: 14),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
                       onPressed: _confirmReservation,
-                      child: Text("Confirm",
+                      child: const Text("Confirm",
                           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontFamily: 'Times New Roman')),
                     ),
                   ),
@@ -177,10 +179,10 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
                         backgroundColor: Colors.black54,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(28)),
-                        padding: EdgeInsets.symmetric(vertical: 14),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
                       onPressed: () => Navigator.pop(context),
-                      child: Text("Cancel",
+                      child: const Text("Cancel",
                           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontFamily: 'Times New Roman')),
                     ),
                   ),
@@ -197,7 +199,7 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
   Widget _counterRow(
       String label, int value, Function(int) onChanged, Color gold) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
       decoration: BoxDecoration(
         color: gold.withOpacity(0.9),
         borderRadius: BorderRadius.circular(12),
@@ -206,17 +208,17 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
         children: [
           Expanded(
               child: Text(label,
-                  style: TextStyle(
+                  style: const TextStyle(
                       fontWeight: FontWeight.w600, color: Colors.white))),
           IconButton(
-            icon: Icon(Icons.remove_circle, color: Colors.white),
+            icon: const Icon(Icons.remove_circle, color: Colors.white),
             onPressed: () => onChanged(value - 1),
           ),
           Text("$value",
               style:
-                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           IconButton(
-            icon: Icon(Icons.add_circle, color: Colors.white),
+            icon: const Icon(Icons.add_circle, color: Colors.white),
             onPressed: () => onChanged(value + 1),
           ),
         ],

@@ -3,6 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../dashboard/dashboard_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
+
   @override
   _RegisterScreenState createState() => _RegisterScreenState();
 }
@@ -49,7 +51,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (!mounted) return;
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => DashboardScreen()),
+      MaterialPageRoute(builder: (context) => const DashboardScreen()),
     );
   }
 
@@ -92,7 +94,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 6),
 
                   // Title + social icons
-                  Text(
+                  const Text(
                     'Sign Up',
                     style: TextStyle(
                       color: Colors.white,

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../models/app_data.dart';
 
 class OrderHistoryScreen extends StatefulWidget {
+  const OrderHistoryScreen({super.key});
+
   @override
   _OrderHistoryScreenState createState() => _OrderHistoryScreenState();
 }
@@ -13,13 +15,13 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Order History'),
+        title: const Text('Order History'),
       ),
       body: Column(
         children: [
           // Filter chips row
           Padding(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             child: Wrap(
               spacing: 8,
               children: ['All', 'Completed', 'Cancelled', 'Upcoming']
@@ -42,7 +44,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
           // Order list
           Expanded(
             child: AppData.orders.isEmpty
-                ? Center(
+                ? const Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -63,16 +65,16 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                       // Apply filter
                       if (selectedFilter != 'All' &&
                           order.status != selectedFilter) {
-                        return SizedBox.shrink();
+                        return const SizedBox.shrink();
                       }
 
                       return Card(
                         margin:
-                            EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                            const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                         child: ExpansionTile(
                           title: Text(
                             'Order #${order.id.substring(0, 8)}',
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                            style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           subtitle: Text(
                             '${order.date.day}/${order.date.month}/${order.date.year} • Rs ${order.total.toStringAsFixed(2)}',
@@ -82,7 +84,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                             backgroundColor: Colors.green.shade100,
                           ),
                           children: [
-                            Divider(),
+                            const Divider(),
                             ...order.items.map(
                               (item) => ListTile(
                                 leading: Image.asset(
@@ -93,7 +95,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                                 ),
                                 title: Text(
                                   item.food.name,
-                                  style: TextStyle(fontWeight: FontWeight.w600),
+                                  style: const TextStyle(fontWeight: FontWeight.w600),
                                   overflow: TextOverflow.ellipsis, // prevent overflow
                                 ),
                                 subtitle: Text(
@@ -101,17 +103,17 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 trailing: ConstrainedBox(
-                                  constraints: BoxConstraints(maxWidth: 80),
+                                  constraints: const BoxConstraints(maxWidth: 80),
                                   child: Text(
                                     'Rs ${(item.food.price * item.quantity).toStringAsFixed(2)}',
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                         fontWeight: FontWeight.bold),
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                               ),
                             ),
-                            SizedBox(height: 8),
+                            const SizedBox(height: 8),
                           ],
                         ),
                       );

@@ -4,6 +4,8 @@ import '../../models/app_data.dart';
 import '../dashboard/dashboard_screen.dart';
 
 class ReservationScreen extends StatefulWidget {
+  const ReservationScreen({super.key});
+
   @override
   _ReservationScreenState createState() => _ReservationScreenState();
 }
@@ -39,7 +41,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text('Reservation Confirmed!'),
+          title: const Text('Reservation Confirmed!'),
           content: Text(
             'Your table has been reserved for ${_selectedDay.day}/${_selectedDay.month}/${_selectedDay.year} at $_selectedTime for $_guests guests.',
           ),
@@ -49,11 +51,11 @@ class _ReservationScreenState extends State<ReservationScreen> {
                 Navigator.of(context).pop();
                 Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (context) => DashboardScreen()),
+                  MaterialPageRoute(builder: (context) => const DashboardScreen()),
                   (route) => false,
                 );
               },
-              child: Text('OK'),
+              child: const Text('OK'),
             ),
           ],
         ),
@@ -64,23 +66,23 @@ class _ReservationScreenState extends State<ReservationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Reserve Table')),
+      appBar: AppBar(title: const Text('Reserve Table')),
       body: Column(
         children: [
           Expanded(
             child: SingleChildScrollView(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  const Text(
                     'Select Date',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   TableCalendar(
                     firstDay: DateTime.now(),
-                    lastDay: DateTime.now().add(Duration(days: 30)),
+                    lastDay: DateTime.now().add(const Duration(days: 30)),
                     focusedDay: _selectedDay,
                     selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
                     onDaySelected: (selectedDay, focusedDay) {
@@ -90,7 +92,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
                       });
                     },
                     calendarStyle: CalendarStyle(
-                      selectedDecoration: BoxDecoration(
+                      selectedDecoration: const BoxDecoration(
                         color: Colors.amber,
                         shape: BoxShape.circle,
                       ),
@@ -100,47 +102,47 @@ class _ReservationScreenState extends State<ReservationScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 24),
-                  Text(
+                  const SizedBox(height: 24),
+                  const Text(
                     'Number of Guests',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   Row(
                     children: [
                       IconButton(
                         onPressed: _guests > 1
                             ? () => setState(() => _guests--)
                             : null,
-                        icon: Icon(Icons.remove),
+                        icon: const Icon(Icons.remove),
                         style: IconButton.styleFrom(
                           backgroundColor: Colors.grey[200],
                         ),
                       ),
                       Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Text(
                           '$_guests guests',
-                          style: TextStyle(fontSize: 16),
+                          style: const TextStyle(fontSize: 16),
                         ),
                       ),
                       IconButton(
                         onPressed: _guests < 8
                             ? () => setState(() => _guests++)
                             : null,
-                        icon: Icon(Icons.add),
+                        icon: const Icon(Icons.add),
                         style: IconButton.styleFrom(
                           backgroundColor: Colors.amber,
                         ),
                       ),
                     ],
                   ),
-                  SizedBox(height: 24),
-                  Text(
+                  const SizedBox(height: 24),
+                  const Text(
                     'Available Times',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
@@ -165,7 +167,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
             ),
           ),
           Container(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             child: SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -173,9 +175,9 @@ class _ReservationScreenState extends State<ReservationScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.amber,
                   foregroundColor: Colors.black,
-                  padding: EdgeInsets.symmetric(vertical: 16),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                child: Text(
+                child: const Text(
                   'CONFIRM RESERVATION',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),

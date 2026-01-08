@@ -3,6 +3,8 @@ import '../../models/app_data.dart';
 import '../food/food_detail_screen.dart';
 
 class FavoritesScreen extends StatefulWidget {
+  const FavoritesScreen({super.key});
+
   @override
   _FavoritesScreenState createState() => _FavoritesScreenState();
 }
@@ -13,11 +15,11 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     final favorites = AppData.getFavorites();
 
     return Scaffold(
-      appBar: AppBar(title: Text('Favorites')),
+      appBar: AppBar(title: const Text('Favorites')),
       body: Column(
         children: [
           if (favorites.isNotEmpty) ...[
-            Padding(
+            const Padding(
               padding: EdgeInsets.all(16),
               child: Align(
                 alignment: Alignment.centerLeft,
@@ -27,11 +29,11 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 ),
               ),
             ),
-            Container(
+            SizedBox(
               height: 140,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                padding: EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 itemCount: AppData.foodItems
                     .where((item) => !item.isFavorite)
                     .length,
@@ -51,7 +53,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                     },
                     child: Container(
                       width: 120,
-                      margin: EdgeInsets.only(right: 12),
+                      margin: const EdgeInsets.only(right: 12),
                       decoration: BoxDecoration(
                         color: Colors.amber.shade100,
                         borderRadius: BorderRadius.circular(12),
@@ -70,15 +72,15 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                                     ),
                                   )
                                 : Text(item.image,
-                                    style: TextStyle(fontSize: 30)),
+                                    style: const TextStyle(fontSize: 30)),
                           ),
-                          SizedBox(height: 8),
+                          const SizedBox(height: 8),
                           Padding(
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 4.0),
                             child: Text(
                               item.name,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -97,7 +99,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           ],
           Expanded(
             child: favorites.isEmpty
-                ? Center(
+                ? const Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -119,12 +121,12 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                     ),
                   )
                 : ListView.builder(
-                    padding: EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(16),
                     itemCount: favorites.length,
                     itemBuilder: (context, index) {
                       final item = favorites[index];
                       return Card(
-                        margin: EdgeInsets.only(bottom: 8),
+                        margin: const EdgeInsets.only(bottom: 8),
                         child: ListTile(
                           leading: Container(
                             width: 50,
@@ -144,13 +146,13 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                                 : Center(
                                     child: Text(
                                       item.image,
-                                      style: TextStyle(fontSize: 24),
+                                      style: const TextStyle(fontSize: 24),
                                     ),
                                   ),
                           ),
                           title: Text(
                             item.name,
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                            style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           subtitle: Text(
                             '${item.category} • Rs ${item.price.toStringAsFixed(2)}',
@@ -159,12 +161,12 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.star,
+                                const Icon(Icons.star,
                                     size: 16, color: Colors.amber),
                                 Text('${item.rating}'),
-                                SizedBox(width: 8),
+                                const SizedBox(width: 8),
                                 IconButton(
-                                  icon: Icon(Icons.favorite, color: Colors.red),
+                                  icon: const Icon(Icons.favorite, color: Colors.red),
                                   onPressed: () {
                                     setState(() {
                                       item.isFavorite = false;

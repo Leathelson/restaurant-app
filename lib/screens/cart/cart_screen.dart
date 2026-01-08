@@ -3,6 +3,8 @@ import '../../models/app_data.dart';
 import '../checkout/checkout_screen.dart';
 
 class CartScreen extends StatefulWidget {
+  const CartScreen({super.key});
+
   @override
   _CartScreenState createState() => _CartScreenState();
 }
@@ -34,9 +36,9 @@ class _CartScreenState extends State<CartScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Cart')),
+      appBar: AppBar(title: const Text('Cart')),
       body: AppData.cart.isEmpty
-          ? Center(
+          ? const Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -61,9 +63,9 @@ class _CartScreenState extends State<CartScreen> {
                     itemBuilder: (context, index) {
                       final cartItem = AppData.cart[index];
                       return Card(
-                        margin: EdgeInsets.all(8),
+                        margin: const EdgeInsets.all(8),
                         child: Padding(
-                          padding: EdgeInsets.all(12),
+                          padding: const EdgeInsets.all(12),
                           child: Row(
                             children: [
                               Container(
@@ -76,24 +78,24 @@ class _CartScreenState extends State<CartScreen> {
                                 child: Center(
                                   child: Text(
                                     cartItem.food.image,
-                                    style: TextStyle(fontSize: 24),
+                                    style: const TextStyle(fontSize: 24),
                                   ),
                                 ),
                               ),
-                              SizedBox(width: 12),
+                              const SizedBox(width: 12),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       cartItem.food.name,
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                     Text(
                                       '\$${cartItem.food.price}',
-                                      style: TextStyle(color: Colors.amber),
+                                      style: const TextStyle(color: Colors.amber),
                                     ),
                                   ],
                                 ),
@@ -105,13 +107,13 @@ class _CartScreenState extends State<CartScreen> {
                                       index,
                                       cartItem.quantity - 1,
                                     ),
-                                    icon: Icon(Icons.remove),
+                                    icon: const Icon(Icons.remove),
                                     style: IconButton.styleFrom(
                                       backgroundColor: Colors.grey[200],
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsets.symmetric(
+                                    padding: const EdgeInsets.symmetric(
                                       horizontal: 12,
                                     ),
                                     child: Text('${cartItem.quantity}'),
@@ -121,7 +123,7 @@ class _CartScreenState extends State<CartScreen> {
                                       index,
                                       cartItem.quantity + 1,
                                     ),
-                                    icon: Icon(Icons.add),
+                                    icon: const Icon(Icons.add),
                                     style: IconButton.styleFrom(
                                       backgroundColor: Colors.amber,
                                     ),
@@ -136,7 +138,7 @@ class _CartScreenState extends State<CartScreen> {
                   ),
                 ),
                 Container(
-                  padding: EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     boxShadow: [
@@ -148,7 +150,7 @@ class _CartScreenState extends State<CartScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
+                          const Text(
                             'Total:',
                             style: TextStyle(
                               fontSize: 18,
@@ -157,7 +159,7 @@ class _CartScreenState extends State<CartScreen> {
                           ),
                           Text(
                             '\$${total.toStringAsFixed(2)}',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: Colors.amber,
@@ -165,7 +167,7 @@ class _CartScreenState extends State<CartScreen> {
                           ),
                         ],
                       ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
@@ -174,7 +176,7 @@ class _CartScreenState extends State<CartScreen> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => CheckoutScreen(),
+                                      builder: (context) => const CheckoutScreen(),
                                     ),
                                   );
                                 }
@@ -182,9 +184,9 @@ class _CartScreenState extends State<CartScreen> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.amber,
                             foregroundColor: Colors.black,
-                            padding: EdgeInsets.symmetric(vertical: 16),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
                           ),
-                          child: Text(
+                          child: const Text(
                             'CHECKOUT',
                             style: TextStyle(
                               fontSize: 16,

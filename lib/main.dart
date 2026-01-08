@@ -5,10 +5,12 @@ import 'screens/dashboard/dashboard_screen.dart';
 import 'models/app_data.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -16,18 +18,20 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.amber,
         fontFamily: 'serif',
-        appBarTheme: AppBarTheme(
+        appBarTheme: const AppBarTheme(
           backgroundColor: Colors.black87,
           foregroundColor: Colors.amber,
         ),
       ),
-      home: AuthWrapper(),
+      home: const AuthWrapper(),
       debugShowCheckedModeBanner: false,
     );
   }
 }
 
 class AuthWrapper extends StatefulWidget {
+  const AuthWrapper({super.key});
+
   @override
   _AuthWrapperState createState() => _AuthWrapperState();
 }
@@ -50,6 +54,6 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    return isLoggedIn ? DashboardScreen() : LoginScreen();
+    return isLoggedIn ? const DashboardScreen() : const LoginScreen();
   }
 }
