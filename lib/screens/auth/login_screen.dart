@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../dashboard/dashboard_screen.dart';
 import 'register_screen.dart';
+import 'dart:convert';
+import '../../services/socket_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,6 +15,8 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final SocketService _socket = SocketService();
+  bool _isLoading = false;
   bool _remember = false;
 
   @override
@@ -23,33 +27,58 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _login() async {
-    if (_emailController.text.isNotEmpty &&
-        _passwordController.text.isNotEmpty) {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-
-      await prefs.setBool('isLoggedIn', true);
-
-      // Save credentials only if remember is checked
-      if (_remember) {
-        await prefs.setString('email', _emailController.text);
-        await prefs.setString('password', _passwordController.text);
-      } else {
-        await prefs.remove('email');
-        await prefs.remove('password');
+    if (_emailController.text.isEmpty ||
+          _passwordController.text.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Please enter email and password")),
+        );
+        return;
       }
 
-      if (!mounted) return; // ensure widget still active
+      setState(() => _isLoading = true);
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const DashboardScreen()),
+      _socket.login(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
       );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please enter email and password")),
-      );
+
+      _socket.stream.listen((message) async {
+        final data = jsonDecode(message);
+
+        if (data['type'] != 'login') return;
+
+        setState(() => _isLoading = false);
+
+        if (data['success'] == true) {
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+
+          await prefs.setBool('isLoggedIn', true);
+          await prefs.setString('token', data['token']);
+
+          // Remember me
+          if (_remember) {
+            await prefs.setString('email', _emailController.text);
+          } else {
+            await prefs.remove('email');
+          }
+
+          if (!mounted) return;
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const DashboardScreen(),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(data['message'] ?? 'Login failed'),
+            ),
+          );
+        }
+      });
     }
-  }
 
   @override
   Widget build(BuildContext context) {

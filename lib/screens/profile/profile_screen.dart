@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../models/app_data.dart';
 import 'user_info_screen.dart';
 import 'order_history_screen.dart';
 import 'favorites_screen.dart';

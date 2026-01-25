@@ -45,7 +45,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
     _checkLoginStatus();
   }
 
-  _checkLoginStatus() async {
+  Future<void> _checkLoginStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
