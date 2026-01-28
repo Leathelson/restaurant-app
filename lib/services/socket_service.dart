@@ -12,7 +12,7 @@ class SocketService {
   SocketService._internal() {
     
     _channel = WebSocketChannel.connect(
-      Uri.parse('ws://10.0.2.2:3306'), // Android emulator
+      Uri.parse('ws://10.0.2.2:3000'), // Android emulator
       // ws://localhost:3000 for desktop/web
     );
   }
