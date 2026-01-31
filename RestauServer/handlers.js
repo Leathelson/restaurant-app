@@ -17,7 +17,7 @@ async function handleRegister(ws, data = {}) {
 
   if (existingUser.length > 0) {
     ws.send(JSON.stringify({ 
-        type: 'register',
+        type: 'register_success',
         success: false,
         message: 'Email already registered' }));
     return;
@@ -28,9 +28,9 @@ async function handleRegister(ws, data = {}) {
     [name, phone, email, hashedPassword]);
 
     ws.send(JSON.stringify({ 
-        type: 'register',
+        type: 'register_success',
         success: true,
-        message: 'Registration successful' }));
+        message: 'register_success' }));
 }
 
 // Login handler
@@ -61,7 +61,7 @@ async function handleLogin(ws, data) {
     ws.send(JSON.stringify({ 
         type: 'login',
         success: true,
-        message: 'Login successful',
+        message: 'login',
         userId: user.id }));
     
 }
