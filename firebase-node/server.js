@@ -1,7 +1,8 @@
-const express = require('express');
-const bcrypt = require('brcrypt');
-const cors = require('cors');
+const WebSocket = require('ws');
 const admin = require('firebase-admin');
+
+const registerHandler = require('./handlers/registerHandler');
+const loginHandler = require('./handlers/loginHandler');
 
 const serviceAccount = require('./firebaseServiceKey.json');
 
@@ -11,12 +12,44 @@ admin.initializeApp({
 
 const db = admin.firestore();
 
-const app = express();
-app.use(express.json());
-app.use(cors());
+// Create WebSocket server
+const wss = new WebSocket.Server({ port: 3000 });
 
-const PORT = 3000;
+console.log('WebSocket server running on port 3000');
 
-app.listen(PORT, () => {
-    console.log(`FirebaseServer is running on port ${PORT}`);
+wss.on('connection', (ws) => {
+  console.log('New client connected');
+
+  ws.on('message', async (message) => {
+    try {
+      const data = JSON.parse(message);
+
+      switch (data.type) {
+        case 'register':
+          await registerHandler(ws, data, db);
+          break;
+
+        case 'login':
+          await loginHandler(ws, data, db);
+          break;
+
+        default:
+          ws.send(JSON.stringify({
+            type: 'error',
+            message: 'Unknown message type'
+          }));
+      }
+
+    } catch (error) {
+      console.error(error);
+      ws.send(JSON.stringify({
+        type: 'error',
+        message: 'Invalid JSON format'
+      }));
+    }
+  });
+
+  ws.on('close', () => {
+    console.log('Client disconnected');
+  });
 });
