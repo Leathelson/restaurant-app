@@ -1,22 +1,23 @@
 import 'dart:convert';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-
 class SocketService {
   static final SocketService _instance = SocketService._internal();
   factory SocketService() => _instance;
   static SocketService get instance => _instance;
 
   late WebSocketChannel _channel;
+  late Stream _broadcastStream;
 
   SocketService._internal() {
-    
     _channel = WebSocketChannel.connect(
       Uri.parse('ws://10.0.2.2:3000'), // Android emulator
-      // ws://localhost:3000 for desktop/web
     );
+
+    _broadcastStream = _channel.stream.asBroadcastStream();
   }
 
+  // LOGIN
   void login(String email, String password) {
     _channel.sink.add(jsonEncode({
       'type': 'login',
@@ -25,6 +26,7 @@ class SocketService {
     }));
   }
 
+  // REGISTER
   void register({
     required String name,
     required String phone,
@@ -40,11 +42,10 @@ class SocketService {
     }));
   }
 
-
-  Stream get stream => _channel.stream;
+  // STREAM (broadcast-safe)
+  Stream get stream => _broadcastStream;
 
   void dispose() {
     _channel.sink.close();
   }
 }
-

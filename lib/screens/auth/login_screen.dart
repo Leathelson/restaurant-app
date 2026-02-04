@@ -3,7 +3,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../dashboard/dashboard_screen.dart';
 import 'register_screen.dart';
 import 'dart:convert';
+import 'dart:async';
 import '../../services/socket_service.dart';
+
+late StreamSubscription _socketSub;
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -19,13 +22,6 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   bool _remember = false;
 
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
-
   Future<void> _login() async {
     if (_emailController.text.isEmpty ||
           _passwordController.text.isEmpty) {
@@ -36,50 +32,66 @@ class _LoginScreenState extends State<LoginScreen> {
       }
 
       setState(() => _isLoading = true);
-;
+
       _socket.login(
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
+  }
 
-      _socket.stream.listen((message) async {
-        final data = jsonDecode(message);
+  @override
+void initState() {
+  super.initState();
 
-        if (data['type'] != 'login') return;
+  _socketSub = SocketService.instance.stream.listen(
+    (message) async {
+      final data = jsonDecode(message);
 
-        setState(() => _isLoading = false);
+      if (data['type'] != 'login') return;
+      if (!mounted) return;
 
-        if (data['success'] == true) {
-          SharedPreferences prefs = await SharedPreferences.getInstance();
+      setState(() => _isLoading = false);
 
-          await prefs.setBool('isLoggedIn', true);
+      if (data['success'] == true) {
+        final prefs = await SharedPreferences.getInstance();
+
+        await prefs.setBool('isLoggedIn', true);
+
+        if (data['token'] != null) {
           await prefs.setString('token', data['token']);
-
-
-          // Remember me
-          if (_remember) {
-            await prefs.setString('email', _emailController.text);
-          } else {
-            await prefs.remove('email');
-          }
-
-          if (!mounted) return;
-
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (_) => const DashboardScreen(),
-            ),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(data['message'] ?? 'Login failed'),
-            ),
-          );
         }
-      });
-    }
+
+        if (_remember) {
+          await prefs.setString('email', _emailController.text);
+        } else {
+          await prefs.remove('email');
+        }
+
+        if (!mounted) return;
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const DashboardScreen(),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(data['message'] ?? 'Login failed'),
+          ),
+        );
+      }
+    },
+  );
+}
+  @override
+  void dispose() {
+    _socketSub.cancel(); 
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
