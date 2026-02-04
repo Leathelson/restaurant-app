@@ -55,6 +55,7 @@ class _LoginScreenState extends State<LoginScreen> {
           await prefs.setBool('isLoggedIn', true);
           await prefs.setString('token', data['token']);
 
+
           // Remember me
           if (_remember) {
             await prefs.setString('email', _emailController.text);

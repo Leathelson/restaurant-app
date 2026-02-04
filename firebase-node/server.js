@@ -12,6 +12,16 @@ admin.initializeApp({
 
 const db = admin.firestore();
 
+(async () => {
+  try {
+    await db.collection('_healthcheck').limit(1).get();
+    console.log('Firestore connected successfully');
+  } catch (error) {
+    console.error('Firestore connection failed:', error.message);
+    process.exit(1); // stop server if DB not reachable
+  }
+})();
+
 // Create WebSocket server
 const wss = new WebSocket.Server({ port: 3000 });
 

@@ -1,4 +1,7 @@
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const jwtsecret = 'pineapple'; // In production, use environment variable
+
 
 async function loginHandler(ws, data, db) {
   const { email, password } = data;
@@ -29,7 +32,17 @@ async function loginHandler(ws, data, db) {
 
   const isMatch = await bcrypt.compare(password, user.password);
 
+  const token = jwt.sign(
+  {userId: userDoc.id, email: user.email},
+  jwtsecret,
+  {expiresIn: '10d'}
+);
+
+
+
   if (!isMatch) {
+    console.log('Invalid login attempt for email:', email);
+
     return ws.send(JSON.stringify({
       type: 'login',
       success: false,
@@ -37,9 +50,12 @@ async function loginHandler(ws, data, db) {
     }));
   }
 
+  console.log('User logged in:', user.email);
+
   ws.send(JSON.stringify({
-    type: 'success',
+    type: 'login',
     success: true,
+    token,
     user: {
       id: userDoc.id,
       name: user.name,

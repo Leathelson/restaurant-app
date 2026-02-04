@@ -6,7 +6,7 @@ async function registerHandler(ws, data, db) {
 
   if (!name || !phone || !email || !password) {
     return ws.send(JSON.stringify({
-      type: 'register',
+      type: 'register_error',
       success: false,
       message: 'All fields required'
     }));
@@ -19,7 +19,7 @@ async function registerHandler(ws, data, db) {
 
   if (!existingUser.empty) {
     return ws.send(JSON.stringify({
-      type: 'register',
+      type: 'register_error',
       success: false,
       message: 'Email already registered'
     }));
@@ -36,7 +36,7 @@ async function registerHandler(ws, data, db) {
   });
 
   ws.send(JSON.stringify({
-    type: 'register',
+    type: 'register_success',
     success: true,
     message: 'User registered successfully'
   }));
