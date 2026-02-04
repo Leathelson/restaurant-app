@@ -36,7 +36,7 @@ class _LoginScreenState extends State<LoginScreen> {
       }
 
       setState(() => _isLoading = true);
-
+;
       _socket.login(
         _emailController.text.trim(),
         _passwordController.text.trim(),
@@ -89,7 +89,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return Scaffold(
       resizeToAvoidBottomInset:
-          false, // 👈 prevents bg from moving with keyboard
+          false, //  prevents bg from moving with keyboard
       body: Stack(
         children: [
           // background image stays fixed
