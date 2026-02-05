@@ -1,11 +1,11 @@
-class User {
+class AppUser {
   String name;
   String email;
   double totalSpent;
   int totalOrders;
   int loyaltyPoints;
 
-  User({
+  AppUser({
     required this.name,
     required this.email,
     this.totalSpent = 0.0,
@@ -76,7 +76,8 @@ class Reservation {
 }
 
 class AppData {
-  static User currentUser = User(name: "William Dafuk", email: "william@dafuk.com");
+  static AppUser currentUser =
+      AppUser(name: "William Dafuk", email: "william@dafuk.com");
   static List<CartItem> cart = [];
   static List<Order> orders = [];
   static List<Reservation> reservations = [];
@@ -90,7 +91,8 @@ class AppData {
       price: 1200.00,
       image: "assets/images/food1.png",
       rating: 4.8,
-      description: "MEAT LOVERS DELIGHT! Juicy grilled sirloin steak with herbs",
+      description:
+          "MEAT LOVERS DELIGHT! Juicy grilled sirloin steak with herbs",
       isFavorite: true,
     ),
     FoodItem(
@@ -122,8 +124,13 @@ class AppData {
     // ),
   ];
 
-  static List<String> categories = ["Starters", "Non-Veg", "Desserts", "Beverages"];
-  
+  static List<String> categories = [
+    "Starters",
+    "Non-Veg",
+    "Desserts",
+    "Beverages"
+  ];
+
   static List<FoodItem> getFavorites() {
     return foodItems.where((item) => item.isFavorite).toList();
   }

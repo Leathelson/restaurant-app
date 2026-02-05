@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:luxury_restaurant_app/main.dart';
 import '../../models/app_data.dart';
-import '../auth/login_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -98,11 +98,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           TextButton(
             onPressed: () async {
-              SharedPreferences prefs = await SharedPreferences.getInstance();
-              await prefs.setBool('isLoggedIn', false);
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (context) => LoginScreen()),
+              await FirebaseAuth.instance.signOut();
+              Navigator.pop(context); // just close the dialog },
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => AuthGate()),
                 (route) => false,
               );
             },

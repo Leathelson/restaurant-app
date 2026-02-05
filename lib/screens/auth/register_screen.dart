@@ -1,6 +1,5 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../dashboard/dashboard_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   @override
@@ -25,32 +24,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _register() async {
-    if (_nameController.text.isEmpty ||
-        _phoneController.text.isEmpty ||
-        _emailController.text.isEmpty ||
-        _passwordController.text.isEmpty ||
-        _confirmController.text.isEmpty) {
+    if (_passwordController.text.trim() != _confirmController.text.trim()) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all fields')),
+        SnackBar(content: Text('Passwords do not match')),
       );
       return;
     }
 
-    if (_passwordController.text != _confirmController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwords do not match')),
+    try {
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
       );
-      return;
+    } on FirebaseAuthException catch (e) {
+      String message;
+      if (e.code == 'weak-password') {
+        message = 'The password provided is too weak.';
+      } else if (e.code == 'email-already-in-use') {
+        message = 'The account already exists for that email.';
+      } else {
+        message = 'Registration failed. Please try again.';
+      }
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message)));
     }
-
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isLoggedIn', true);
-
-    if (!mounted) return;
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => DashboardScreen()),
-    );
   }
 
   Color get gold => const Color(0xFFB37C1E);
@@ -76,7 +73,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Colors.black.withOpacity(0.28), Colors.black.withOpacity(0.64)],
+                  colors: [
+                    Colors.black.withOpacity(0.28),
+                    Colors.black.withOpacity(0.64)
+                  ],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),
@@ -164,11 +164,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       onPressed: _register,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: gold,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(28)),
                         elevation: 8,
                       ),
                       child: const Text(
-                        'Sign In',
+                        'Sign Up',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 18,
@@ -213,7 +214,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
           prefixIcon: Icon(icon, color: Colors.white70),
           filled: true,
           fillColor: fillColor,
-          contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
             borderSide: BorderSide.none,
@@ -232,11 +234,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
           assetPath,
           width: 28,
           height: 28,
-          errorBuilder: (_, __, ___) => const Icon(Icons.circle, color: Colors.white70, size: 24),
+          errorBuilder: (_, __, ___) =>
+              const Icon(Icons.circle, color: Colors.white70, size: 24),
         ),
         splashRadius: 20,
       ),
     );
   }
-
 }

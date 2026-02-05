@@ -1,3 +1,5 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../dashboard/dashboard_screen.dart';
@@ -21,11 +23,13 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _login() async {
-    if (_emailController.text.isNotEmpty &&
-        _passwordController.text.isNotEmpty) {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
 
-      await prefs.setBool('isLoggedIn', true);
+      final prefs = await SharedPreferences.getInstance();
 
       // Save credentials only if remember is checked
       if (_remember) {
@@ -35,16 +39,10 @@ class _LoginScreenState extends State<LoginScreen> {
         await prefs.remove('email');
         await prefs.remove('password');
       }
-
-      if (!mounted) return; // ensure widget still active
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => DashboardScreen()),
-      );
-    } else {
+    } catch (e) {
+      // handle login error
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Please enter email and password")),
+        SnackBar(content: Text('Login failed: $e')),
       );
     }
   }
