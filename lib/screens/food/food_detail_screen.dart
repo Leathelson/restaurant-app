@@ -8,9 +8,19 @@ class FoodDetailScreen extends StatefulWidget {
 
   const FoodDetailScreen({super.key, required this.foodItem});
 
+
   @override
   _FoodDetailScreenState createState() => _FoodDetailScreenState();
 }
+
+//customisation options - you can replace these with actual options from your data model if needed
+String selectedOption = 'Regular';
+
+final Map<String, double> customizationOptions = {
+  'Regular': 0,
+  'Extra Sauce': 150,
+  'Cheese Topping': 200,
+};
 
 class _FoodDetailScreenState extends State<FoodDetailScreen> {
   int qty = 1;
@@ -106,6 +116,13 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
       return 0;
     }
   }
+
+//calculate total price based on base price, quantity, and any selected customisation options
+  double get totalPrice {
+  final base = _price();
+  final extra = customizationOptions[selectedOption] ?? 0;
+  return (base + extra) * qty;
+}
 
   @override
   Widget build(BuildContext context) {
@@ -242,6 +259,43 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                       ),
                     ),
 
+                    const SizedBox(height: 12),
+
+                    // customisation options
+                    Text(
+                      'Customisation',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black87,
+                      ),
+                    ),
+
+                    const SizedBox(height: 6),
+
+                    Wrap(
+                      spacing: 10,
+                      children: customizationOptions.entries.map((entry) {
+                        final isSelected = selectedOption == entry.key;
+
+                        return ChoiceChip(
+                          label: Text(
+                            entry.value == 0
+                                ? entry.key
+                                : '${entry.key} (+Rs ${entry.value.toStringAsFixed(0)})',
+                          ),
+                          selected: isSelected,
+                          selectedColor: gold.withOpacity(0.9),
+                          labelStyle: TextStyle(
+                            color: isSelected ? Colors.white : Colors.black,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          onSelected: (_) {
+                            setState(() => selectedOption = entry.key);
+                          },
+                        );
+                      }).toList(),
+                    ),
+
                     const SizedBox(height: 8),
 
                     // total price + add to cart button row
@@ -255,7 +309,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                                 style: TextStyle(color: Colors.black54)),
                             const SizedBox(height: 6),
                             Text(
-                              'Rs ${(price * qty).toStringAsFixed(0)}',
+                              'Rs ${(totalPrice).toStringAsFixed(0)}',
                               style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.w800,
