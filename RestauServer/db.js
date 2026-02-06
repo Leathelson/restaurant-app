@@ -2,10 +2,11 @@ const mysql = require('mysql2');
 
 
 const pool = mysql.createConnection({
-  host: "localhost",
+  host: "127.0.0.1",
   user: "root",
   password: "",
-  database: "restodb"
+  database: "restodb",
+  port: 3307 //for smrithi xampp
 }).promise();
 
 module.exports = pool;

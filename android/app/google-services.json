@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "267388970581",
+    "project_id": "restotestbed",
+    "storage_bucket": "restotestbed.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:267388970581:android:caaf02903fac8e27ce16dc",
+        "android_client_info": {
+          "package_name": "com.example.restaurant_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAzjZN3qk7fD8tC82jgVnYEYG8e5LFMtgU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

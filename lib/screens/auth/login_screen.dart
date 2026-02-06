@@ -3,7 +3,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../dashboard/dashboard_screen.dart';
 import 'register_screen.dart';
 import 'dart:convert';
+import 'dart:async';
 import '../../services/socket_service.dart';
+
+late StreamSubscription _socketSub;
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -19,44 +22,44 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   bool _remember = false;
 
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
+  Future<void> _login() async {
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter email and password")),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    _socket.login(
+      _emailController.text.trim(),
+      _passwordController.text.trim(),
+    );
   }
 
-  Future<void> _login() async {
-    if (_emailController.text.isEmpty ||
-          _passwordController.text.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Please enter email and password")),
-        );
-        return;
-      }
+  @override
+  void initState() {
+    super.initState();
 
-      setState(() => _isLoading = true);
-;
-      _socket.login(
-        _emailController.text.trim(),
-        _passwordController.text.trim(),
-      );
-
-      _socket.stream.listen((message) async {
+    _socketSub = SocketService.instance.stream.listen(
+      (message) async {
         final data = jsonDecode(message);
 
         if (data['type'] != 'login') return;
+        if (!mounted) return;
 
         setState(() => _isLoading = false);
 
         if (data['success'] == true) {
-          SharedPreferences prefs = await SharedPreferences.getInstance();
+          final prefs = await SharedPreferences.getInstance();
 
           await prefs.setBool('isLoggedIn', true);
-          await prefs.setString('token', data['token']);
 
+          if (data['token'] != null) {
+            await prefs.setString('token', data['token']);
+          }
 
-          // Remember me
           if (_remember) {
             await prefs.setString('email', _emailController.text);
           } else {
@@ -78,8 +81,17 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           );
         }
-      });
-    }
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _socketSub.cancel();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -88,8 +100,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final w = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      resizeToAvoidBottomInset:
-          false, //  prevents bg from moving with keyboard
+      resizeToAvoidBottomInset: false, //  prevents bg from moving with keyboard
       body: Stack(
         children: [
           // background image stays fixed
@@ -202,6 +213,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         value: _remember,
                         onChanged: (v) =>
                             setState(() => _remember = v ?? false),
+                        side: const BorderSide(
+                            color: Colors
+                                .white70), // Makes the border visible on dark backgrounds
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(4),
                         ),
@@ -212,7 +226,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       const Expanded(
                         child: Text(
                           'Remember me',
-                          style: TextStyle(color: Colors.white),
+                          style: TextStyle(color: Colors.white, fontSize: 14),
                         ),
                       ),
                       GestureDetector(
@@ -220,9 +234,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           // TODO: forgot password flow
                         },
                         child: const Text(
-                          'forgot password',
+                          'forgot password?',
                           style: TextStyle(
-                            color: Colors.redAccent,
+                            color: Color.fromARGB(255, 181, 47, 47),
+                            fontWeight: FontWeight.bold,
                             decoration: TextDecoration.underline,
                           ),
                         ),
@@ -264,7 +279,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (c) => const RegisterScreen()),
+                        MaterialPageRoute(
+                            builder: (c) => const RegisterScreen()),
                       );
                     },
                     child: const Text(
