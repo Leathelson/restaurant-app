@@ -4,7 +4,7 @@ const admin = require('firebase-admin');
 const registerHandler = require('./handlers/registerHandler');
 const loginHandler = require('./handlers/loginHandler');
 
-const serviceAccount = require('./firebaseServiceKey.json');
+const serviceAccount = require('./serviceAccountKey.json');
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)

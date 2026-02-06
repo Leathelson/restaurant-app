@@ -11,7 +11,7 @@ class SocketService {
 
   SocketService._internal() {
     _channel = WebSocketChannel.connect(
-      Uri.parse('ws://10.0.2.2:3000'), // Android emulator
+      Uri.parse('ws://192.168.100.58:3000'), // Android emulator for smrithi
     );
 
     _broadcastStream = _channel.stream.asBroadcastStream();
@@ -19,11 +19,9 @@ class SocketService {
 
   // LOGIN
   void login(String email, String password) {
-    _channel.sink.add(jsonEncode({
-      'type': 'login',
-      'email': email,
-      'password': password,
-    }));
+    _channel.sink.add(
+      jsonEncode({'type': 'login', 'email': email, 'password': password}),
+    );
   }
 
   // REGISTER
@@ -33,13 +31,15 @@ class SocketService {
     required String email,
     required String password,
   }) {
-    _channel.sink.add(jsonEncode({
-      'type': 'register',
-      'name': name,
-      'phone': phone,
-      'email': email,
-      'password': password,
-    }));
+    _channel.sink.add(
+      jsonEncode({
+        'type': 'register',
+        'name': name,
+        'phone': phone,
+        'email': email,
+        'password': password,
+      }),
+    );
   }
 
   // STREAM (broadcast-safe)

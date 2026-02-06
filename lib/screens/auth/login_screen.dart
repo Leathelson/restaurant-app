@@ -23,71 +23,71 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _remember = false;
 
   Future<void> _login() async {
-    if (_emailController.text.isEmpty ||
-          _passwordController.text.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Please enter email and password")),
-        );
-        return;
-      }
-
-      setState(() => _isLoading = true);
-
-      _socket.login(
-        _emailController.text.trim(),
-        _passwordController.text.trim(),
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter email and password")),
       );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    _socket.login(
+      _emailController.text.trim(),
+      _passwordController.text.trim(),
+    );
   }
 
   @override
-void initState() {
-  super.initState();
+  void initState() {
+    super.initState();
 
-  _socketSub = SocketService.instance.stream.listen(
-    (message) async {
-      final data = jsonDecode(message);
+    _socketSub = SocketService.instance.stream.listen(
+      (message) async {
+        final data = jsonDecode(message);
 
-      if (data['type'] != 'login') return;
-      if (!mounted) return;
-
-      setState(() => _isLoading = false);
-
-      if (data['success'] == true) {
-        final prefs = await SharedPreferences.getInstance();
-
-        await prefs.setBool('isLoggedIn', true);
-
-        if (data['token'] != null) {
-          await prefs.setString('token', data['token']);
-        }
-
-        if (_remember) {
-          await prefs.setString('email', _emailController.text);
-        } else {
-          await prefs.remove('email');
-        }
-
+        if (data['type'] != 'login') return;
         if (!mounted) return;
 
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => const DashboardScreen(),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(data['message'] ?? 'Login failed'),
-          ),
-        );
-      }
-    },
-  );
-}
+        setState(() => _isLoading = false);
+
+        if (data['success'] == true) {
+          final prefs = await SharedPreferences.getInstance();
+
+          await prefs.setBool('isLoggedIn', true);
+
+          if (data['token'] != null) {
+            await prefs.setString('token', data['token']);
+          }
+
+          if (_remember) {
+            await prefs.setString('email', _emailController.text);
+          } else {
+            await prefs.remove('email');
+          }
+
+          if (!mounted) return;
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const DashboardScreen(),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(data['message'] ?? 'Login failed'),
+            ),
+          );
+        }
+      },
+    );
+  }
+
   @override
   void dispose() {
-    _socketSub.cancel(); 
+    _socketSub.cancel();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -100,8 +100,7 @@ void initState() {
     final w = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      resizeToAvoidBottomInset:
-          false, //  prevents bg from moving with keyboard
+      resizeToAvoidBottomInset: false, //  prevents bg from moving with keyboard
       body: Stack(
         children: [
           // background image stays fixed
@@ -214,6 +213,9 @@ void initState() {
                         value: _remember,
                         onChanged: (v) =>
                             setState(() => _remember = v ?? false),
+                        side: const BorderSide(
+                            color: Colors
+                                .white70), // Makes the border visible on dark backgrounds
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(4),
                         ),
@@ -224,7 +226,7 @@ void initState() {
                       const Expanded(
                         child: Text(
                           'Remember me',
-                          style: TextStyle(color: Colors.white),
+                          style: TextStyle(color: Colors.white, fontSize: 14),
                         ),
                       ),
                       GestureDetector(
@@ -232,9 +234,10 @@ void initState() {
                           // TODO: forgot password flow
                         },
                         child: const Text(
-                          'forgot password',
+                          'forgot password?',
                           style: TextStyle(
-                            color: Colors.redAccent,
+                            color: Color.fromARGB(255, 181, 47, 47),
+                            fontWeight: FontWeight.bold,
                             decoration: TextDecoration.underline,
                           ),
                         ),
@@ -276,7 +279,8 @@ void initState() {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (c) => const RegisterScreen()),
+                        MaterialPageRoute(
+                            builder: (c) => const RegisterScreen()),
                       );
                     },
                     child: const Text(
