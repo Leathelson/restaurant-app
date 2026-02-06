@@ -151,7 +151,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             child: TextField(
               decoration: InputDecoration(
                 hintText: 'Do you have any discount code?',
-                hintStyle: TextStyle(color: Colors.black54),
+                hintStyle: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
                 border: UnderlineInputBorder(),
               ),
             ),
@@ -207,6 +207,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
+                          color: Colors.white,
                         ),
                       ),
                     ),

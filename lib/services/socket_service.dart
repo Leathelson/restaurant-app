@@ -11,7 +11,7 @@ class SocketService {
 
   SocketService._internal() {
     _channel = WebSocketChannel.connect(
-      Uri.parse('ws://192.168.100.58:3000'), // Android emulator for smrithi
+      Uri.parse('ws://10.0.2.2:3000'), // Android emulator 
     );
 
     _broadcastStream = _channel.stream.asBroadcastStream();

@@ -91,7 +91,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   child: Container(
                     height: 48,
                     decoration: BoxDecoration(
-                      color: Colors.grey[850],
+                      color: const Color.fromARGB(255, 57, 69, 90),
                       borderRadius: BorderRadius.circular(28),
                       border: Border.all(color: gold, width: 2),
                     ),
@@ -105,12 +105,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       },
                       child: const Row(
                         children: [
-                          Icon(Icons.search, color: Colors.white70),
+                          Icon(Icons.search, color: Color.fromARGB(255, 255, 255, 255)),
                           SizedBox(width: 8),
                           Text(
                             'Search',
                             style: TextStyle(
-                              color: Colors.white70,
+                              color: Color.fromARGB(255, 255, 255, 255),
                               fontSize: 16,
                             ),
                           ),
@@ -138,7 +138,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
             // horizontal featured cards
             SizedBox(
-              height: 280,
+              height: 300,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: featured.length,
@@ -168,7 +168,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(18),
-                        border: Border.all(color: gold.withOpacity(0.18)),
+                        border: Border.all(color: gold.withOpacity(0.90),
+                        width: 2),
                         boxShadow: const [
                           BoxShadow(
                             color: Colors.black12,
@@ -261,7 +262,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: 42),
 
             // favourites header
             Text(
@@ -290,7 +291,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(28),
-                      border: Border.all(color: gold.withOpacity(0.18)),
+                      border: Border.all(color: gold.withOpacity(0.90), width: 2),
                       boxShadow: const [
                         BoxShadow(
                           color: Colors.black12,

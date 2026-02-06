@@ -100,7 +100,7 @@ class AppData {
       price: 1000.00,
       image: "assets/images/food2.png",
       rating: 4.9,
-      description: "East Coast style citrus-garlic shrimp platter",
+      description: "Succulent shrimp sautéed in fragrant garlic and bright citrus, finished with a touch of butter and coastal herbs. Inspired by classic East Coast seafood traditions, this platter delivers fresh, zesty flavors with a rich, savory finish.",
     ),
     // FoodItem(
     //   id: "3",

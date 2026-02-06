@@ -191,7 +191,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: _emailController,
                     hint: "Email",
                     icon: Icons.email_outlined,
-                    fillColor: goldCard.withOpacity(0.95),
+                    fillColor: Colors.black.withOpacity(0.45),
                     keyboard: TextInputType.emailAddress,
                   ),
 
@@ -207,44 +207,56 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 8),
 
                   // remember + forgot
-                  Row(
-                    children: [
-                      Checkbox(
-                        value: _remember,
-                        onChanged: (v) =>
-                            setState(() => _remember = v ?? false),
-                        side: const BorderSide(
-                            color: Colors
-                                .white70), // Makes the border visible on dark backgrounds
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withOpacity(0.50),
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: Row(
+                      children: [
+                        Checkbox(
+                          value: _remember,
+                          onChanged: (v) =>
+                              setState(() => _remember = v ?? false),
+                          side: const BorderSide(
+                              color: Colors
+                                  .white70), // Makes the border visible on dark backgrounds
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          activeColor: gold,
+                          checkColor: Colors.black,
                         ),
-                        activeColor: gold,
-                        checkColor: Colors.black,
-                      ),
-                      const SizedBox(width: 6),
-                      const Expanded(
-                        child: Text(
-                          'Remember me',
-                          style: TextStyle(color: Colors.white, fontSize: 14),
+                        const SizedBox(width: 4),
+                        const Expanded(
+                          child: Text(
+                            'Remember me',
+                            style: TextStyle(color: Colors.white, fontSize: 14,),
+                            
+                          ),
                         ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          // TODO: forgot password flow
-                        },
-                        child: const Text(
-                          'forgot password?',
-                          style: TextStyle(
-                            color: Color.fromARGB(255, 181, 47, 47),
-                            fontWeight: FontWeight.bold,
-                            decoration: TextDecoration.underline,
+                        GestureDetector(
+                          onTap: () {
+                            // TODO: forgot password flow
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            child: const Text(
+                            'Forgot Password?',
+                            style: TextStyle(
+                              color: Color.fromARGB(255, 170, 47, 47),
+                              decoration: TextDecoration.underline,
+                              decorationColor: Color.fromARGB(255, 170, 47, 47),
+                            ),
                           ),
                         ),
                       ),
+                          
                     ],
                   ),
-
+                  ),
+                  
                   const SizedBox(height: 18),
 
                   // Log In button
@@ -324,10 +336,18 @@ class _LoginScreenState extends State<LoginScreen> {
           prefixIcon: Icon(icon, color: Colors.white70),
           filled: true,
           fillColor: fillColor,
-          contentPadding: const EdgeInsets.symmetric(vertical: 18),
-          border: OutlineInputBorder(
+
+          enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
             borderSide: BorderSide.none,
+          ),
+
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(30),
+              borderSide: BorderSide(color: Color.fromARGB(255, 80, 80, 80).withOpacity(0.60),
+              width: 3),
           ),
         ),
       ),

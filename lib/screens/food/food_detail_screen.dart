@@ -153,16 +153,15 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
             // image card
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(20),
+              child: Container(
+                height: 260,
+                width: double.infinity,
                 child: Image.asset(
                   img,
-                  height: 260,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
+                  fit: BoxFit.cover, // 👈 no clipping
                 ),
               ),
-            ),
+),
 
             // white detail panel
             Expanded(
@@ -322,7 +321,9 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                           icon: const Icon(Icons.shopping_cart_outlined),
                           label: const Text('Add To Cart'),
                           style: ElevatedButton.styleFrom(
+          
                             backgroundColor: darkBg,
+                            foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 18, vertical: 14),
                             shape: RoundedRectangleBorder(
