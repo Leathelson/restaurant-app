@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../dashboard/dashboard_screen.dart';
 import 'register_screen.dart';
-import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
-import '../../services/socket_service.dart';
-
-late StreamSubscription _socketSub;
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -18,76 +14,35 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final SocketService _socket = SocketService();
-  bool _isLoading = false;
   bool _remember = false;
 
   Future<void> _login() async {
-    if (_emailController.text.isEmpty ||
-          _passwordController.text.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Please enter email and password")),
-        );
-        return;
-      }
-
-      setState(() => _isLoading = true);
-
-      _socket.login(
-        _emailController.text.trim(),
-        _passwordController.text.trim(),
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
       );
+
+      final prefs = await SharedPreferences.getInstance();
+
+      // Save credentials only if remember is checked
+      if (_remember) {
+        await prefs.setString('email', _emailController.text);
+        await prefs.setString('password', _passwordController.text);
+      } else {
+        await prefs.remove('email');
+        await prefs.remove('password');
+      }
+    } catch (e) {
+      // handle login error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Login failed: $e')),
+      );
+    }
   }
 
   @override
-void initState() {
-  super.initState();
-
-  _socketSub = SocketService.instance.stream.listen(
-    (message) async {
-      final data = jsonDecode(message);
-
-      if (data['type'] != 'login') return;
-      if (!mounted) return;
-
-      setState(() => _isLoading = false);
-
-      if (data['success'] == true) {
-        final prefs = await SharedPreferences.getInstance();
-
-        await prefs.setBool('isLoggedIn', true);
-
-        if (data['token'] != null) {
-          await prefs.setString('token', data['token']);
-        }
-
-        if (_remember) {
-          await prefs.setString('email', _emailController.text);
-        } else {
-          await prefs.remove('email');
-        }
-
-        if (!mounted) return;
-
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => const DashboardScreen(),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(data['message'] ?? 'Login failed'),
-          ),
-        );
-      }
-    },
-  );
-}
-  @override
   void dispose() {
-    _socketSub.cancel(); 
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -118,9 +73,9 @@ void initState() {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    Colors.black.withOpacity(0.28),
-                    Colors.black.withOpacity(0.58),
-                  ],
+                    Colors.black.withOpacity(0),
+                    Colors.black.withOpacity(0.9),
+                  ],  
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),
@@ -192,7 +147,7 @@ void initState() {
                     controller: _emailController,
                     hint: "Email",
                     icon: Icons.email_outlined,
-                    fillColor: goldCard.withOpacity(0.95),
+                    fillColor: Colors.black.withOpacity(0.55),
                     keyboard: TextInputType.emailAddress,
                   ),
 
@@ -201,7 +156,7 @@ void initState() {
                     controller: _passwordController,
                     hint: "Password",
                     icon: Icons.lock_outline,
-                    fillColor: Colors.black.withOpacity(0.45),
+                    fillColor: Colors.black.withOpacity(0.55),
                     obscure: true,
                   ),
 

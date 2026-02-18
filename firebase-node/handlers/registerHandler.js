@@ -2,9 +2,9 @@ const bcrypt = require('bcrypt');
 const admin = require('firebase-admin');
 
 async function registerHandler(ws, data, db) {
-  const { name, phone, email, password } = data;
+  const { name, phone, email, token } = data;
 
-  if (!name || !phone || !email || !password) {
+  if (!name || !phone || !email || !token) {
     return ws.send(JSON.stringify({
       type: 'register_error',
       success: false,
@@ -12,26 +12,10 @@ async function registerHandler(ws, data, db) {
     }));
   }
 
-  const existingUser = await db
-    .collection('users')
-    .where('email', '==', email)
-    .get();
-
-  if (!existingUser.empty) {
-    return ws.send(JSON.stringify({
-      type: 'register_error',
-      success: false,
-      message: 'Email already registered'
-    }));
-  }
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-
   await db.collection('users').add({
     name,
     phone,
     email,
-    password: hashedPassword,
     dateOfEntry: admin.firestore.Timestamp.now()
   });
 

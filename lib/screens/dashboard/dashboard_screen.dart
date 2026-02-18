@@ -12,6 +12,7 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  
   int selectedCategory = 1; // 0: Non-Veg, 1: Veg, 2: Salad
 
   final List<Map<String, String>> featured = [

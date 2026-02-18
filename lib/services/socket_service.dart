@@ -17,28 +17,29 @@ class SocketService {
     _broadcastStream = _channel.stream.asBroadcastStream();
   }
 
-  // LOGIN
-  void login(String email, String password) {
-    _channel.sink.add(jsonEncode({
-      'type': 'login',
-      'email': email,
-      'password': password,
-    }));
-  }
+  //sending token
+void sendFirebaseToken(String idToken) {
+  final message = jsonEncode({
+    'event': 'firebase_login',
+    'data': {'token': idToken},
+  });
+  _channel.sink.add(message);
+}
+
 
   // REGISTER
-  void register({
+  void sendRegisterData({
     required String name,
     required String phone,
     required String email,
-    required String password,
+    required String token,
   }) {
     _channel.sink.add(jsonEncode({
-      'type': 'register',
+      'event': 'registerData',
       'name': name,
       'phone': phone,
       'email': email,
-      'password': password,
+      'token': token,
     }));
   }
 

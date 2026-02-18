@@ -1,8 +1,7 @@
-import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../dashboard/dashboard_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../services/socket_service.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -29,7 +28,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
-void _register() {
+Future<void> _register() async {
+
+  
   if (_nameController.text.isEmpty ||
       _phoneController.text.isEmpty ||
       _emailController.text.isEmpty ||
@@ -48,40 +49,55 @@ void _register() {
     return;
   }
 
-  SocketService.instance.register(
-    name: _nameController.text.trim(),
-    phone: _phoneController.text.trim(),
-    email: _emailController.text.trim(),
-    password: _passwordController.text,
-  );
-}
+  try {
+    //Create Firebase user
+    UserCredential userCredential =
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      email: _emailController.text.trim(),
+      password: _passwordController.text.trim(),
+    );
 
-@override
-void initState() {
-  super.initState();
+    User? user = userCredential.user;
 
-  SocketService.instance.stream.listen((message) async {
-    final data = jsonDecode(message);
+    if (user == null) return;
 
-    if (data['type'] == 'register_success') {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('isLoggedIn', true);
+    final idToken = await user.getIdToken();
 
-      if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const DashboardScreen()),
-      );
-    }
-
-    if (data['type'] == 'register_error') {
+    if (idToken == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(data['message'] ?? 'Registration failed'),
-        ),
+        const SnackBar(content: Text('Failed to retrieve ID token')),
       );
+      return;
     }
-  });
+    
+    SocketService.instance.sendFirebaseToken(idToken);
+
+    SocketService.instance.sendRegisterData(
+      token: idToken,
+      name: _nameController.text.trim(),
+      phone: _phoneController.text.trim(),
+      email: _emailController.text.trim(),
+
+    );
+
+
+    //Optionally update display name
+    await userCredential.user!.updateDisplayName(
+      _nameController.text.trim(),
+
+    );
+
+    //AuthGate will automatically switch to Dashboard
+    //remove
+    print("After register: ${FirebaseAuth.instance.currentUser}");
+
+  } on FirebaseAuthException catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(e.message ?? 'Registration failed')),
+    );
+  }
+  if (!mounted) return;
+  Navigator.of(context).popUntil((route) => route.isFirst);
 }
 
   Color get gold => const Color(0xFFB37C1E);
