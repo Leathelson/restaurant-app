@@ -54,8 +54,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final w = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      resizeToAvoidBottomInset:
-          false, //  prevents bg from moving with keyboard
+      resizeToAvoidBottomInset: false, //  prevents bg from moving with keyboard
       body: Stack(
         children: [
           // background image stays fixed
@@ -168,6 +167,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         value: _remember,
                         onChanged: (v) =>
                             setState(() => _remember = v ?? false),
+                        side: const BorderSide(
+                            color: Colors
+                                .white70), // Makes the border visible on dark backgrounds
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(4),
                         ),
@@ -178,7 +180,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       const Expanded(
                         child: Text(
                           'Remember me',
-                          style: TextStyle(color: Colors.white),
+                          style: TextStyle(color: Colors.white, fontSize: 14),
                         ),
                       ),
                       GestureDetector(
@@ -186,9 +188,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           // TODO: forgot password flow
                         },
                         child: const Text(
-                          'forgot password',
+                          'forgot password?',
                           style: TextStyle(
-                            color: Colors.redAccent,
+                            color: Color.fromARGB(255, 181, 47, 47),
+                            fontWeight: FontWeight.bold,
                             decoration: TextDecoration.underline,
                           ),
                         ),
@@ -230,7 +233,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (c) => const RegisterScreen()),
+                        MaterialPageRoute(
+                            builder: (c) => const RegisterScreen()),
                       );
                     },
                     child: const Text(

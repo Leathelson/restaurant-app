@@ -7,7 +7,7 @@ const app = express();
 const registerHandler = require('./handlers/registerHandler');
 const loginHandler = require('./handlers/loginHandler');
 
-const serviceAccount = require('./firebaseServiceKey.json');
+const serviceAccount = require('./serviceAccountKey.json');
 
 
 

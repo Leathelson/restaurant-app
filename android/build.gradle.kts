@@ -1,3 +1,13 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        // This is the bridge for Firebase
+        classpath("com.google.gms:google-services:4.4.0")
+    }
+} //only for smrithi firebase integration
 allprojects {
     repositories {
         google()
