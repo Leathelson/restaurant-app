@@ -16,7 +16,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   double get subtotal {
     return AppData.cart.fold(
-      0,
+      0.0,
       (sum, item) => sum + (item.food.price * item.quantity),
     );
   }

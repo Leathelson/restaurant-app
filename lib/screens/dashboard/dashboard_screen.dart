@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../models/app_data.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; 
+import '../../models/food_model.dart'; 
 import '../food/food_detail_screen.dart';
 import '../profile/profile_screen.dart';
 import '../search/search_screen.dart';
@@ -12,34 +13,17 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  
   int selectedCategory = 1; // 0: Non-Veg, 1: Veg, 2: Salad
 
-  final List<Map<String, String>> featured = [
-    {
-      'image': 'assets/images/food1.png',
-      'name': 'Grilled Sirloin Steak',
-      'price': 'Rs 1200'
-    },
-    {
-      'image': 'assets/images/food2.png',
-      'name': 'East Coast Citrus-Garlic',
-      'price': 'Rs 1000'
-    },
-  ];
-
-  final List<Map<String, dynamic>> favourites = [
-    {
-      'image': 'assets/images/food1.png',
-      'name': 'Grilled Whole Snapper',
-      'rating': 4.8,
-    },
-    {
-      'image': 'assets/images/food2.png',
-      'name': 'Salad',
-      'rating': 4.3,
-    },
-  ];
+  // Map category index to Firestore filter value
+  String get _categoryFilter {
+    switch (selectedCategory) {
+      case 0: return 'NonVeg';
+      case 1: return 'Veg';
+      case 2: return 'Salad';
+      default: return 'NonVeg';
+    }
+  }
 
   Color get titleColor => const Color(0xFFB56A2E);
   Color get gold => const Color(0xFFB37C1E);
@@ -85,7 +69,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Search row
+            // Search row (unchanged)
             Row(
               children: [
                 Expanded(
@@ -125,7 +109,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
             const SizedBox(height: 14),
 
-            // category chips
+            // Category chips (unchanged logic)
             Wrap(
               spacing: 10,
               children: [
@@ -137,114 +121,161 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
             const SizedBox(height: 18),
 
-            // horizontal featured cards
+            //  Featured FoodModels -FIREBASE 
             SizedBox(
               height: 280,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: featured.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 14),
-                itemBuilder: (context, index) {
-                  final item = featured[index];
-                  return GestureDetector(
-                    onTap: () {
-                      if (AppData.foodItems.isNotEmpty) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => FoodDetailScreen(
-                              foodItem: AppData.foodItems[
-                                  index % AppData.foodItems.length],
-                            ),
-                          ),
-                        );
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("No food details available")),
-                        );
-                      }
-                    },
-                    child: Container(
-                      width: w * 0.56,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(18),
-                        border: Border.all(color: gold.withOpacity(0.18)),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 8,
-                            offset: Offset(0, 4),
-                          )
-                        ],
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('FoodItems')
+                    .where('Category', isEqualTo: _categoryFilter)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  // Loading state
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  // Error state
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Text(
+                        'Error: ${snapshot.error}',
+                        style: TextStyle(color: Colors.red[700]),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // image area with rounded top corners
-                          ClipRRect(
-                            borderRadius: const BorderRadius.vertical(
-                                top: Radius.circular(18)),
-                            child: Image.asset(
-                              item['image']!,
-                              height: 160,
-                              width: double.infinity,
-                              fit: BoxFit.cover,
+                    );
+                  }
+
+                  // Empty state
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return Center(
+                      child: Text(
+                        'No featured items in ${_categoryFilter.toUpperCase()}',
+                        style: TextStyle(color: Colors.grey[600]),
+                      ),
+                    );
+                  }
+
+                  // Data ready - map to your UI
+                  final featuredItems = snapshot.data!.docs;
+
+                  return ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: featuredItems.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 14),
+                    itemBuilder: (context, index) {
+                      final doc = featuredItems[index];
+                      final data = doc.data() as Map<String, dynamic>;
+                      final food = FoodModel.fromFirestore(data, doc.id);
+
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => FoodDetailScreen(
+                                foodItem: food, // Pass real Firebase data
+                              ),
                             ),
+                          );
+                        },
+                        child: Container(
+                          width: w * 0.56,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(color: gold.withOpacity(0.18)),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 8,
+                                offset: Offset(0, 4),
+                              )
+                            ],
                           ),
-                          Padding(
-                            padding:
-                                const EdgeInsets.fromLTRB(12, 12, 12, 8),
+                          child: SingleChildScrollView(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  item['name']!,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 14,
-                                  ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
+                                ClipRRect(
+                                  borderRadius: const BorderRadius.vertical(
+                                      top: Radius.circular(18)),
+                                  child: _buildFoodImage(data['Image']),
                                 ),
-                                const SizedBox(height: 8),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      item['price']!,
-                                      style: TextStyle(
-                                        color: gold,
-                                        fontWeight: FontWeight.bold,
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        food.name,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 14,
+                                        ),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                    ),
-                                    Container(
-                                      decoration: const BoxDecoration(
-                                        color: Colors.white,
-                                        shape: BoxShape.circle,
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black12,
-                                            blurRadius: 6,
+
+                                      if (food.shortdescription.isNotEmpty)
+                                        Text(
+                                          food.shortdescription,
+                                          style: TextStyle(
+                                            color: Colors.grey.shade600,
+                                            fontSize: 11,
+                                            height: 1.3,
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+
+                                      const SizedBox(height: 8),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            'Rs ${food.price.toStringAsFixed(0)}',
+                                            style: TextStyle(
+                                              color: gold,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          Container(
+                                            decoration: const BoxDecoration(
+                                              color: Colors.white,
+                                              shape: BoxShape.circle,
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black12,
+                                                  blurRadius: 6,
+                                                )
+                                              ],
+                                            ),
+                                            padding: const EdgeInsets.all(3),
+                                            child: IconButton(
+                                              icon: const Icon(
+                                                Icons.favorite_border,
+                                                color: Colors.redAccent,
+                                                size: 18,
+                                              ),
+                                              onPressed: () {
+                                                // TODO: Add to favourites in Firebase
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  const SnackBar(content: Text('Added to favourites!')),
+                                                );
+                                              },
+                                            ),
                                           )
                                         ],
                                       ),
-                                      padding: const EdgeInsets.all(6),
-                                      child: const Icon(
-                                        Icons.favorite_border,
-                                        color: Colors.redAccent,
-                                        size: 18,
-                                      ),
-                                    )
-                                  ],
-                                ),
+                                    ],
+                                  ),
+                                )
                               ],
                             ),
-                          )
-                        ],
-                      ),
-                    ),
+                          ),
+                      ));
+                    },
                   );
                 },
               ),
@@ -252,7 +283,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
             const SizedBox(height: 18),
 
-            // divider accent
+            // Divider accent 
             Container(
               height: 4,
               width: 46,
@@ -264,7 +295,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
             const SizedBox(height: 12),
 
-            // favourites header
+            //  Favourites Header
             Text(
               'Favourites',
               style: TextStyle(
@@ -275,65 +306,88 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             const SizedBox(height: 12),
 
-            // favorites horizontal list (pill cards)
+            // Favourites List - NOW FROM FIREBASE
             SizedBox(
               height: 96,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: favourites.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 12),
-                itemBuilder: (context, idx) {
-                  final fav = favourites[idx];
-                  return Container(
-                    width: w * 0.6,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(28),
-                      border: Border.all(color: gold.withOpacity(0.18)),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 6,
-                          offset: Offset(0, 3),
-                        )
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 26,
-                          backgroundImage:
-                              AssetImage(fav['image'] as String), // ✅ fixed
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('FoodItems')
+                    .limit(5)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (snapshot.hasError || !snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return const Center(
+                      child: Text('No favourites yet', style: TextStyle(color: Colors.grey)),
+                    );
+                  }
+
+                  final favItems = snapshot.data!.docs;
+
+                  return ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: favItems.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 12),
+                    itemBuilder: (context, idx) {
+                      final doc = favItems[idx];
+                      final data = doc.data() as Map<String, dynamic>;
+                      final food = FoodModel.fromFirestore(data, doc.id);
+
+                      return Container(
+                        width: w * 0.6,
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(28),
+                          border: Border.all(color: gold.withOpacity(0.18)),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 6,
+                              offset: Offset(0, 3),
+                            )
+                          ],
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                fav['name'] as String,
-                                style: const TextStyle(fontWeight: FontWeight.w700),
-                              ),
-                              const SizedBox(height: 6),
-                              Row(
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 26,
+                              backgroundImage: _getFoodImageProvider(data['Image']),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Icon(Icons.star,
-                                      size: 16, color: Colors.amber),
-                                  const SizedBox(width: 6),
                                   Text(
-                                    fav['rating'].toString(),
-                                    style: const TextStyle(fontSize: 13),
+                                    food.name,
+                                    style: const TextStyle(fontWeight: FontWeight.w700),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.star, size: 16, color: Colors.amber),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        food.rating != null ? food.rating.toStringAsFixed(1) : 'N/A',
+                                        style: TextStyle(
+                                          color: Colors.grey[700],
+                                          fontSize: 12,
+                                        ),
+                                      )
+                                    ],
                                   )
                                 ],
-                              )
-                            ],
-                          ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      );
+                    },
                   );
                 },
               ),
@@ -346,6 +400,76 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  // Helper: Build image widget (supports asset or network)
+  Widget _buildFoodImage(String? imagePath) {
+    if (imagePath == null) {
+      return Container(
+        height: 160,
+        width: double.infinity,
+        color: Colors.grey[100],
+        child: const Icon(Icons.restaurant, size: 48, color: Colors.grey),
+      );
+    }
+    if (imagePath.startsWith('http')) {
+      return Image.network(imagePath, height: 160, fit: BoxFit.cover, loadingBuilder: (ctx, child, progress) {
+        return progress == null ? child : const Center(child: CircularProgressIndicator());
+      });
+    }
+    return Container(
+    height: 160,
+    width: double.infinity,
+    color: Colors.grey[50], // Light background for empty areas
+    child: ClipRRect(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+      child: _buildImageWidget(imagePath),
+    ),
+  );
+  }
+
+  Widget _buildImageWidget(String path) {
+  final isNetwork = path.startsWith('http');
+  
+  return Stack(
+    fit: StackFit.expand,
+    children: [
+      // Background color
+      Container(color: Colors.white),
+      
+      // Image centered and contained
+      isNetwork
+          ? Image.network(
+              path,
+              fit: BoxFit.contain, // Shows entire image, centered
+              alignment: Alignment.center,
+              loadingBuilder: (ctx, child, progress) {
+                return progress == null
+                    ? child
+                    : const Center(child: CircularProgressIndicator());
+              },
+              errorBuilder: (ctx, err, stack) => const Center(
+                child: Icon(Icons.broken_image, color: Colors.grey, size: 50),
+              ),
+            )
+          : Image.asset(
+              path,
+              fit: BoxFit.contain, // Shows entire image, centered
+              alignment: Alignment.center,
+              errorBuilder: (ctx, err, stack) => const Center(
+                child: Icon(Icons.broken_image, color: Colors.grey, size: 50),
+              ),
+            ),
+    ],
+  );
+}
+
+  // Helper: Get ImageProvider for CircleAvatar
+  ImageProvider _getFoodImageProvider(String? imagePath) {
+    if (imagePath == null) return const AssetImage('assets/images/placeholder.png');
+    if (imagePath.startsWith('http')) return NetworkImage(imagePath);
+    return AssetImage(imagePath);
+  }
+
+  // Category chip widget (unchanged)
   Widget _categoryChip(String label, int idx, Color background) {
     final isSelected = selectedCategory == idx;
     return GestureDetector(
@@ -357,7 +481,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           color: isSelected ? background : Colors.transparent,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: isSelected ? Colors.transparent : gold, // ✅ fixed
+            color: isSelected ? Colors.transparent : gold,
             width: 2,
           ),
         ),

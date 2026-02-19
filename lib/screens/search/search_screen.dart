@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/app_data.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../models/food_model.dart';
 import '../food/food_detail_screen.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -11,14 +13,16 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   final _searchController = TextEditingController();
-  List<FoodItem> _searchResults = [];
+  List<FoodModel> _searchResults = [];
+  bool _isSearching = false;
+  List<FoodModel> _allFood = [];
 
   void _performSearch(String query) {
     setState(() {
       if (query.isEmpty) {
         _searchResults = [];
       } else {
-        _searchResults = AppData.foodItems
+        _searchResults = _allFood
             .where(
               (item) =>
                   item.name.toLowerCase().contains(query.toLowerCase()) ||

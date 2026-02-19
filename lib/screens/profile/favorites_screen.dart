@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../models/app_data.dart';
 import '../food/food_detail_screen.dart';
+import '../../models/food_model.dart';
 
 class FavoritesScreen extends StatefulWidget {
   const FavoritesScreen({super.key});
@@ -12,10 +12,14 @@ class FavoritesScreen extends StatefulWidget {
 class _FavoritesScreenState extends State<FavoritesScreen> {
   @override
   Widget build(BuildContext context) {
-    final favorites = AppData.getFavorites();
+    final favorites = FoodModel.getFavorites();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Favorites')),
+      appBar: AppBar(
+        title: const Text('Favorites'),
+        backgroundColor: Colors.white,
+        elevation: 0,
+      ),
       body: Column(
         children: [
           if (favorites.isNotEmpty) ...[
@@ -34,13 +38,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: AppData.foodItems
-                    .where((item) => !item.isFavorite)
-                    .length,
+                itemCount: favorites.length,
                 itemBuilder: (context, index) {
-                  final item = AppData.foodItems
-                      .where((item) => !item.isFavorite)
-                      .toList()[index];
+                  final item = favorites[index];
                   return GestureDetector(
                     onTap: () {
                       Navigator.push(
@@ -62,22 +62,15 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Expanded(
-                            child: item.image.endsWith('.png')
-                                ? ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: Image.asset(
-                                      item.image,
-                                      fit: BoxFit.cover,
-                                      width: double.infinity,
-                                    ),
-                                  )
-                                : Text(item.image,
-                                    style: const TextStyle(fontSize: 30)),
+                            child: ClipRRect(
+                              borderRadius: const BorderRadius.vertical(
+                                  top: Radius.circular(12)),
+                              child: _buildImage(item.image),
+                            ),
                           ),
                           const SizedBox(height: 8),
                           Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 4.0),
+                            padding: const EdgeInsets.symmetric(horizontal: 4.0),
                             child: Text(
                               item.name,
                               style: const TextStyle(
@@ -128,34 +121,13 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                       return Card(
                         margin: const EdgeInsets.only(bottom: 8),
                         child: ListTile(
-                          leading: Container(
-                            width: 50,
-                            height: 50,
-                            decoration: BoxDecoration(
-                              color: Colors.grey[200],
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: item.image.endsWith('.png')
-                                ? ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: Image.asset(
-                                      item.image,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  )
-                                : Center(
-                                    child: Text(
-                                      item.image,
-                                      style: const TextStyle(fontSize: 24),
-                                    ),
-                                  ),
-                          ),
+                          leading: _buildImage(item.image, size: 50),
                           title: Text(
                             item.name,
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           subtitle: Text(
-                            '${item.category} • Rs ${item.price.toStringAsFixed(2)}',
+                            '${item.category} • Rs ${item.price.toStringAsFixed(0)}',
                           ),
                           trailing: FittedBox(
                             child: Row(
@@ -163,7 +135,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                               children: [
                                 const Icon(Icons.star,
                                     size: 16, color: Colors.amber),
-                                Text('${item.rating}'),
+                                Text(item.rating.toStringAsFixed(1)),
                                 const SizedBox(width: 8),
                                 IconButton(
                                   icon: const Icon(Icons.favorite, color: Colors.red),
@@ -191,6 +163,37 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   ),
           ),
         ],
+      ),
+    );
+  }
+
+  // Helper method to build images with proper error handling
+  Widget _buildImage(String imagePath, {double? size, double? width}) {
+    final displaySize = size ?? 120.0;
+    
+    return Container(
+      width: width ?? displaySize,
+      height: displaySize,
+      color: Colors.grey[200],
+      child: ClipRRect(
+        borderRadius: size != null ? BorderRadius.circular(8) : BorderRadius.zero,
+        child: Image.asset(
+          imagePath,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            // Show placeholder icon if image fails to load
+            return Container(
+              color: Colors.grey[300],
+              child: Center(
+                child: Icon(
+                  Icons.restaurant,
+                  size: displaySize * 0.4,
+                  color: Colors.grey[400],
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
   }

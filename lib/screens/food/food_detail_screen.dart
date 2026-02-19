@@ -96,9 +96,9 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
   String _desc() {
     final item = widget.foodItem;
     if (item == null) return '';
-    if (item is Map) return item['description'] ?? '';
+    if (item is Map) return item['longdesc'] ?? '';
     try {
-      return item.description ?? '';
+      return item.longdescription?? '';
     } catch (_) {
       return '';
     }

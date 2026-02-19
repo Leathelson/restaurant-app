@@ -1,8 +1,8 @@
-import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../services/socket_service.dart';
+import 'package:flutter/rendering.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -18,19 +18,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
 
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _phoneController.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
-    _confirmController.dispose();
-    super.dispose();
-  }
 
 Future<void> _register() async {
 
-  
   if (_nameController.text.isEmpty ||
       _phoneController.text.isEmpty ||
       _emailController.text.isEmpty ||
@@ -61,25 +51,24 @@ Future<void> _register() async {
 
     if (user == null) return;
 
-    final idToken = await user.getIdToken();
+    try{
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        'Uid': user.uid,
+        'Name': _nameController.text.trim(),
+        'Phone': _phoneController.text.trim(),
+        'Email': _emailController.text.trim(),
+        'DateofEntry': DateTime.now(),
+      });
+    } catch (firestoreError) {
+      print("Firestore error: $firestoreError");
 
-    if (idToken == null) {
+      await user.delete();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to retrieve ID token')),
+        const SnackBar(content: Text('Failed to save user data. Please try again.')),
       );
       return;
     }
     
-    SocketService.instance.sendFirebaseToken(idToken);
-
-    SocketService.instance.sendRegisterData(
-      token: idToken,
-      name: _nameController.text.trim(),
-      phone: _phoneController.text.trim(),
-      email: _emailController.text.trim(),
-
-    );
-
 
     //Optionally update display name
     await userCredential.user!.updateDisplayName(
@@ -99,6 +88,16 @@ Future<void> _register() async {
   if (!mounted) return;
   Navigator.of(context).popUntil((route) => route.isFirst);
 }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _phoneController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmController.dispose();
+    super.dispose();
+  }
 
   Color get gold => const Color(0xFFB37C1E);
   Color get goldCard => const Color(0xFF906224);

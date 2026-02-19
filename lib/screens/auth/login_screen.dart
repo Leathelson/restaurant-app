@@ -51,7 +51,6 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     const gold = Color(0xFFB37C1E);
-    const goldCard = Color(0xFF906224);
     final w = MediaQuery.of(context).size.width;
 
     return Scaffold(

@@ -17,6 +17,8 @@ dependencies:
   web_socket_channel: ^3.0.3
   firebase_core: ^4.2.0
   firebase_auth: ^6.1.4
+  cloud_firestore: 6.1.2
+
 
 dev_dependencies:
   flutter_test:
@@ -26,5 +28,8 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/images/
     - assets/icons/
+    - assets/images/FoodItems/
+    - assets/images/FoodItems/GrilledSirloinSteak.png
+    - assets/images/
+
