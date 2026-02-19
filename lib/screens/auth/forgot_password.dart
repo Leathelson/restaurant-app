@@ -15,6 +15,6 @@ class _ForgotPasswordState extends State<ForgotPassword> {
           title: Text('Account Recovery'),
           backgroundColor: Colors.black.withOpacity(0.28),
         ),
-        body: Text('Enter the account email'));
+        body: Text('Can you see me ??'));
   }
 }
