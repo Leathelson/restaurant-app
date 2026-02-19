@@ -36,6 +36,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
+      Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
       String message;
       if (e.code == 'weak-password') {
@@ -117,7 +118,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     controller: _nameController,
                     hint: 'Name',
                     icon: Icons.person_outline,
-                    fillColor: goldCard.withOpacity(0.95),
+                    fillColor: Colors.black.withOpacity(0.5),
                     keyboard: TextInputType.name,
                   ),
 
@@ -125,7 +126,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     controller: _phoneController,
                     hint: 'Phone Num',
                     icon: Icons.phone_android_outlined,
-                    fillColor: goldCard.withOpacity(0.95),
+                    fillColor: Colors.black.withOpacity(0.5),
                     keyboard: TextInputType.phone,
                   ),
 
@@ -133,7 +134,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     controller: _emailController,
                     hint: 'Email',
                     icon: Icons.email_outlined,
-                    fillColor: goldCard.withOpacity(0.95),
+                    fillColor: Colors.black.withOpacity(0.5),
                     keyboard: TextInputType.emailAddress,
                   ),
 
@@ -142,7 +143,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     controller: _passwordController,
                     hint: 'Password',
                     icon: Icons.lock_outline,
-                    fillColor: Colors.black.withOpacity(0.48),
+                    fillColor: Colors.black.withOpacity(0.5),
                     obscure: true,
                   ),
 
@@ -150,7 +151,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     controller: _confirmController,
                     hint: 'Confirm Password',
                     icon: Icons.lock_outline,
-                    fillColor: goldCard.withOpacity(0.95),
+                    fillColor: Colors.black.withOpacity(0.5),
                     obscure: true,
                   ),
 
@@ -215,10 +216,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
           filled: true,
           fillColor: fillColor,
           contentPadding:
-              const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+              const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
-            borderSide: BorderSide.none,
+            borderSide: BorderSide(
+                color: Color.fromARGB(255, 80, 80, 80).withOpacity(0.60),
+                width: 5),
           ),
         ),
       ),

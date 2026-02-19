@@ -1,8 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:luxury_restaurant_app/screens/auth/forgot_password.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../dashboard/dashboard_screen.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -54,8 +54,6 @@ class _LoginScreenState extends State<LoginScreen> {
     final w = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      resizeToAvoidBottomInset:
-          false, // 👈 prevents bg from moving with keyboard
       body: Stack(
         children: [
           // background image stays fixed
@@ -86,7 +84,7 @@ class _LoginScreenState extends State<LoginScreen> {
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
               child: Column(
-                children: [
+                children: <Widget>[
                   const SizedBox(height: 8),
                   Text(
                     'Log In',
@@ -146,7 +144,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: _emailController,
                     hint: "Email",
                     icon: Icons.email_outlined,
-                    fillColor: goldCard.withOpacity(0.95),
+                    fillColor: Colors.black.withOpacity(0.45),
                     keyboard: TextInputType.emailAddress,
                   ),
 
@@ -157,43 +155,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     icon: Icons.lock_outline,
                     fillColor: Colors.black.withOpacity(0.45),
                     obscure: true,
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  // remember + forgot
-                  Row(
-                    children: [
-                      Checkbox(
-                        value: _remember,
-                        onChanged: (v) =>
-                            setState(() => _remember = v ?? false),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        activeColor: gold,
-                        checkColor: Colors.black,
-                      ),
-                      const SizedBox(width: 6),
-                      const Expanded(
-                        child: Text(
-                          'Remember me',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          // TODO: forgot password flow
-                        },
-                        child: Text(
-                          'forgot password',
-                          style: TextStyle(
-                            color: Colors.redAccent,
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                      ),
-                    ],
                   ),
 
                   const SizedBox(height: 18),
@@ -225,17 +186,55 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 18),
 
-                  // register link
-                  TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (c) => RegisterScreen()),
-                      );
-                    },
-                    child: Text(
-                      'Don\'t have an account? Register',
-                      style: TextStyle(color: gold),
+                  Container(
+                    width: double.infinity,
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 8, horizontal: 40),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.35),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.white.withOpacity(0.06)),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (c) => ForgotPassword(),
+                              ),
+                            );
+                          },
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            visualDensity: VisualDensity.compact,
+                          ),
+                          child: Text(
+                            'Forgot Password? Reset!',
+                            style: TextStyle(color: gold),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (c) => RegisterScreen()),
+                            );
+                          },
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            visualDensity: VisualDensity.compact,
+                          ),
+                          child: Text(
+                            'Don\'t have an account? Register!',
+                            style: TextStyle(color: gold),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
 
@@ -277,7 +276,8 @@ class _LoginScreenState extends State<LoginScreen> {
           contentPadding: const EdgeInsets.symmetric(vertical: 18),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
-            borderSide: BorderSide.none,
+            borderSide: BorderSide(
+                color: const Color(0xFF906224).withOpacity(0.60), width: 5),
           ),
         ),
       ),

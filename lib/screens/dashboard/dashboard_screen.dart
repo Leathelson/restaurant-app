@@ -52,7 +52,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         title: Text(
-          'Search Food',
+          'Lol',
           style: TextStyle(
             color: titleColor,
             fontSize: 22,
@@ -150,8 +150,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           context,
                           MaterialPageRoute(
                             builder: (_) => FoodDetailScreen(
-                              foodItem: AppData.foodItems[
-                                  index % AppData.foodItems.length],
+                              foodItem: AppData
+                                  .foodItems[index % AppData.foodItems.length],
                             ),
                           ),
                         );
@@ -180,8 +180,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         children: [
                           // image area with rounded top corners
                           ClipRRect(
-                            borderRadius: BorderRadius.vertical(
-                                top: Radius.circular(18)),
+                            borderRadius:
+                                BorderRadius.vertical(top: Radius.circular(18)),
                             child: Image.asset(
                               item['image']!,
                               height: 160,
@@ -190,8 +190,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             ),
                           ),
                           Padding(
-                            padding:
-                                const EdgeInsets.fromLTRB(12, 12, 12, 8),
+                            padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
