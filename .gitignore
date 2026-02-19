@@ -11,6 +11,8 @@
 .svn/
 .swiftpm/
 migrate_working_dir/
+firebase_options.dart
+Thumbs.db
 
 # IntelliJ related
 *.iml
@@ -27,6 +29,8 @@ migrate_working_dir/
 **/doc/api/
 **/ios/Flutter/.last_build_id
 .dart_tool/
+.packages
+.flutter-plugins
 .flutter-plugins-dependencies
 .pub-cache/
 .pub/
@@ -43,3 +47,23 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Android generated files
+android/.gradle/
+android/local.properties
+
+# iOS generated files
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+
+# IDE files (machine-specific)
+.vscode/
+.idea/
+*.iml
+
+# Firebase secrets (IMPORTANT: keep private)
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+lib/firebase_options.dart
