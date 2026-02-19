@@ -1,22 +1,28 @@
 import 'package:flutter/material.dart';
 import '../../models/app_data.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../models/food_model.dart';
 import '../food/food_detail_screen.dart';
 
 class SearchScreen extends StatefulWidget {
+  const SearchScreen({super.key});
+
   @override
   _SearchScreenState createState() => _SearchScreenState();
 }
 
 class _SearchScreenState extends State<SearchScreen> {
   final _searchController = TextEditingController();
-  List<FoodItem> _searchResults = [];
+  List<FoodModel> _searchResults = [];
+  bool _isSearching = false;
+  List<FoodModel> _allFood = [];
 
   void _performSearch(String query) {
     setState(() {
       if (query.isEmpty) {
         _searchResults = [];
       } else {
-        _searchResults = AppData.foodItems
+        _searchResults = _allFood
             .where(
               (item) =>
                   item.name.toLowerCase().contains(query.toLowerCase()) ||
@@ -30,23 +36,23 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Search')),
+      appBar: AppBar(title: const Text('Search')),
       body: Column(
         children: [
           Padding(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             child: TextField(
               controller: _searchController,
               onChanged: _performSearch,
               decoration: InputDecoration(
                 hintText: 'Search for dishes...',
-                prefixIcon: Icon(Icons.search),
+                prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.amber, width: 2),
+                  borderSide: const BorderSide(color: Colors.amber, width: 2),
                 ),
               ),
             ),
@@ -57,13 +63,13 @@ class _SearchScreenState extends State<SearchScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.search, size: 80, color: Colors.grey),
-                        SizedBox(height: 16),
+                        const Icon(Icons.search, size: 80, color: Colors.grey),
+                        const SizedBox(height: 16),
                         Text(
                           _searchController.text.isEmpty
                               ? 'Start typing to search for dishes'
                               : 'No results found',
-                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                          style: const TextStyle(fontSize: 16, color: Colors.grey),
                         ),
                       ],
                     ),
@@ -73,7 +79,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     itemBuilder: (context, index) {
                       final item = _searchResults[index];
                       return Card(
-                        margin: EdgeInsets.symmetric(
+                        margin: const EdgeInsets.symmetric(
                           horizontal: 16,
                           vertical: 4,
                         ),
@@ -88,19 +94,19 @@ class _SearchScreenState extends State<SearchScreen> {
                             child: Center(
                               child: Text(
                                 item.image,
-                                style: TextStyle(fontSize: 24),
+                                style: const TextStyle(fontSize: 24),
                               ),
                             ),
                           ),
                           title: Text(
                             item.name,
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                            style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           subtitle: Text('${item.category} • \$${item.price}'),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.star, size: 16, color: Colors.amber),
+                              const Icon(Icons.star, size: 16, color: Colors.amber),
                               Text('${item.rating}'),
                             ],
                           ),

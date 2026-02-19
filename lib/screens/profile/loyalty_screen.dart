@@ -2,46 +2,48 @@ import 'package:flutter/material.dart';
 import '../../models/app_data.dart';
 
 class LoyaltyScreen extends StatelessWidget {
+  const LoyaltyScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Loyalty Program')),
+      appBar: AppBar(title: const Text('Loyalty Program')),
       body: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             Card(
               color: Colors.amber,
               child: Padding(
-                padding: EdgeInsets.all(20),
+                padding: const EdgeInsets.all(20),
                 child: Column(
                   children: [
-                    Text(
+                    const Text(
                       'Your Points',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Text(
                       '${AppData.currentUser.loyaltyPoints}',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 36,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Text('Points available'),
+                    const Text('Points available'),
                   ],
                 ),
               ),
             ),
-            SizedBox(height: 24),
-            Text(
+            const SizedBox(height: 24),
+            const Text(
               'Available Rewards',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Expanded(
               child: ListView(
                 children: [
@@ -78,7 +80,7 @@ class LoyaltyScreen extends StatelessWidget {
     final canRedeem = AppData.currentUser.loyaltyPoints >= points;
 
     return Card(
-      margin: EdgeInsets.only(bottom: 8),
+      margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         leading: Icon(
           Icons.card_giftcard,
@@ -89,9 +91,9 @@ class LoyaltyScreen extends StatelessWidget {
         trailing: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('$points pts', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text('$points pts', style: const TextStyle(fontWeight: FontWeight.bold)),
             if (canRedeem)
-              Text(
+              const Text(
                 'Available',
                 style: TextStyle(color: Colors.green, fontSize: 12),
               ),

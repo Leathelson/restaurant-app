@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../models/app_data.dart';
 import 'user_info_screen.dart';
 import 'order_history_screen.dart';
 import 'favorites_screen.dart';
@@ -9,6 +8,8 @@ import 'reservations_screen.dart';
 import 'settings_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
+  const ProfileScreen({super.key});
+
   Color get gold => const Color(0xFFB37C1E);
 
   @override
@@ -23,7 +24,7 @@ class ProfileScreen extends StatelessWidget {
               children: [
                 Container(
                   height: 180,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     image: DecorationImage(
                       image: AssetImage('assets/images/background_profile.png'),
                       fit: BoxFit.cover,
@@ -37,15 +38,15 @@ class ProfileScreen extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           IconButton(
-                            icon: Icon(Icons.arrow_back_ios, color: Colors.white),
+                            icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
                             onPressed: () => Navigator.pop(context),
                           ),
                           IconButton(
-                            icon: Icon(Icons.settings, color: Colors.white),
+                            icon: const Icon(Icons.settings, color: Colors.white),
                             onPressed: () => Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (_) => SettingsScreen()),
+                                  builder: (_) => const SettingsScreen()),
                             ),
                           ),
                         ],
@@ -55,7 +56,7 @@ class ProfileScreen extends StatelessWidget {
                 ),
 
                 // Centered profile picture floating below the background
-                Positioned(
+                const Positioned(
                   bottom: -120, // moves the avatar down
                   left: 0,
                   right: 0,
@@ -65,7 +66,7 @@ class ProfileScreen extends StatelessWidget {
                         radius: 80,
                         backgroundImage: AssetImage('assets/images/profile.png'),
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: 12),
                       Text(
                         'William Dafuk',
                         style: TextStyle(
@@ -93,7 +94,7 @@ class ProfileScreen extends StatelessWidget {
                     'User Info & Preferences',
                     Icons.person_outline,
                     () => Navigator.push(context,
-                        MaterialPageRoute(builder: (_) => UserInfoScreen())),
+                        MaterialPageRoute(builder: (_) => const UserInfoScreen())),
                     gold,
                   ),
                   _buildMenuOption(
@@ -103,7 +104,7 @@ class ProfileScreen extends StatelessWidget {
                     () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (_) => OrderHistoryScreen())),
+                            builder: (_) => const OrderHistoryScreen())),
                     gold,
                   ),
                   _buildMenuOption(
@@ -111,7 +112,7 @@ class ProfileScreen extends StatelessWidget {
                     'Favourite & Recommendation',
                     Icons.favorite_border,
                     () => Navigator.push(context,
-                        MaterialPageRoute(builder: (_) => FavoritesScreen())),
+                        MaterialPageRoute(builder: (_) => const FavoritesScreen())),
                     gold,
                   ),
                   _buildMenuOption(
@@ -119,7 +120,7 @@ class ProfileScreen extends StatelessWidget {
                     'Loyalty & Rewards',
                     Icons.card_giftcard,
                     () => Navigator.push(context,
-                        MaterialPageRoute(builder: (_) => LoyaltyScreen())),
+                        MaterialPageRoute(builder: (_) => const LoyaltyScreen())),
                     const Color(0xFF2F2740),
                   ),
                   _buildMenuOption(
@@ -127,7 +128,7 @@ class ProfileScreen extends StatelessWidget {
                     'Payment & Security',
                     Icons.payment,
                     () => Navigator.push(context,
-                        MaterialPageRoute(builder: (_) => PaymentScreen())),
+                        MaterialPageRoute(builder: (_) => const PaymentScreen())),
                     gold,
                   ),
                   _buildMenuOption(
@@ -137,7 +138,7 @@ class ProfileScreen extends StatelessWidget {
                     () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (_) => ReservationsScreen())),
+                            builder: (_) => const ReservationsScreen())),
                     gold,
                   ),
                 ],
@@ -167,12 +168,12 @@ class ProfileScreen extends StatelessWidget {
           onTap: onTap,
           title: Text(
             title,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.w600,
             ),
           ),
-          trailing: Icon(Icons.arrow_forward_ios, color: Colors.white, size: 18),
+          trailing: const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 18),
         ),
       ),
     );

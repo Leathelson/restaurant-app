@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../models/app_data.dart';
 import '../food/food_detail_screen.dart';
+import '../../models/food_model.dart';
 
 class FavoritesScreen extends StatefulWidget {
+  const FavoritesScreen({super.key});
+
   @override
   _FavoritesScreenState createState() => _FavoritesScreenState();
 }
@@ -10,14 +12,18 @@ class FavoritesScreen extends StatefulWidget {
 class _FavoritesScreenState extends State<FavoritesScreen> {
   @override
   Widget build(BuildContext context) {
-    final favorites = AppData.getFavorites();
+    final favorites = FoodModel.getFavorites();
 
     return Scaffold(
-      appBar: AppBar(title: Text('Favorites')),
+      appBar: AppBar(
+        title: const Text('Favorites'),
+        backgroundColor: Colors.white,
+        elevation: 0,
+      ),
       body: Column(
         children: [
           if (favorites.isNotEmpty) ...[
-            Padding(
+            const Padding(
               padding: EdgeInsets.all(16),
               child: Align(
                 alignment: Alignment.centerLeft,
@@ -27,18 +33,14 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 ),
               ),
             ),
-            Container(
+            SizedBox(
               height: 140,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                itemCount: AppData.foodItems
-                    .where((item) => !item.isFavorite)
-                    .length,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: favorites.length,
                 itemBuilder: (context, index) {
-                  final item = AppData.foodItems
-                      .where((item) => !item.isFavorite)
-                      .toList()[index];
+                  final item = favorites[index];
                   return GestureDetector(
                     onTap: () {
                       Navigator.push(
@@ -51,7 +53,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                     },
                     child: Container(
                       width: 120,
-                      margin: EdgeInsets.only(right: 12),
+                      margin: const EdgeInsets.only(right: 12),
                       decoration: BoxDecoration(
                         color: Colors.amber.shade100,
                         borderRadius: BorderRadius.circular(12),
@@ -60,25 +62,18 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Expanded(
-                            child: item.image.endsWith('.png')
-                                ? ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: Image.asset(
-                                      item.image,
-                                      fit: BoxFit.cover,
-                                      width: double.infinity,
-                                    ),
-                                  )
-                                : Text(item.image,
-                                    style: TextStyle(fontSize: 30)),
+                            child: ClipRRect(
+                              borderRadius: const BorderRadius.vertical(
+                                  top: Radius.circular(12)),
+                              child: _buildImage(item.image),
+                            ),
                           ),
-                          SizedBox(height: 8),
+                          const SizedBox(height: 8),
                           Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 4.0),
+                            padding: const EdgeInsets.symmetric(horizontal: 4.0),
                             child: Text(
                               item.name,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -97,7 +92,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           ],
           Expanded(
             child: favorites.isEmpty
-                ? Center(
+                ? const Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -119,52 +114,31 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                     ),
                   )
                 : ListView.builder(
-                    padding: EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(16),
                     itemCount: favorites.length,
                     itemBuilder: (context, index) {
                       final item = favorites[index];
                       return Card(
-                        margin: EdgeInsets.only(bottom: 8),
+                        margin: const EdgeInsets.only(bottom: 8),
                         child: ListTile(
-                          leading: Container(
-                            width: 50,
-                            height: 50,
-                            decoration: BoxDecoration(
-                              color: Colors.grey[200],
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: item.image.endsWith('.png')
-                                ? ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: Image.asset(
-                                      item.image,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  )
-                                : Center(
-                                    child: Text(
-                                      item.image,
-                                      style: TextStyle(fontSize: 24),
-                                    ),
-                                  ),
-                          ),
+                          leading: _buildImage(item.image, size: 50),
                           title: Text(
                             item.name,
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                            style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           subtitle: Text(
-                            '${item.category} • Rs ${item.price.toStringAsFixed(2)}',
+                            '${item.category} • Rs ${item.price.toStringAsFixed(0)}',
                           ),
                           trailing: FittedBox(
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.star,
+                                const Icon(Icons.star,
                                     size: 16, color: Colors.amber),
-                                Text('${item.rating}'),
-                                SizedBox(width: 8),
+                                Text(item.rating.toStringAsFixed(1)),
+                                const SizedBox(width: 8),
                                 IconButton(
-                                  icon: Icon(Icons.favorite, color: Colors.red),
+                                  icon: const Icon(Icons.favorite, color: Colors.red),
                                   onPressed: () {
                                     setState(() {
                                       item.isFavorite = false;
@@ -189,6 +163,37 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   ),
           ),
         ],
+      ),
+    );
+  }
+
+  // Helper method to build images with proper error handling
+  Widget _buildImage(String imagePath, {double? size, double? width}) {
+    final displaySize = size ?? 120.0;
+    
+    return Container(
+      width: width ?? displaySize,
+      height: displaySize,
+      color: Colors.grey[200],
+      child: ClipRRect(
+        borderRadius: size != null ? BorderRadius.circular(8) : BorderRadius.zero,
+        child: Image.asset(
+          imagePath,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            // Show placeholder icon if image fails to load
+            return Container(
+              color: Colors.grey[300],
+              child: Center(
+                child: Icon(
+                  Icons.restaurant,
+                  size: displaySize * 0.4,
+                  color: Colors.grey[400],
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
   }

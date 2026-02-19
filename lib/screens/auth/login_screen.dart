@@ -4,8 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:luxury_restaurant_app/screens/auth/forgot_password.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'register_screen.dart';
+import 'dart:async';
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
@@ -14,13 +17,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _remember = false;
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
 
   Future<void> _login() async {
     try {
@@ -48,12 +44,19 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final gold = const Color(0xFFB37C1E);
-    final goldCard = const Color(0xFF906224);
+    const gold = Color(0xFFB37C1E);
     final w = MediaQuery.of(context).size.width;
 
     return Scaffold(
+      resizeToAvoidBottomInset: false, //  prevents bg from moving with keyboard
       body: Stack(
         children: [
           // background image stays fixed
@@ -70,8 +73,8 @@ class _LoginScreenState extends State<LoginScreen> {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    Colors.black.withOpacity(0.28),
-                    Colors.black.withOpacity(0.58),
+                    Colors.black.withOpacity(0),
+                    Colors.black.withOpacity(0.9),
                   ],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
@@ -86,7 +89,7 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 children: <Widget>[
                   const SizedBox(height: 8),
-                  Text(
+                  const Text(
                     'Log In',
                     style: TextStyle(
                       color: Colors.white,
@@ -127,7 +130,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           width: 120, // bigger emblem
                           height: 120,
                           fit: BoxFit.contain,
-                          errorBuilder: (_, __, ___) => Icon(
+                          errorBuilder: (_, __, ___) => const Icon(
                             Icons.local_dining,
                             color: Colors.white70,
                             size: 64, // bigger fallback icon too
@@ -144,7 +147,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: _emailController,
                     hint: "Email",
                     icon: Icons.email_outlined,
-                    fillColor: Colors.black.withOpacity(0.45),
+                    fillColor: Colors.black.withOpacity(0.55),
                     keyboard: TextInputType.emailAddress,
                   ),
 
@@ -153,7 +156,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: _passwordController,
                     hint: "Password",
                     icon: Icons.lock_outline,
-                    fillColor: Colors.black.withOpacity(0.45),
+                    fillColor: Colors.black.withOpacity(0.55),
                     obscure: true,
                   ),
 

@@ -4,6 +4,8 @@ import '../../models/app_data.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class SettingsScreen extends StatefulWidget {
+  const SettingsScreen({super.key});
+
   @override
   _SettingsScreenState createState() => _SettingsScreenState();
 }
@@ -15,7 +17,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Select Language'),
+        title: const Text('Select Language'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: ['English', 'Spanish']
@@ -50,25 +52,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Edit Profile'),
+        title: const Text('Edit Profile'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: nameController,
-              decoration: InputDecoration(labelText: 'Name'),
+              decoration: const InputDecoration(labelText: 'Name'),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             TextField(
               controller: emailController,
-              decoration: InputDecoration(labelText: 'Email'),
+              decoration: const InputDecoration(labelText: 'Email'),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel'),
+            child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () {
@@ -78,7 +80,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               });
               Navigator.pop(context);
             },
-            child: Text('Save'),
+            child: const Text('Save'),
           ),
         ],
       ),
@@ -99,11 +101,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
           TextButton(
             onPressed: () async {
               await FirebaseAuth.instance.signOut();
+<<<<<<< HEAD
               Navigator.pop(context); // just close the dialog },
+=======
+              Navigator.pop(context);
+>>>>>>> feat/firebase
               Navigator.of(context).pushAndRemoveUntil(
                 MaterialPageRoute(builder: (_) => AuthGate()),
                 (route) => false,
-              );
+                );
             },
             child: Text('Logout', style: TextStyle(color: Colors.red)),
           ),
@@ -115,35 +121,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Settings')),
+      appBar: AppBar(title: const Text('Settings')),
       body: ListView(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         children: [
           Card(
             child: ListTile(
-              leading: Icon(Icons.language, color: Colors.amber),
-              title: Text('Language'),
+              leading: const Icon(Icons.language, color: Colors.amber),
+              title: const Text('Language'),
               subtitle: Text(AppData.selectedLanguage),
-              trailing: Icon(Icons.arrow_forward_ios, size: 16),
+              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
               onTap: _changeLanguage,
             ),
           ),
           Card(
             child: ListTile(
-              leading: Icon(Icons.edit, color: Colors.amber),
-              title: Text('Edit Profile'),
-              subtitle: Text('Update your personal information'),
-              trailing: Icon(Icons.arrow_forward_ios, size: 16),
+              leading: const Icon(Icons.edit, color: Colors.amber),
+              title: const Text('Edit Profile'),
+              subtitle: const Text('Update your personal information'),
+              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
               onTap: _editProfile,
             ),
           ),
           Card(
             child: SwitchListTile(
-              secondary: Icon(Icons.notifications, color: Colors.amber),
-              title: Text('Push Notifications'),
-              subtitle: Text('Receive order updates and offers'),
+              secondary: const Icon(Icons.notifications, color: Colors.amber),
+              title: const Text('Push Notifications'),
+              subtitle: const Text('Receive order updates and offers'),
               value: pushNotifications,
-              activeColor: Colors.amber,
+              activeThumbColor: Colors.amber,
               onChanged: (value) {
                 setState(() {
                   pushNotifications = value;
@@ -151,11 +157,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               },
             ),
           ),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
           Card(
             child: ListTile(
-              leading: Icon(Icons.logout, color: Colors.red),
-              title: Text('Logout', style: TextStyle(color: Colors.red)),
+              leading: const Icon(Icons.logout, color: Colors.red),
+              title: const Text('Logout', style: TextStyle(color: Colors.red)),
               onTap: _logout,
             ),
           ),

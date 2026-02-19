@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../models/app_data.dart';
 
 class UserInfoScreen extends StatefulWidget {
+  const UserInfoScreen({super.key});
+
   @override
   _UserInfoScreenState createState() => _UserInfoScreenState();
 }
@@ -47,7 +49,7 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -60,7 +62,7 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.check, color: Colors.black),
+            icon: const Icon(Icons.check, color: Colors.black),
             onPressed: _saveProfile,
           ),
         ],
@@ -71,7 +73,7 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
           child: Column(
             children: [
               // Profile Picture
-              Stack(
+              const Stack(
                 alignment: Alignment.bottomRight,
                 children: [
                   CircleAvatar(
@@ -91,7 +93,7 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
               _buildTextField("Name", nameController, Colors.brown.shade600),
 
               // Email field
-              _buildTextField("Email", emailController, Color(0xFF2F2740)),
+              _buildTextField("Email", emailController, const Color(0xFF2F2740)),
 
               // Password field
               _buildTextField("Password", passwordController, Colors.brown.shade600,
@@ -133,10 +135,10 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
             child: TextField(
               controller: controller,
               obscureText: obscure,
-              style: TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 hintText: hint,
-                hintStyle: TextStyle(color: Colors.white70),
+                hintStyle: const TextStyle(color: Colors.white70),
                 border: InputBorder.none,
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
