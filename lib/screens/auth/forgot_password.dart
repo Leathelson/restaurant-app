@@ -13,11 +13,15 @@ class _ForgotPasswordState extends State<ForgotPassword> {
   bool _isSent = false;
   bool _isLoading = false;
 
-  // Colors refined for a sleeker look
+  // Colors refined for your theme
   final Color gold = const Color(0xFFB37C1E);
+  final Color purpleAccent = Colors.purple;
 
+  // This is the logic that makes the "Send Link" work
   Future<void> _resetPassword() async {
-    if (_emailController.text.trim().isEmpty) {
+    final email = _emailController.text.trim();
+
+    if (email.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter your email')),
       );
@@ -27,17 +31,32 @@ class _ForgotPasswordState extends State<ForgotPassword> {
     setState(() => _isLoading = true);
 
     try {
-      await FirebaseAuth.instance.sendPasswordResetEmail(
-        email: _emailController.text.trim(),
-      );
+      // 1. Firebase command to automatically send the email
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+
+      // 2. Switch to the success screen
       setState(() {
         _isSent = true;
         _isLoading = false;
       });
+    } on FirebaseAuthException catch (e) {
+      setState(() => _isLoading = false);
+      String errorMessage = "An error occurred. Please try again.";
+
+      if (e.code == 'user-not-found') {
+        errorMessage = "No account found with this email.";
+      } else if (e.code == 'invalid-email') {
+        errorMessage = "Please enter a valid email address.";
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorMessage)),
+      );
     } catch (e) {
       setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
+        const SnackBar(
+            content: Text("Connection failed. Check your internet.")),
       );
     }
   }
@@ -54,7 +73,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
       resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
-          // 1. Background Image
+          // Background Image
           Positioned.fill(
             child: Image.asset(
               'assets/images/glassesandshi.jpg',
@@ -62,10 +81,10 @@ class _ForgotPasswordState extends State<ForgotPassword> {
             ),
           ),
 
-          // 2. Dark Overlay
+          // Dark Overlay
           Positioned.fill(
             child: Container(
-              color: Colors.black.withOpacity(0.7),
+              color: Colors.black.withOpacity(0.5),
             ),
           ),
 
@@ -75,7 +94,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
               child: Column(
                 children: [
                   const SizedBox(height: 10),
-                  // Back Button - Updated to match standard font styles
+                  // Back Button (Matches Login/Register style)
                   Align(
                     alignment: Alignment.topLeft,
                     child: IconButton(
@@ -87,6 +106,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
 
                   const Spacer(),
 
+                  // Animated transition between Form and Success Message
                   AnimatedSwitcher(
                     duration: const Duration(milliseconds: 400),
                     child:
@@ -103,6 +123,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
     );
   }
 
+  // UI for entering the email
   Widget _buildRequestState() {
     return Column(
       key: const ValueKey(1),
@@ -112,24 +133,18 @@ class _ForgotPasswordState extends State<ForgotPassword> {
           style: TextStyle(
             color: Colors.white,
             fontSize: 24,
-            fontWeight: FontWeight.w700, // Matches your Login title weight
+            fontWeight: FontWeight.w700,
           ),
         ),
         const SizedBox(height: 15),
-
-        // Simplified text, no container
         const Text(
           "Enter your email to reset your password",
           textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Colors.white70,
-            fontSize: 15,
-          ),
+          style: TextStyle(color: Colors.white70, fontSize: 15),
         ),
-
         const SizedBox(height: 40),
 
-        // Updated Input Field: Black border, thinner width
+        // Email Field: Thin black border, purple focus
         _inputField(
           controller: _emailController,
           hint: "Email",
@@ -138,7 +153,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
 
         const SizedBox(height: 25),
 
-        // Gold Button
+        // Send Link Button
         SizedBox(
           width: double.infinity,
           height: 56,
@@ -170,6 +185,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
     );
   }
 
+  // UI after the email is sent
   Widget _buildSuccessState() {
     return Column(
       key: const ValueKey(2),
@@ -181,11 +197,18 @@ class _ForgotPasswordState extends State<ForgotPassword> {
           style: TextStyle(
               color: Colors.white, fontSize: 22, fontWeight: FontWeight.w700),
         ),
+        const SizedBox(height: 15),
+        const Text(
+          "A recovery link has been sent to your inbox.",
+          textAlign: TextAlign.center,
+          style: TextStyle(color: Colors.white70, fontSize: 15),
+        ),
         const SizedBox(height: 40),
         TextButton(
           onPressed: () => Navigator.pop(context),
           child: Text("Back to Login",
-              style: TextStyle(color: gold, fontWeight: FontWeight.w600)),
+              style: TextStyle(
+                  color: gold, fontWeight: FontWeight.w600, fontSize: 16)),
         ),
       ],
     );
@@ -199,6 +222,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
     return TextField(
       controller: controller,
       style: const TextStyle(color: Colors.white),
+      keyboardType: TextInputType.emailAddress,
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
@@ -207,14 +231,15 @@ class _ForgotPasswordState extends State<ForgotPassword> {
         fillColor: Colors.black.withOpacity(0.6),
         contentPadding:
             const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
-        // Border is now black and thinner (width: 1.5)
+        // Normal State: Thin Black
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(30),
-          borderSide: const BorderSide(color: Colors.black, width: 1.5),
+          borderSide: const BorderSide(color: Colors.black, width: 1.2),
         ),
+        // Focus State: Thin Purple
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(30),
-          borderSide: BorderSide(color: gold.withOpacity(0.5), width: 1.5),
+          borderSide: BorderSide(color: purpleAccent, width: 1.5),
         ),
       ),
     );
