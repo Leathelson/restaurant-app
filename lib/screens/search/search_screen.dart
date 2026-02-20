@@ -14,8 +14,8 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   final _searchController = TextEditingController();
   List<FoodModel> _searchResults = [];
-  bool _isSearching = false;
-  List<FoodModel> _allFood = [];
+  final bool _isSearching = false;
+  final List<FoodModel> _allFood = [];
 
   void _performSearch(String query) {
     setState(() {

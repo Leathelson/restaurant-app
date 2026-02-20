@@ -388,9 +388,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                           size: 16, color: Colors.amber),
                                       const SizedBox(width: 6),
                                       Text(
-                                        food.rating != null
-                                            ? food.rating.toStringAsFixed(1)
-                                            : 'N/A',
+                                        food.rating.toStringAsFixed(1),
                                         style: TextStyle(
                                           color: Colors.grey[700],
                                           fontSize: 12,
@@ -484,8 +482,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   // Helper: Get ImageProvider for CircleAvatar
   ImageProvider _getFoodImageProvider(String? imagePath) {
-    if (imagePath == null)
+    if (imagePath == null) {
       return const AssetImage('assets/images/placeholder.png');
+    }
     if (imagePath.startsWith('http')) return NetworkImage(imagePath);
     return AssetImage(imagePath);
   }
