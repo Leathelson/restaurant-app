@@ -1,3 +1,4 @@
+import '../services/favorites_service.dart';
 
 class FoodModel {
   final String id;
@@ -22,44 +23,6 @@ class FoodModel {
     this.isFavorite = false,
   });
 
-  static List<FoodModel> getFavorites() {
-    return [
-      FoodModel(
-        id: 'placeholder_1',
-        name: 'Grilled Sirloin Steak',
-        image: 'assets/images/FoodItems/Grilled_Sirloin_Steak.png',
-        shortdescription: 'Perfectly seared premium steak',
-        longdescription: 'A juicy, tender sirloin steak grilled to perfection with herbs and garlic butter.',
-        rating: 4.8,
-        category: 'NonVeg',
-        price: 1200,
-        isFavorite: true,
-      ),
-      FoodModel(
-        id: 'placeholder_2',
-        name: 'East Coast Citrus-Garlic',
-        image: 'assets/images/FoodItems/East_Coast_Citrus-Garlic.png',
-        shortdescription: 'Fresh citrus with garlic infusion',
-        longdescription: 'A light and flavorful dish featuring fresh citrus notes with aromatic garlic.',
-        rating: 4.5,
-        category: 'Veg',
-        price: 1000,
-        isFavorite: true,
-      ),
-      FoodModel(
-        id: 'placeholder_3',
-        name: 'Garden Fresh Salad',
-        image: 'assets/images/FoodItems/Garden_Fresh_Salad.png',
-        shortdescription: 'Crisp greens with house dressing',
-        longdescription: 'A refreshing mix of seasonal vegetables tossed with our signature vinaigrette.',
-        rating: 4.3,
-        category: 'Salad',
-        price: 450,
-        isFavorite: true,
-      ),
-    ];
-  }
-
   // Create FoodModel from Firebase Document
   factory FoodModel.fromFirestore(Map<String, dynamic> data, String documentId) {
     return FoodModel(
@@ -74,6 +37,44 @@ class FoodModel {
       isFavorite: data['IsFavorite'] ?? false, // Read from Firestore if available
     );
   }
+
+  FoodModel copyWith({
+    String? id,
+    String? image,
+    String? name,
+    String? shortdescription,
+    String? longdescription,
+    double? rating,
+    String? category,
+    double? price,
+    bool? isFavorite,
+  }) {
+    return FoodModel(
+      id: id ?? this.id,
+      image: image ?? this.image,
+      name: name ?? this.name,
+      shortdescription: shortdescription ?? this.shortdescription,
+      longdescription: longdescription ?? this.longdescription,
+      rating: rating ?? this.rating,
+      category: category ?? this.category,
+      price: price ?? this.price,
+      isFavorite: isFavorite ?? this.isFavorite,
+    );
+  }
+
+  static Future<List<FoodModel>> getFavorites({
+    required List<FoodModel> allProducts, // Pass your full product list
+  }) async {
+    final favoriteIds = await FavoritesService.getFavoriteIdsStream().first;
+    
+    // Filter allProducts to only include favorited items
+    return allProducts
+        .where((product) => favoriteIds.contains(product.id))
+        .map((product) => product.copyWith(isFavorite: true)) // Mark as favorite
+        .toList();
+  }
+
+  
   // Convert to Map for Firestore (if you need to write back)
   Map<String, dynamic> toMap() {
     return {

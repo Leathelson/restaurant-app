@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:luxury_restaurant_app/services/favorites_service.dart';
 import '../../models/food_model.dart';
 import '../food/food_detail_screen.dart';
 import '../profile/profile_screen.dart';
@@ -13,7 +14,7 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  int selectedCategory = 1; // 0: Non-Veg, 1: Veg, 2: Salad
+  int selectedCategory = 0; // 0: Non-Veg, 1: Veg, 2: Salad
 
   // Map category index to Firestore filter value
   String get _categoryFilter {
@@ -43,7 +44,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         title: Text(
-          'Lol',
+          'Luxury Restaurant',
           style: TextStyle(
             color: titleColor,
             fontSize: 22,
@@ -245,7 +246,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                 fontWeight: FontWeight.bold,
                                               ),
                                             ),
-                                            Container(
+                                         Container(
                                               decoration: const BoxDecoration(
                                                 color: Colors.white,
                                                 shape: BoxShape.circle,
@@ -257,23 +258,42 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                 ],
                                               ),
                                               padding: const EdgeInsets.all(3),
-                                              child: IconButton(
-                                                icon: const Icon(
-                                                  Icons.favorite_border,
-                                                  color: Colors.redAccent,
-                                                  size: 18,
-                                                ),
-                                                onPressed: () {
-                                                  // TODO: Add to favourites in Firebase
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(
-                                                    const SnackBar(
-                                                        content: Text(
-                                                            'Added to favourites!')),
+                                              child: StreamBuilder<Set<String>>(
+                                                //Listen to favorites stream for real-time state
+                                                stream: FavoritesService.getFavoriteIdsStream(),
+                                                builder: (context, snapshot) {
+                                                  final favoriteIds = snapshot.data ?? {};
+                                                  final isFavorite = favoriteIds.contains(food.id);
+
+                                                  return IconButton(
+                                                    icon: Icon(
+                                                      //Filled heart if favorited, outlined if not
+                                                      isFavorite ? Icons.favorite : Icons.favorite_border,
+                                                      color: isFavorite ? Colors.red : Colors.grey,
+                                                      size: 18,
+                                                    ),
+                                                    onPressed: () async {
+                                                      //Toggle and get the new state
+                                                      final isNowFavorite = await FavoritesService.toggleFavorite(food.id);
+                                                      
+                                                      // Show  message
+                                                      ScaffoldMessenger.of(context).showSnackBar(
+                                                        SnackBar(
+                                                          content: Text(
+                                                            isNowFavorite 
+                                                                ? 'Added to favourites' 
+                                                                : 'Removed from favourites',
+                                                          ),
+                                                          duration: const Duration(seconds: 1),
+                                                        ),
+                                                      );
+                                                    },
+                                                    padding: EdgeInsets.zero,
+                                                    constraints: const BoxConstraints(),
                                                   );
                                                 },
                                               ),
-                                            )
+                                            ),
                                           ],
                                         ),
                                       ],
@@ -289,22 +309,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
 
-            const SizedBox(height: 18),
+const SizedBox(height: 18),
 
-            // Divider accent
-            Container(
-              height: 4,
-              width: 46,
-              decoration: BoxDecoration(
-                color: gold.withOpacity(0.9),
-                borderRadius: BorderRadius.circular(4),
-              ),
-            ),
+// Divider accent
+Container(
+  height: 4,
+  width: 46,
+  decoration: BoxDecoration(
+    color: gold.withOpacity(0.9),
+    borderRadius: BorderRadius.circular(4),
+  ),
+),
 
-            const SizedBox(height: 12),
+const SizedBox(height: 12),
 
             //  Favourites Header
-            Text(
+           Text(
               'Favourites',
               style: TextStyle(
                 color: titleColor,
@@ -314,43 +334,69 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             const SizedBox(height: 12),
 
-            // Favourites List - NOW FROM FIREBASE
+            // ✅ Favourites List
             SizedBox(
               height: 96,
-              child: StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection('FoodItems')
-                    .limit(5)
-                    .snapshots(),
+              child: StreamBuilder<Set<String>>(
+                stream: FavoritesService.getFavoriteIdsStream(), // Real-time favorites
                 builder: (context, snapshot) {
+                  // Loading
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   }
 
-                  if (snapshot.hasError ||
-                      !snapshot.hasData ||
-                      snapshot.data!.docs.isEmpty) {
-                    return const Center(
-                      child: Text('No favourites yet',
-                          style: TextStyle(color: Colors.grey)),
+                  // Error
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Text('Error: ${snapshot.error}', 
+                          style: TextStyle(color: Colors.red[700], fontSize: 12)),
                     );
                   }
 
-                  final favItems = snapshot.data!.docs;
+                  // ✅ Data ready - build list
+                  final favDocs = snapshot.data ?? {};
 
-                  return ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: favItems.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 12),
-                    itemBuilder: (context, idx) {
-                      final doc = favItems[idx];
-                      final data = doc.data() as Map<String, dynamic>;
-                      final food = FoodModel.fromFirestore(data, doc.id);
+                  return StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance.collection('FoodItems').snapshots(),
+                    builder: (context, productsSnapshot) {
+                      if (productsSnapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
 
+                      if (productsSnapshot.hasError || !productsSnapshot.hasData) {
+                        return Center(
+                          child: Text('Error loading products', 
+                              style: TextStyle(color: Colors.red[700], fontSize: 12)),
+                        );
+                      }
+                      
+                      final docs = productsSnapshot.data!.docs;
+                      final doc = docs
+                      .where((doc) => favDocs.contains(doc.id))
+                      .toList();
+
+                      if (doc.isEmpty) {
+                        return Center(
+                          child: Text(
+                            'No favorites yet. Tap the heart icon to add some!',
+                            style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                          ),
+                        );
+                      }
+
+                      //building list
+                      return ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: doc.length,
+                        itemBuilder: (context, index) {
+                          final data = doc[index].data() as Map<String, dynamic>;
+                          final food = FoodModel.fromFirestore(data, doc[index].id);
+
+                      
+                      
                       return Container(
                         width: w * 0.6,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 10),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(28),
@@ -367,8 +413,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           children: [
                             CircleAvatar(
                               radius: 26,
-                              backgroundImage:
-                                  _getFoodImageProvider(data['Image']),
+                              backgroundImage: _getFoodImageProvider(food.image),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
@@ -378,42 +423,39 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 children: [
                                   Text(
                                     food.name,
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.w700),
+                                    style: const TextStyle(fontWeight: FontWeight.w700),
                                   ),
                                   const SizedBox(height: 6),
                                   Row(
                                     children: [
-                                      const Icon(Icons.star,
-                                          size: 16, color: Colors.amber),
+                                      const Icon(Icons.star, size: 16, color: Colors.amber),
                                       const SizedBox(width: 6),
                                       Text(
                                         food.rating.toStringAsFixed(1),
-                                        style: TextStyle(
-                                          color: Colors.grey[700],
-                                          fontSize: 12,
-                                        ),
+                                        style: TextStyle(color: Colors.grey[700], fontSize: 12),
                                       )
                                     ],
-                                  )
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
+                                  ),
+                                ]
+                              )
+                            )
+                          ]
+                        )
+                      );
+                      }
                       );
                     },
                   );
                 },
               ),
             ),
-
-            const SizedBox(height: 28),
           ],
         ),
       ),
     );
   }
+    
+                      
 
   // Helper: Build image widget (supports asset or network)
   Widget _buildFoodImage(String? imagePath) {

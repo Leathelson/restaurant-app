@@ -105,7 +105,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Navigator.of(context).pushAndRemoveUntil(
                 MaterialPageRoute(builder: (_) => AuthGate()),
                 (route) => false,
-                );
+              );
             },
             child: Text('Logout', style: TextStyle(color: Colors.red)),
           ),
