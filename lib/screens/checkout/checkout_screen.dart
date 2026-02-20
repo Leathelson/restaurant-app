@@ -15,9 +15,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   Color get darkBg => const Color(0xFF2F2740);
 
   double get subtotal {
-    return AppData.cart.fold(
+    return AppData.cart.fold<double>(
       0.0,
-      (sum, item) => sum + (item.food.price * item.quantity),
+      (double sum, item) => sum + (item.food.price * item.quantity),
     );
   }
 
@@ -75,7 +75,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     children: [
                       // Food image
                       ClipRRect(
-                        borderRadius: const BorderRadius.horizontal(left: Radius.circular(12)),
+                        borderRadius: const BorderRadius.horizontal(
+                            left: Radius.circular(12)),
                         child: Image.asset(
                           item.food.image,
                           width: 80,
@@ -83,7 +84,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           fit: BoxFit.cover,
                         ),
                       ),
-                      
+
                       Expanded(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -123,17 +124,20 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               icon: const Icon(Icons.remove, size: 20),
                               onPressed: () => _updateQuantity(index, false),
                               padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                              constraints: const BoxConstraints(
+                                  minWidth: 32, minHeight: 32),
                             ),
                             Text(
                               'x${item.quantity}',
-                              style: const TextStyle(fontWeight: FontWeight.w600),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w600),
                             ),
                             IconButton(
                               icon: const Icon(Icons.add, size: 20),
                               onPressed: () => _updateQuantity(index, true),
                               padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                              constraints: const BoxConstraints(
+                                  minWidth: 32, minHeight: 32),
                             ),
                           ],
                         ),
@@ -167,16 +171,24 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Subtotal', style: TextStyle(color: Colors.white70)),
-                      Text('Rs$subtotal', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                      const Text('Subtotal',
+                          style: TextStyle(color: Colors.white70)),
+                      Text('Rs$subtotal',
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600)),
                     ],
                   ),
                   const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Tax', style: TextStyle(color: Colors.white70)),
-                      Text('Rs$tax', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                      const Text('Tax',
+                          style: TextStyle(color: Colors.white70)),
+                      Text('Rs$tax',
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600)),
                     ],
                   ),
                   const Padding(
@@ -186,8 +198,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Total', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-                      Text('Rs$total', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+                      const Text('Total',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600)),
+                      Text('Rs$total',
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700)),
                     ],
                   ),
                   const SizedBox(height: 16),
