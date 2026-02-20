@@ -133,6 +133,8 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
     final desc = _desc();
     final price = _price();
 
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+
     return Scaffold(
       backgroundColor: darkBg,
       body: SafeArea(
@@ -156,7 +158,8 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
             ),
 
             // image card
-            Padding(
+            if (!isLandscape) ...[
+              Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(20),
@@ -168,118 +171,295 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                 ),
               ),
             ),
+            ],
+            
 
             // white detail panel
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-                ),
-                padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            // ✅ White detail panel - Scrollable in landscape
+Expanded(
+  child: Container(
+    width: double.infinity,
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.vertical(
+        top: isLandscape ? Radius.zero : const Radius.circular(28),
+      ),
+    ),
+    child: isLandscape
+        ? // ✅ Landscape: Scrollable content
+        SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Rating + quantity row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // rating + quantity pill row
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        // rating pill
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(22),
-                            border: Border.all(
-                                color: gold.withOpacity(0.9), width: 2),
-                          ),
-                          child: const Row(
-                            children: [
-                              Icon(Icons.star,
-                                  color: Colors.amber, size: 18),
-                              SizedBox(width: 8),
-                              Text('4.0',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w700)),
-                            ],
-                          ),
-                        ),
+                    // Rating pill
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(22),
+                        border: Border.all(
+                            color: gold.withOpacity(0.9), width: 2),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.star, color: Colors.amber, size: 18),
+                          SizedBox(width: 8),
+                          Text('4.0',
+                              style: TextStyle(fontWeight: FontWeight.w700)),
+                        ],
+                      ),
+                    ),
 
-                        // qty pill
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6),
-                          decoration: BoxDecoration(
-                            color: gold,
-                            borderRadius: BorderRadius.circular(22),
+                    // Qty pill
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      decoration: BoxDecoration(
+                        color: gold,
+                        borderRadius: BorderRadius.circular(22),
+                      ),
+                      child: Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.remove, color: Colors.white),
+                            onPressed: () => setState(() {
+                              if (qty > 1) qty--;
+                            }),
+                            splashRadius: 18,
                           ),
-                          child: Row(
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.remove,
-                                    color: Colors.white),
-                                onPressed: () => setState(() {
-                                  if (qty > 1) qty--;
-                                }),
-                                splashRadius: 18,
-                              ),
-                              Text('$qty',
-                                  style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w700)),
-                              IconButton(
-                                icon:
-                                    const Icon(Icons.add, color: Colors.white),
-                                onPressed: () => setState(() => qty++),
-                                splashRadius: 18,
-                              ),
-                            ],
+                          Text('$qty',
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700)),
+                          IconButton(
+                            icon: const Icon(Icons.add, color: Colors.white),
+                            onPressed: () => setState(() => qty++),
+                            splashRadius: 18,
                           ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 12),
+
+                // Title
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Color(0xFFB56A2E),
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+
+                // Description
+                Text(
+                  desc,
+                  style: const TextStyle(fontSize: 13, height: 1.4),
+                ),
+
+                const SizedBox(height: 12),
+
+                // Customisation header
+                Text(
+                  'Customisation',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: Colors.black87,
+                  ),
+                ),
+
+                const SizedBox(height: 6),
+
+                // ✅ Horizontal scrollable chips
+                SizedBox(
+                  height: 44,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: customizationOptions.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 10),
+                    itemBuilder: (context, index) {
+                      final entry = customizationOptions.entries.elementAt(index);
+                      final isSelected = selectedOption == entry.key;
+
+                      return ChoiceChip(
+                        label: Text(
+                          entry.value == 0
+                              ? entry.key
+                              : '${entry.key} (+Rs ${entry.value.toStringAsFixed(0)})',
+                        ),
+                        selected: isSelected,
+                        selectedColor: gold.withOpacity(0.9),
+                        labelStyle: TextStyle(
+                          color: isSelected ? Colors.white : Colors.black,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        onSelected: (_) {
+                          setState(() => selectedOption = entry.key);
+                        },
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      );
+                    },
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // Total price + add to cart button
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Total Price',
+                            style: TextStyle(color: Colors.black54)),
+                        const SizedBox(height: 6),
+                        Text(
+                          'Rs ${(totalPrice).toStringAsFixed(0)}',
+                          style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w800,
+                              color: gold),
                         ),
                       ],
                     ),
-
-                    const SizedBox(height: 12),
-
-                    // title
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        color: Color(0xFFB56A2E),
-                        fontSize: 22,
-                        fontWeight: FontWeight.w800,
+                    ElevatedButton.icon(
+                      onPressed: _addToCart,
+                      icon: const Icon(Icons.shopping_cart_outlined),
+                      label: const Text('Add To Cart'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: darkBg,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 18, vertical: 14),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16)),
                       ),
-                    ),
-
-                    const SizedBox(height: 10),
-
-                    // description
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: Text(
-                          desc,
-                          style: const TextStyle(fontSize: 13, height: 1.4),
+                    )
+                  ],
+                ),
+              ],
+            ),
+          )
+        : // ✅ Portrait: Original scrollable layout
+          Padding(
+              padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Rating + quantity row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Rating pill
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(22),
+                          border: Border.all(
+                              color: gold.withOpacity(0.9), width: 2),
+                        ),
+                        child: const Row(
+                          children: [
+                            Icon(Icons.star, color: Colors.amber, size: 18),
+                            SizedBox(width: 8),
+                            Text('4.0',
+                                style: TextStyle(fontWeight: FontWeight.w700)),
+                          ],
                         ),
                       ),
+
+                      // Qty pill
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                        decoration: BoxDecoration(
+                          color: gold,
+                          borderRadius: BorderRadius.circular(22),
+                        ),
+                        child: Row(
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.remove, color: Colors.white),
+                              onPressed: () => setState(() {
+                                if (qty > 1) qty--;
+                              }),
+                              splashRadius: 18,
+                            ),
+                            Text('$qty',
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700)),
+                            IconButton(
+                              icon: const Icon(Icons.add, color: Colors.white),
+                              onPressed: () => setState(() => qty++),
+                              splashRadius: 18,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // Title
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      color: Color(0xFFB56A2E),
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
                     ),
+                  ),
 
-                    const SizedBox(height: 12),
+                  const SizedBox(height: 10),
 
-                    // customisation options
-                    Text(
-                      'Customisation',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        color: Colors.black87,
+                  // Description - Scrollable in portrait
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Text(
+                        desc,
+                        style: const TextStyle(fontSize: 13, height: 1.4),
                       ),
                     ),
+                  ),
 
-                    const SizedBox(height: 6),
+                  const SizedBox(height: 12),
 
-                    Wrap(
-                      spacing: 10,
-                      children: customizationOptions.entries.map((entry) {
+                  // Customisation header
+                  Text(
+                    'Customisation',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black87,
+                    ),
+                  ),
+
+                  const SizedBox(height: 6),
+
+                  // Horizontal scrollable chips
+                  SizedBox(
+                    height: 44,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: customizationOptions.length,
+                      separatorBuilder: (_, __) => const SizedBox(width: 10),
+                      itemBuilder: (context, index) {
+                        final entry = customizationOptions.entries.elementAt(index);
                         final isSelected = selectedOption == entry.key;
 
                         return ChoiceChip(
@@ -297,49 +477,54 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                           onSelected: (_) {
                             setState(() => selectedOption = entry.key);
                           },
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         );
-                      }).toList(),
+                      },
                     ),
+                  ),
 
-                    const SizedBox(height: 8),
+                  const SizedBox(height: 8),
 
-                    // total price + add to cart button row
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('Total Price',
-                                style: TextStyle(color: Colors.black54)),
-                            const SizedBox(height: 6),
-                            Text(
-                              'Rs ${(totalPrice).toStringAsFixed(0)}',
-                              style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w800,
-                                  color: gold),
-                            ),
-                          ],
-                        ),
-                        ElevatedButton.icon(
-                          onPressed: _addToCart,
-                          icon: const Icon(Icons.shopping_cart_outlined),
-                          label: const Text('Add To Cart'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: darkBg,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 18, vertical: 14),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16)),
+                  // Total price + add to cart button
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Total Price',
+                              style: TextStyle(color: Colors.black54)),
+                          const SizedBox(height: 6),
+                          Text(
+                            'Rs ${(totalPrice).toStringAsFixed(0)}',
+                            style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w800,
+                                color: gold),
                           ),
-                        )
-                      ],
-                    ),
-                  ],
-                ),
+                        ],
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: _addToCart,
+                        icon: const Icon(Icons.shopping_cart_outlined),
+                        label: const Text('Add To Cart'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: darkBg,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 18, vertical: 14),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16)),
+                        ),
+                      )
+                    ],
+                  ),
+                ],
               ),
-            )
+            ),
+            ),
+          ),
           ],
         ),
       ),

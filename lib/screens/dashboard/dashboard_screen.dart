@@ -54,22 +54,76 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
         centerTitle: true,
         actions: [
-          IconButton(
-            icon: CircleAvatar(
-              radius: 18,
-              backgroundImage: const AssetImage('assets/images/profile.png'),
-              backgroundColor: Colors.grey[200],
+            Padding(
+          padding: const EdgeInsets.only(right: 8),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                SoundService.playClick();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (c) => const ProfileScreen()),
+                );
+              },
+              borderRadius: BorderRadius.circular(24),
+              // ✅ Visual feedback on press
+              splashColor: gold.withOpacity(0.3),
+              highlightColor: gold.withOpacity(0.1),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  // ✅ Gold border to make it stand out
+                  border: Border.all(color: gold, width: 2),
+                  borderRadius: BorderRadius.circular(24),
+                  // ✅ Subtle shadow for depth
+                  boxShadow: [
+                    BoxShadow(
+                      color: gold.withOpacity(0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: CircleAvatar(
+                  radius: 18,
+                  backgroundImage: const AssetImage('assets/images/profile.png'),
+                  backgroundColor: Colors.white,
+                  // ✅ Add a small online/status indicator (optional)
+                  child: Stack(
+                    children: [
+                      // Main avatar
+                      Positioned.fill(
+                        child: ClipOval(
+                          child: Image.asset(
+                            'assets/images/profile.png',
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                      // ✅ Small gold dot indicator (optional - shows it's interactive)
+                      Positioned(
+                        right: 2,
+                        bottom: 2,
+                        child: Container(
+                          width: 10,
+                          height: 10,
+                          decoration: BoxDecoration(
+                            color: gold,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 1.5),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
-            onPressed: () {
-              SoundService.playClick();
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (c) => const ProfileScreen()),
-              );
-            },
           ),
-          const SizedBox(width: 12),
-        ],
+        ),
+        ]
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -116,6 +170,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
 
             const SizedBox(height: 14),
+
+            Padding(
+              padding: const EdgeInsets.only(left: 4, top: 8, bottom: 6),
+              child: Text(
+                'Choose Your Option',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0.3,
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 6),
 
             // Category chips (unchanged logic)
             Wrap(
