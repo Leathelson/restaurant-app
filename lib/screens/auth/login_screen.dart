@@ -6,6 +6,7 @@ import 'package:luxury_restaurant_app/models/app_data.dart'; // REQUIRED for tra
 import 'package:shared_preferences/shared_preferences.dart';
 import 'register_screen.dart';
 import 'dart:async';
+import '../../services/sound_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -150,7 +151,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     width: double.infinity,
                     height: 56,
                     child: ElevatedButton(
-                      onPressed: _login,
+                      onPressed: () {
+                        SoundService.playClick();
+                      _login;
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: gold,
                         foregroundColor: Colors.white,
@@ -185,6 +189,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       children: [
                         TextButton(
                           onPressed: () {
+                            SoundService.playClick();
+                            Navigator.pop(context);
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -200,6 +206,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         const SizedBox(height: 4),
                         TextButton(
                           onPressed: () {
+                            SoundService.playClick();
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -275,7 +282,9 @@ class _LoginScreenState extends State<LoginScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 6),
       child: IconButton(
-        onPressed: () {},
+        onPressed: () {
+          SoundService.playClick();
+        },
         icon: Image.asset(assetPath, width: 28, height: 28),
         splashRadius: 20,
       ),

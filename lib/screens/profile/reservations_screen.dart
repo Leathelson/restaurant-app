@@ -159,55 +159,61 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    const gold = Color(0xFFB37C1E);
+Widget build(BuildContext context) {
+  const gold = Color(0xFFB37C1E);
+  
+  //  Detect orientation for adaptive layout
+  final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Reservation"),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
-          onPressed: () => Navigator.pop(context),
-        ),
-        centerTitle: true,
+  return Scaffold(
+    appBar: AppBar(
+      title: const Text("Reservation"),
+      backgroundColor: Colors.white,
+      elevation: 0,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back, color: Colors.black87),
+        onPressed: () => Navigator.pop(context),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            // Date Picker
-            GestureDetector(
-              onTap: _selectDate,
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
-                decoration: BoxDecoration(
-                  color: Colors.orange.shade50,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: gold),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.calendar_today, color: gold),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}",
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                      ),
+      centerTitle: true,
+    ),
+    // ✅ Make entire body scrollable
+    body: SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch, // ✅ Buttons stretch properly
+        mainAxisSize: MainAxisSize.min, // ✅ Required for SingleChildScrollView
+        children: [
+          // Date Picker
+          GestureDetector(
+            onTap: _selectDate,
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+              decoration: BoxDecoration(
+                color: Colors.orange.shade50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: gold),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.calendar_today, color: gold),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}",
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
+          ),
 
-            const SizedBox(height: 16),
+          const SizedBox(height: 16),
 
-            // Time Picker
-            GestureDetector(
-              onTap: _selectTime,
-              child: Container(
+          // Time Picker
+          GestureDetector(
+            onTap: _selectTime,
+            child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
                 decoration: BoxDecoration(
                   color: Colors.black87,
@@ -226,87 +232,148 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
                   ],
                 ),
               ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Number of Guests
+          _counterRow("Number of Guests", guests, (v) {
+            setState(() => guests = v.clamp(1, 20));
+          }, gold),
+
+          const SizedBox(height: 16),
+
+          // Duration
+          _counterRow("Reservation Duration [hrs]", duration, (v) {
+            setState(() => duration = v.clamp(1, 6));
+          }, gold),
+
+          const SizedBox(height: 16),
+
+          // Display final summary
+          Text(
+            "${_formatDate(selectedDate)}, ${selectedTime.format(context)}",
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            textAlign: TextAlign.center,
+          ),
+
+          // ✅ Remove Spacer - doesn't work with scroll
+          // Instead, add fixed spacing
+          SizedBox(height: isLandscape ? 24 : 48),
+
+          // Confirm & Cancel buttons
+          Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).padding.bottom + 12,
+              top: 12,
             ),
-
-            const SizedBox(height: 16),
-
-            // Number of Guests
-            _counterRow("Number of Guests", guests, (v) {
-              setState(() => guests = v.clamp(1, 20));
-            }, gold),
-
-            const SizedBox(height: 16),
-
-            // Duration
-            _counterRow("Reservation Duration [hrs]", duration, (v) {
-              setState(() => duration = v.clamp(1, 6));
-            }, gold),
-
-            const SizedBox(height: 16),
-
-            // Display final summary
-            Text(
-              "${_formatDate(selectedDate)}, ${selectedTime.format(context)}",
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-
-            const Spacer(),
-
-            // Confirm & Cancel buttons
-            Padding(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).padding.bottom + 12,
-                top: 12,
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: gold,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(28)),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      // FIX 3: Disable button when loading
-                      onPressed: _isLoading ? null : _confirmReservation,
-                      // FIX 4: Show spinner when loading
-                      child: _isLoading
-                          ? SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            child: isLandscape
+                ? // ✅ Landscape: Stack buttons vertically for better touch targets
+                Column(
+                    children: [
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: gold,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(28)),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          minimumSize: const Size(double.infinity, 50),
+                        ),
+                        onPressed: _isLoading ? null : _confirmReservation,
+                        child: _isLoading
+                            ? SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                ),
+                              )
+                            : Text("Confirm Reservation",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold, 
+                                    color: Colors.white, 
+                                    fontFamily: 'Times New Roman',
+                                    fontSize: isLandscape ? 16 : 14,
+                                ),
                               ),
-                            )
-                          : Text("Confirm",
-                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontFamily: 'Times New Roman')),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black54,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(28)),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
-                      onPressed: _isLoading ? null : () => Navigator.pop(context),
-                      child: Text("Cancel",
-                          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontFamily: 'Times New Roman')),
-                    ),
+                      const SizedBox(height: 12),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black54,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(28)),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          minimumSize: const Size(double.infinity, 50),
+                        ),
+                        onPressed: _isLoading ? null : () => Navigator.pop(context),
+                        child: Text("Cancel",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, 
+                                color: Colors.white, 
+                                fontFamily: 'Times New Roman',
+                                fontSize: isLandscape ? 16 : 14,
+                            ),
+                        ),
+                      ),
+                    ],
+                  )
+                : // ✅ Portrait: Keep original side-by-side buttons
+                Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: gold,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(28)),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                          onPressed: _isLoading ? null : _confirmReservation,
+                          child: _isLoading
+                              ? SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  ),
+                                )
+                              : Text("Confirm",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold, 
+                                      color: Colors.white, 
+                                      fontFamily: 'Times New Roman'),
+                                ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.black54,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(28)),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                          onPressed: _isLoading ? null : () => Navigator.pop(context),
+                          child: Text("Cancel",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, 
+                                  color: Colors.white, 
+                                  fontFamily: 'Times New Roman'),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            )
-
-          ],
-        ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _counterRow(
       String label, int value, Function(int) onChanged, Color gold) {

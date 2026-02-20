@@ -1,10 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+<<<<<<< HEAD
 import 'package:luxury_restaurant_app/models/app_data.dart'
     hide User; //  This allows FirebaseAuth to own the 'User' name
 // This tells Flutter: "Import everything from AppData EXCEPT the 'User' class"
 import 'package:luxury_restaurant_app/models/app_data.dart' hide User;
+=======
+import 'package:luxury_restaurant_app/services/sound_service.dart';
+>>>>>>> 0e9ee9c9cf8997385ab5b2c409b5a5e6e2071c05
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -194,7 +198,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           width: double.infinity,
                           height: 55,
                           child: ElevatedButton(
-                            onPressed: _register,
+                            onPressed: () {
+                              SoundService.playClick();
+                              _register;
+                            } ,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: gold,
                               shape: RoundedRectangleBorder(
@@ -262,7 +269,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Widget _socialButton(String assetPath) {
     return IconButton(
-      onPressed: () {},
+      onPressed: () {
+        SoundService.playClick();
+      },
       icon: Image.asset(
         assetPath,
         width: 30,

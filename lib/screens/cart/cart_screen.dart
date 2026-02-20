@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:luxury_restaurant_app/services/sound_service.dart';
 import '../../models/app_data.dart';
 import '../checkout/checkout_screen.dart';
 
@@ -103,10 +104,13 @@ class _CartScreenState extends State<CartScreen> {
                               Row(
                                 children: [
                                   IconButton(
-                                    onPressed: () => _updateQuantity(
+                                    onPressed: () {
+                                      SoundService.playClick;
+                                      _updateQuantity(
                                       index,
                                       cartItem.quantity - 1,
-                                    ),
+                                    );
+                                    },
                                     icon: const Icon(Icons.remove),
                                     style: IconButton.styleFrom(
                                       backgroundColor: Colors.grey[200],
@@ -173,6 +177,7 @@ class _CartScreenState extends State<CartScreen> {
                         child: ElevatedButton(
                           onPressed: AppData.cart.isNotEmpty
                               ? () {
+                                  SoundService.playClick();
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(

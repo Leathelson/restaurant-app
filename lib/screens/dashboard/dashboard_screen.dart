@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:luxury_restaurant_app/services/favorites_service.dart';
+<<<<<<< HEAD
 import '../../models/app_data.dart';
+=======
+import 'package:luxury_restaurant_app/services/sound_service.dart';
+>>>>>>> 0e9ee9c9cf8997385ab5b2c409b5a5e6e2071c05
 import '../../models/food_model.dart';
 import '../food/food_detail_screen.dart';
 import '../profile/profile_screen.dart';
@@ -39,6 +43,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     final w = MediaQuery.of(context).size.width;
 
+<<<<<<< HEAD
     return ValueListenableBuilder<String>(
       valueListenable: languageNotifier,
       builder: (context, lang, child) {
@@ -49,6 +54,368 @@ class _DashboardScreenState extends State<DashboardScreen> {
             elevation: 0,
             title: Text(
               AppData.trans('app_title'),
+=======
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: Text(
+          'Luxury Restaurant',
+          style: TextStyle(
+            color: titleColor,
+            fontSize: 22,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        centerTitle: true,
+        actions: [
+            Padding(
+          padding: const EdgeInsets.only(right: 8),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                SoundService.playClick();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (c) => const ProfileScreen()),
+                );
+              },
+              borderRadius: BorderRadius.circular(24),
+              // ✅ Visual feedback on press
+              splashColor: gold.withOpacity(0.3),
+              highlightColor: gold.withOpacity(0.1),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  // ✅ Gold border to make it stand out
+                  border: Border.all(color: gold, width: 2),
+                  borderRadius: BorderRadius.circular(24),
+                  // ✅ Subtle shadow for depth
+                  boxShadow: [
+                    BoxShadow(
+                      color: gold.withOpacity(0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: CircleAvatar(
+                  radius: 18,
+                  backgroundImage: const AssetImage('assets/images/profile.png'),
+                  backgroundColor: Colors.white,
+                  // ✅ Add a small online/status indicator (optional)
+                  child: Stack(
+                    children: [
+                      // Main avatar
+                      Positioned.fill(
+                        child: ClipOval(
+                          child: Image.asset(
+                            'assets/images/profile.png',
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                      // ✅ Small gold dot indicator (optional - shows it's interactive)
+                      Positioned(
+                        right: 2,
+                        bottom: 2,
+                        child: Container(
+                          width: 10,
+                          height: 10,
+                          decoration: BoxDecoration(
+                            color: gold,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 1.5),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        ]
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Search row (unchanged)
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[850],
+                      borderRadius: BorderRadius.circular(28),
+                      border: Border.all(color: gold, width: 2),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (c) => const SearchScreen()),
+                        );
+                      },
+                      child: const Row(
+                        children: [
+                          Icon(Icons.search, color: Colors.white70),
+                          SizedBox(width: 8),
+                          Text(
+                            'Search',
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 14),
+
+            Padding(
+              padding: const EdgeInsets.only(left: 4, top: 8, bottom: 6),
+              child: Text(
+                'Choose Your Option',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0.3,
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 6),
+
+            // Category chips (unchanged logic)
+            Wrap(
+              spacing: 10,
+              children: [
+                _categoryChip('Non-Veg', 0, Colors.black87),
+                _categoryChip('Veg', 1, Colors.red[800]!),
+                _categoryChip('Salad', 2, goldCard),
+              ],
+            ),
+
+            const SizedBox(height: 18),
+
+            //  Featured FoodModels -FIREBASE
+            SizedBox(
+              height: 280,
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('FoodItems')
+                    .where('Category', isEqualTo: _categoryFilter)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  // Loading state
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  // Error state
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Text(
+                        'Error: ${snapshot.error}',
+                        style: TextStyle(color: Colors.red[700]),
+                      ),
+                    );
+                  }
+
+                  // Empty state
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return Center(
+                      child: Text(
+                        'No featured items in ${_categoryFilter.toUpperCase()}',
+                        style: TextStyle(color: Colors.grey[600]),
+                      ),
+                    );
+                  }
+
+                  // Data ready - map to your UI
+                  final featuredItems = snapshot.data!.docs;
+
+                  return ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: featuredItems.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 14),
+                    itemBuilder: (context, index) {
+                      final doc = featuredItems[index];
+                      final data = doc.data() as Map<String, dynamic>;
+                      final food = FoodModel.fromFirestore(data, doc.id);
+
+                      return GestureDetector(
+                          onTap: () {
+                            SoundService.playClick();
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => FoodDetailScreen(
+                                  foodItem: food, // Pass real Firebase data
+                                ),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            width: w * 0.56,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+                              border: Border.all(color: gold.withOpacity(0.18)),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Colors.black12,
+                                  blurRadius: 8,
+                                  offset: Offset(0, 4),
+                                )
+                              ],
+                            ),
+                            child: SingleChildScrollView(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: const BorderRadius.vertical(
+                                        top: Radius.circular(18)),
+                                    child: _buildFoodImage(data['Image']),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                        12, 12, 12, 8),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          food.name,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 14,
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        if (food.shortdescription.isNotEmpty)
+                                          Text(
+                                            food.shortdescription,
+                                            style: TextStyle(
+                                              color: Colors.grey.shade600,
+                                              fontSize: 11,
+                                              height: 1.3,
+                                            ),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        const SizedBox(height: 8),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              'Rs ${food.price.toStringAsFixed(0)}',
+                                              style: TextStyle(
+                                                color: gold,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                         Container(
+                                              decoration: const BoxDecoration(
+                                                color: Colors.white,
+                                                shape: BoxShape.circle,
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.black12,
+                                                    blurRadius: 6,
+                                                  )
+                                                ],
+                                              ),
+                                              padding: const EdgeInsets.all(3),
+                                              child: StreamBuilder<Set<String>>(
+                                                //Listen to favorites stream for real-time state
+                                                stream: FavoritesService.getFavoriteIdsStream(),
+                                                builder: (context, snapshot) {
+                                                  final favoriteIds = snapshot.data ?? {};
+                                                  final isFavorite = favoriteIds.contains(food.id);
+
+                                                  return IconButton(
+                                                    icon: Icon(
+                                                      //Filled heart if favorited, outlined if not
+                                                      isFavorite ? Icons.favorite : Icons.favorite_border,
+                                                      color: isFavorite ? Colors.red : Colors.grey,
+                                                      size: 18,
+                                                    ),
+                                                    onPressed: () async {
+                                                      SoundService.playClick();
+                                                      //Toggle and get the new state
+                                                      final isNowFavorite = await FavoritesService.toggleFavorite(food.id);
+                                                      
+                                                      // Show  message
+                                                      ScaffoldMessenger.of(context).showSnackBar(
+                                                        SnackBar(
+                                                          content: Text(
+                                                            isNowFavorite 
+                                                                ? 'Added to favourites' 
+                                                                : 'Removed from favourites',
+                                                          ),
+                                                          duration: const Duration(seconds: 1),
+                                                        ),
+                                                      );
+                                                    },
+                                                    padding: EdgeInsets.zero,
+                                                    constraints: const BoxConstraints(),
+                                                  );
+                                                },
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ));
+                    },
+                  );
+                },
+              ),
+            ),
+
+const SizedBox(height: 18),
+
+// Divider accent
+Container(
+  height: 4,
+  width: 46,
+  decoration: BoxDecoration(
+    color: gold.withOpacity(0.9),
+    borderRadius: BorderRadius.circular(4),
+  ),
+),
+
+const SizedBox(height: 12),
+
+            //  Favourites Header
+           Text(
+              'Favourites',
+>>>>>>> 0e9ee9c9cf8997385ab5b2c409b5a5e6e2071c05
               style: TextStyle(
                 color: titleColor,
                 fontSize: 22,
