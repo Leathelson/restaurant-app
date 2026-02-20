@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:luxury_restaurant_app/services/favorites_service.dart';
+import 'package:luxury_restaurant_app/services/sound_service.dart';
 import '../../models/food_model.dart';
 import '../food/food_detail_screen.dart';
 import '../profile/profile_screen.dart';
@@ -60,6 +61,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               backgroundColor: Colors.grey[200],
             ),
             onPressed: () {
+              SoundService.playClick(); // Play click sound when profile icon is tapped
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (c) => const ProfileScreen()),
@@ -88,6 +90,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: InkWell(
                       onTap: () {
+                        SoundService.playClick(); // Play click sound when search bar is tapped
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -175,6 +178,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                       return GestureDetector(
                           onTap: () {
+                            SoundService.playClick(); // Play click sound when food item is tapped
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -273,6 +277,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                       size: 18,
                                                     ),
                                                     onPressed: () async {
+                                                      SoundService.playClick(); // Play click sound on tap
                                                       //Toggle and get the new state
                                                       final isNowFavorite = await FavoritesService.toggleFavorite(food.id);
                                                       

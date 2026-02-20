@@ -24,6 +24,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  audioplayers: ^5.2.1
 
 flutter:
   uses-material-design: true
@@ -32,4 +33,6 @@ flutter:
     - assets/images/FoodItems/
     - assets/images/FoodItems/GrilledSirloinSteak.png
     - assets/images/
+    - assets/audiosfx/
+    - assets/audiosfx/click.mp3
 

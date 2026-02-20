@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../services/sound_service.dart';
 import 'user_info_screen.dart';
 import 'order_history_screen.dart';
 import 'favorites_screen.dart';
@@ -206,7 +207,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 : null,
       ),
         child: InkWell(
-          onTap: onTap,
+          onTap: () {
+            SoundService.playClick(); // Play click sound when tapped
+
+            Future.delayed(const Duration(milliseconds: 150), () {
+              onTap(); // Navigate after a short delay to allow sound to play
+            });
+          },
           borderRadius: BorderRadius.circular(12),
           //  These create the PRESS color change automatically!
           splashColor: purpleHighlight.withOpacity(0.3),  // Ripple effect
