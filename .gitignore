@@ -93,3 +93,6 @@ ios/Flutter/Flutter.podspec
 android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
 lib/firebase_options.dart
+
+/macos/
+/windows/
