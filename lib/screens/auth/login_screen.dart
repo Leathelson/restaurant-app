@@ -1,4 +1,3 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:luxury_restaurant_app/screens/auth/forgot_password.dart';
@@ -134,14 +133,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 28),
                   _inputField(
                     controller: _emailController,
-                    hint: AppData.trans('email'), // TRANSLATED: "Email"
+                    hint: AppData.trans('Email'), // TRANSLATED: "Email"
                     icon: Icons.email_outlined,
                     fillColor: Colors.black.withOpacity(0.55),
                     keyboard: TextInputType.emailAddress,
                   ),
                   _inputField(
                     controller: _passwordController,
-                    hint: AppData.trans('password'), // TRANSLATED: "Password"
+                    hint: AppData.trans('Password'), // TRANSLATED: "Password"
                     icon: Icons.lock_outline,
                     fillColor: Colors.black.withOpacity(0.55),
                     obscure: true,

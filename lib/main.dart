@@ -16,7 +16,7 @@ void main() async {
 
   // Ensure AppData has a default language before the UI builds
   if (AppData.selectedLanguage.isEmpty) {
-    AppData.selectedLanguage = 'es';
+    AppData.selectedLanguage = 'en';
   }
 
   await Firebase.initializeApp(
