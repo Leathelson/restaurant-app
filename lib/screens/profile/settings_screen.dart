@@ -101,11 +101,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           TextButton(
             onPressed: () async {
               await FirebaseAuth.instance.signOut();
-<<<<<<< HEAD
               Navigator.pop(context); // just close the dialog },
-=======
-              Navigator.pop(context);
->>>>>>> feat/firebase
               Navigator.of(context).pushAndRemoveUntil(
                 MaterialPageRoute(builder: (_) => AuthGate()),
                 (route) => false,
