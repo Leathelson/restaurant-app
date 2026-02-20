@@ -44,7 +44,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         title: Text(
-          'Niggles butt',
+          'Luxury Restaurant',
           style: TextStyle(
             color: titleColor,
             fontSize: 22,
@@ -246,7 +246,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                 fontWeight: FontWeight.bold,
                                               ),
                                             ),
-                                            Container(
+                                         Container(
                                               decoration: const BoxDecoration(
                                                 color: Colors.white,
                                                 shape: BoxShape.circle,
@@ -258,23 +258,42 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                 ],
                                               ),
                                               padding: const EdgeInsets.all(3),
-                                              child: IconButton(
-                                                icon: const Icon(
-                                                  Icons.favorite_border,
-                                                  color: Colors.redAccent,
-                                                  size: 18,
-                                                ),
-                                                onPressed: () {
-                                                  FavoritesService.toggleFavorite(food.id);
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(
-                                                    const SnackBar(
-                                                        content: Text(
-                                                            'Added to favourites!')),
+                                              child: StreamBuilder<Set<String>>(
+                                                //Listen to favorites stream for real-time state
+                                                stream: FavoritesService.getFavoriteIdsStream(),
+                                                builder: (context, snapshot) {
+                                                  final favoriteIds = snapshot.data ?? {};
+                                                  final isFavorite = favoriteIds.contains(food.id);
+
+                                                  return IconButton(
+                                                    icon: Icon(
+                                                      //Filled heart if favorited, outlined if not
+                                                      isFavorite ? Icons.favorite : Icons.favorite_border,
+                                                      color: isFavorite ? Colors.red : Colors.grey,
+                                                      size: 18,
+                                                    ),
+                                                    onPressed: () async {
+                                                      //Toggle and get the new state
+                                                      final isNowFavorite = await FavoritesService.toggleFavorite(food.id);
+                                                      
+                                                      // Show  message
+                                                      ScaffoldMessenger.of(context).showSnackBar(
+                                                        SnackBar(
+                                                          content: Text(
+                                                            isNowFavorite 
+                                                                ? 'Added to favourites' 
+                                                                : 'Removed from favourites',
+                                                          ),
+                                                          duration: const Duration(seconds: 1),
+                                                        ),
+                                                      );
+                                                    },
+                                                    padding: EdgeInsets.zero,
+                                                    constraints: const BoxConstraints(),
                                                   );
                                                 },
                                               ),
-                                            )
+                                            ),
                                           ],
                                         ),
                                       ],
@@ -505,8 +524,9 @@ const SizedBox(height: 12),
 
   // Helper: Get ImageProvider for CircleAvatar
   ImageProvider _getFoodImageProvider(String? imagePath) {
-    if (imagePath == null)
+    if (imagePath == null) {
       return const AssetImage('assets/images/placeholder.png');
+    }
     if (imagePath.startsWith('http')) return NetworkImage(imagePath);
     return AssetImage(imagePath);
   }

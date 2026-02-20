@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:emailjs/emailjs.dart' as emailjs;  // Make sure this is correct
 import '../../models/app_data.dart';
+import '../../models/reservation_model.dart' as model;  // Keep 'as model'
 
 class ReservationsScreen extends StatefulWidget {
   const ReservationsScreen({super.key});
@@ -10,9 +14,10 @@ class ReservationsScreen extends StatefulWidget {
 
 class _ReservationsScreenState extends State<ReservationsScreen> {
   DateTime selectedDate = DateTime.now();
-  TimeOfDay selectedTime = const TimeOfDay(hour: 19, minute: 0); // default 7:00 PM
+  TimeOfDay selectedTime = TimeOfDay(hour: 19, minute: 0);
   int guests = 2;
   int duration = 2;
+  bool _isLoading = false;  // Keep this
 
   void _selectDate() async {
     final DateTime? picked = await showDatePicker(
@@ -36,25 +41,121 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
     }
   }
 
-  void _confirmReservation() {
-    final reservation = Reservation(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      date: selectedDate,
-      time: selectedTime.format(context),
-      guests: guests,
-      // duration: duration,
-      status: "Confirmed",
-    );
+  // FIX 1: Add this method
+  Future<void> _sendEmail({
+    required String email,
+    required String name,
+    required String date,
+    required String time,
+    required int guests,
+    required String reservationId,
+  }) async {
+    try {
+      print('Sending email to: $email');
+      
+      await emailjs.send(
+        'service_4c1aafl',     // Your actual service ID
+        'template_xr4owsp',    // Your actual template ID
+        {
+          'to_email': email,
+          'to_name': name,
+          'date': date,
+          'time': time,
+          'guests': guests.toString(),
+          'reservation_id': reservationId,
+        },
+        const emailjs.Options(
+          publicKey: 'ZvZFRKQC3NOezfVE9',
+          privateKey: 'gPqaVMjHo6CO-q2hsk6cL',
+        ),
+      );
+      
+      print('Email sent successfully');
+    } catch (error) {
+      print('Error sending email: $error');
+    }
+  }
 
-    setState(() {
-      AppData.reservations.add(reservation);
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Reservation confirmed")),
-    );
-
-    Navigator.pop(context); // go back to reservations list
+  // FIX 2: Update this method
+  void _confirmReservation() async {
+    // Show loading
+    setState(() => _isLoading = true);
+    
+    try {
+      auth.User? user = auth.FirebaseAuth.instance.currentUser;
+      
+      if (user == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Please log in first")),
+        );
+        setState(() => _isLoading = false);
+        return;
+      }
+      
+      String reservationId = FirebaseFirestore.instance
+          .collection('reservations')
+          .doc()
+          .id;
+      
+      String formattedDate = "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}";
+      String formattedTime = selectedTime.format(context);
+      
+      // Create Firebase version (using model.Reservation)
+      final firebaseReservation = model.Reservation(
+        id: reservationId,
+        userId: user.uid,
+        customerName: user.displayName ?? 'Customer',
+        customerEmail: user.email!,
+        customerPhone: user.phoneNumber ?? '',
+        date: selectedDate,
+        time: formattedTime,
+        guests: guests,
+        status: 'pending',
+        createdAt: DateTime.now(),
+      );
+      
+      // Create local AppData version (using regular Reservation)
+      final localReservation = Reservation(
+        id: reservationId,
+        date: selectedDate,
+        time: formattedTime,
+        guests: guests,
+        status: 'pending',
+      );
+      
+      // Save to Firestore
+      await FirebaseFirestore.instance
+          .collection('reservations')
+          .doc(reservationId)
+          .set(firebaseReservation.toJson());
+      
+      // Send email
+      await _sendEmail(
+        email: user.email!,
+        name: user.displayName ?? 'Customer',
+        date: formattedDate,
+        time: formattedTime,
+        guests: guests,
+        reservationId: reservationId,
+      );
+      
+      // Save to local AppData
+      AppData.reservations.add(localReservation);
+      
+      setState(() => _isLoading = false);
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Reservation request sent! Check your email.")),
+      );
+      
+      Navigator.pop(context);
+      
+    } catch (e) {
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e")),
+      );
+    }
   }
 
   @override
@@ -154,7 +255,7 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
             // Confirm & Cancel buttons
             Padding(
               padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).padding.bottom + 12, // extra safe margin
+                bottom: MediaQuery.of(context).padding.bottom + 12,
                 top: 12,
               ),
               child: Row(
@@ -167,9 +268,20 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
                             borderRadius: BorderRadius.circular(28)),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
-                      onPressed: _confirmReservation,
-                      child: const Text("Confirm",
-                          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontFamily: 'Times New Roman')),
+                      // FIX 3: Disable button when loading
+                      onPressed: _isLoading ? null : _confirmReservation,
+                      // FIX 4: Show spinner when loading
+                      child: _isLoading
+                          ? SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : Text("Confirm",
+                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontFamily: 'Times New Roman')),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -181,8 +293,8 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
                             borderRadius: BorderRadius.circular(28)),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text("Cancel",
+                      onPressed: _isLoading ? null : () => Navigator.pop(context),
+                      child: Text("Cancel",
                           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontFamily: 'Times New Roman')),
                     ),
                   ),
