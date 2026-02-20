@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../food/food_detail_screen.dart';
 import '../../models/food_model.dart';
+import '../../services/product_repository.dart';
+import '../../services/favorites_service.dart';
 
 class FavoritesScreen extends StatefulWidget {
   const FavoritesScreen({super.key});
@@ -10,160 +12,136 @@ class FavoritesScreen extends StatefulWidget {
 }
 
 class _FavoritesScreenState extends State<FavoritesScreen> {
+  List<FoodModel> _favorites = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFavorites();
+  }
+
+  Future<void> _loadFavorites() async {
+    try {
+          // 1. Get all products from Firestore (cached)
+          final allProducts = await ProductRepository.getAllProducts();
+          
+          // 2. Filter to only favorites using our new method
+          final favorites = await FoodModel.getFavorites(allProducts: allProducts);
+          
+          setState(() {
+            _favorites = favorites;
+            _isLoading = false;
+          });
+        } catch (e) {
+          print('Error loading favorites: $e');
+          setState(() => _isLoading = false);
+        }
+  }
+
+Future<void> _toggleFavorite(FoodModel food) async {
+  // Toggle in Firestore
+  final isNowFavorite = await FavoritesService.toggleFavorite(food.id);
+  
+  // Optional: Show user feedback
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(isNowFavorite 
+          ? 'Added to favorites' 
+          : 'Removed from favorites'),
+      duration: const Duration(seconds: 1),
+    ),
+  );
+}
+
   @override
   Widget build(BuildContext context) {
-    final favorites = FoodModel.getFavorites();
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Favorites'),
         backgroundColor: Colors.white,
         elevation: 0,
-      ),
-      body: Column(
-        children: [
-          if (favorites.isNotEmpty) ...[
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Recommended for you',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-            SizedBox(
-              height: 140,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: favorites.length,
-                itemBuilder: (context, index) {
-                  final item = favorites[index];
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              FoodDetailScreen(foodItem: item),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      width: 120,
-                      margin: const EdgeInsets.only(right: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.amber.shade100,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: ClipRRect(
-                              borderRadius: const BorderRadius.vertical(
-                                  top: Radius.circular(12)),
-                              child: _buildImage(item.image),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                            child: Text(
-                              item.name,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              textAlign: TextAlign.center,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-          Expanded(
-            child: favorites.isEmpty
-                ? const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.favorite_border,
-                          size: 80,
-                          color: Colors.grey,
-                        ),
-                        SizedBox(height: 16),
-                        Text(
-                          'No favorites yet',
-                          style: TextStyle(fontSize: 18, color: Colors.grey),
-                        ),
-                        Text(
-                          'Start adding dishes to your favorites!',
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: favorites.length,
-                    itemBuilder: (context, index) {
-                      final item = favorites[index];
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        child: ListTile(
-                          leading: _buildImage(item.image, size: 50),
-                          title: Text(
-                            item.name,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          subtitle: Text(
-                            '${item.category} • Rs ${item.price.toStringAsFixed(0)}',
-                          ),
-                          trailing: FittedBox(
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(Icons.star,
-                                    size: 16, color: Colors.amber),
-                                Text(item.rating.toStringAsFixed(1)),
-                                const SizedBox(width: 8),
-                                IconButton(
-                                  icon: const Icon(Icons.favorite, color: Colors.red),
-                                  onPressed: () {
-                                    setState(() {
-                                      item.isFavorite = false;
-                                    });
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    FoodDetailScreen(foodItem: item),
-                              ),
-                            );
-                          },
-                        ),
-                      );
-                    },
-                  ),
+        actions: [
+          // Refresh button
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _loadFavorites,
           ),
         ],
       ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          :_favorites.isEmpty
+              ? _buildEmptyState()
+              : _buildFavoritesList(),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.favorite_border, size: 80, color: Color.fromARGB(255, 192, 177, 41)),
+          const SizedBox(height: 16),
+          Text(
+            'No favorites yet',
+            style: TextStyle(fontSize: 18, color: Color.fromARGB(255, 110, 110, 110)),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Tap the heart icon on any dish to add it here!',
+            style: TextStyle(color: Color.fromARGB(255, 155, 155, 155)),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+  
+ Widget _buildFavoritesList() {
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: _favorites.length,
+      itemBuilder: (context, index) {
+        final item = _favorites[index];
+        return Card(
+          margin: const EdgeInsets.only(bottom: 8),
+          child: ListTile(
+            leading: _buildImage(item.image, size: 50),
+            title: Text(
+              item.name,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            subtitle: Text(
+              '${item.category} • Rs ${item.price.toStringAsFixed(0)}',
+            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.star, size: 16, color: Colors.amber),
+                Text(item.rating.toStringAsFixed(1)),
+                const SizedBox(width: 8),
+                IconButton(
+                  icon: Icon(
+                    item.isFavorite ? Icons.favorite : Icons.favorite_border,
+                    color: item.isFavorite ? Colors.red : Colors.grey,
+                  ),
+                  onPressed: () => _toggleFavorite(item),
+                ),
+              ],
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => FoodDetailScreen(foodItem: item),
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 
