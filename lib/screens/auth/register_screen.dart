@@ -1,8 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:luxury_restaurant_app/models/app_data.dart'
+    hide User; //  This allows FirebaseAuth to own the 'User' name
+// This tells Flutter: "Import everything from AppData EXCEPT the 'User' class"
+import 'package:luxury_restaurant_app/models/app_data.dart' hide User;
 
-//edited to fill android screen
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -18,26 +21,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _confirmController = TextEditingController();
 
   Future<void> _register() async {
+    // Translated Validation Messages
     if (_nameController.text.isEmpty ||
         _phoneController.text.isEmpty ||
         _emailController.text.isEmpty ||
         _passwordController.text.isEmpty ||
         _confirmController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all fields')),
+        SnackBar(content: Text(AppData.trans('Please fill all fields'))),
       );
       return;
     }
 
     if (_passwordController.text != _confirmController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwords do not match')),
+        SnackBar(content: Text(AppData.trans('Passwords do not match'))),
       );
       return;
     }
 
     try {
-      //Create Firebase user
       UserCredential userCredential =
           await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
@@ -45,7 +48,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
 
       User? user = userCredential.user;
-
       if (user == null) return;
 
       try {
@@ -57,29 +59,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
           'DateofEntry': DateTime.now(),
         });
       } catch (firestoreError) {
-        print("Firestore error: $firestoreError");
-
         await user.delete();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Failed to save user data. Please try again.')),
+          SnackBar(content: Text(AppData.trans('save_error'))),
         );
         return;
       }
 
-      //Optionally update display name
-      await userCredential.user!.updateDisplayName(
-        _nameController.text.trim(),
-      );
-
-      //AuthGate will automatically switch to Dashboard
-      //remove
-      print("After register: ${FirebaseAuth.instance.currentUser}");
+      await userCredential.user!.updateDisplayName(_nameController.text.trim());
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message ?? 'Registration failed')),
+        SnackBar(content: Text(e.message ?? AppData.trans('reg_failed'))),
       );
     }
+
     if (!mounted) return;
     Navigator.of(context).popUntil((route) => route.isFirst);
   }
@@ -143,12 +136,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     child: Column(
                       children: [
                         const SizedBox(height: 20),
-                        const Text(
-                          'Sign Up',
-                          style: TextStyle(
+                        Text(
+                          AppData.trans('register'), // TRANSLATED: "Sign Up"
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
+                            fontFamily: 'serif',
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -163,34 +157,34 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         const SizedBox(height: 25),
                         _inputField(
                           controller: _nameController,
-                          hint: 'Name',
+                          hint: AppData.trans('Name'), // TRANSLATED
                           icon: Icons.person_outline,
                           fillColor: goldCard.withOpacity(0.9),
                         ),
                         _inputField(
                           controller: _phoneController,
-                          hint: 'Phone Number',
+                          hint: AppData.trans('Phone'), // TRANSLATED
                           icon: Icons.phone_android_outlined,
                           fillColor: goldCard.withOpacity(0.9),
                           keyboard: TextInputType.phone,
                         ),
                         _inputField(
                           controller: _emailController,
-                          hint: 'Email',
+                          hint: AppData.trans('Email'), // TRANSLATED
                           icon: Icons.email_outlined,
                           fillColor: goldCard.withOpacity(0.9),
                           keyboard: TextInputType.emailAddress,
                         ),
                         _inputField(
                           controller: _passwordController,
-                          hint: 'Password',
+                          hint: AppData.trans('Password'), // TRANSLATED
                           icon: Icons.lock_outline,
                           fillColor: Colors.black.withOpacity(0.5),
                           obscure: true,
                         ),
                         _inputField(
                           controller: _confirmController,
-                          hint: 'Confirm Password',
+                          hint: AppData.trans('Confirm Password'), // TRANSLATED
                           icon: Icons.lock_outline,
                           fillColor: goldCard.withOpacity(0.9),
                           obscure: true,
@@ -207,12 +201,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   borderRadius: BorderRadius.circular(30)),
                               elevation: 5,
                             ),
-                            child: const Text(
-                              'Sign In',
-                              style: TextStyle(
+                            child: Text(
+                              AppData.trans('register'), // TRANSLATED
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
+                                fontFamily: 'serif',
                               ),
                             ),
                           ),
@@ -257,8 +252,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
             borderSide: BorderSide(
-                color: Color.fromARGB(255, 80, 80, 80).withOpacity(0.60),
-                width: 5),
+                color: const Color.fromARGB(255, 80, 80, 80).withOpacity(0.60),
+                width: 1.5), // Reduced width for elegance
           ),
         ),
       ),

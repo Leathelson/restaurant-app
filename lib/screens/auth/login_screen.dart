@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:luxury_restaurant_app/screens/auth/forgot_password.dart';
+import 'package:luxury_restaurant_app/models/app_data.dart'; // REQUIRED for translations
 import 'package:shared_preferences/shared_preferences.dart';
 import 'register_screen.dart';
 import 'dart:async';
@@ -27,7 +28,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
       final prefs = await SharedPreferences.getInstance();
 
-      // Save credentials only if remember is checked
       if (_remember) {
         await prefs.setString('email', _emailController.text);
         await prefs.setString('password', _passwordController.text);
@@ -36,9 +36,8 @@ class _LoginScreenState extends State<LoginScreen> {
         await prefs.remove('password');
       }
     } catch (e) {
-      // handle login error
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login failed: $e')),
+        SnackBar(content: Text('${AppData.trans('login_failed')}: $e')),
       );
     }
   }
@@ -56,18 +55,15 @@ class _LoginScreenState extends State<LoginScreen> {
     final w = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      resizeToAvoidBottomInset: false, //  prevents bg from moving with keyboard
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
-          // background image stays fixed
           Positioned.fill(
             child: Image.asset(
               'assets/images/glassesandshi.jpg',
               fit: BoxFit.cover,
             ),
           ),
-
-          // dark gradient overlay
           Positioned.fill(
             child: Container(
               decoration: BoxDecoration(
@@ -82,24 +78,22 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ),
-
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
               child: Column(
                 children: <Widget>[
                   const SizedBox(height: 8),
-                  const Text(
-                    'Log In',
-                    style: TextStyle(
+                  Text(
+                    AppData.trans('Login'), // TRANSLATED: 'Log In'
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
+                      fontFamily: 'serif',
                     ),
                   ),
                   const SizedBox(height: 8),
-
-                  // social icons
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -108,13 +102,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       _socialButton('assets/icons/x_icon.png'),
                     ],
                   ),
-
                   const SizedBox(height: 18),
-
-                  // emblem circle
                   Center(
                     child: Container(
-                      width: 150, // bigger circle
+                      width: 150,
                       height: 150,
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.06),
@@ -127,42 +118,34 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Center(
                         child: Image.asset(
                           'assets/images/emblem.png',
-                          width: 120, // bigger emblem
+                          width: 120,
                           height: 120,
                           fit: BoxFit.contain,
                           errorBuilder: (_, __, ___) => const Icon(
                             Icons.local_dining,
                             color: Colors.white70,
-                            size: 64, // bigger fallback icon too
+                            size: 64,
                           ),
                         ),
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 28),
-
-                  // Email field
                   _inputField(
                     controller: _emailController,
-                    hint: "Email",
+                    hint: AppData.trans('email'), // TRANSLATED: "Email"
                     icon: Icons.email_outlined,
                     fillColor: Colors.black.withOpacity(0.55),
                     keyboard: TextInputType.emailAddress,
                   ),
-
-                  // Password field
                   _inputField(
                     controller: _passwordController,
-                    hint: "Password",
+                    hint: AppData.trans('password'), // TRANSLATED: "Password"
                     icon: Icons.lock_outline,
                     fillColor: Colors.black.withOpacity(0.55),
                     obscure: true,
                   ),
-
                   const SizedBox(height: 18),
-
-                  // Log In button
                   SizedBox(
                     width: double.infinity,
                     height: 56,
@@ -176,19 +159,18 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         elevation: 8,
                       ),
-                      child: const Text(
-                        'Log In',
-                        style: TextStyle(
+                      child: Text(
+                        AppData.trans('Login'), // TRANSLATED: 'Log In'
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 0.6,
+                          fontFamily: 'serif',
                         ),
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 18),
-
                   Container(
                     width: double.infinity,
                     padding:
@@ -206,17 +188,13 @@ class _LoginScreenState extends State<LoginScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (c) => ForgotPassword(),
-                              ),
+                                  builder: (c) => const ForgotPassword()),
                             );
                           },
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            visualDensity: VisualDensity.compact,
-                          ),
                           child: Text(
-                            'Forgot Password? Reset!',
-                            style: TextStyle(color: gold),
+                            AppData.trans('Forgot Password?'), // TRANSLATED
+                            style: const TextStyle(
+                                color: gold, fontFamily: 'serif'),
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -225,22 +203,18 @@ class _LoginScreenState extends State<LoginScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (c) => RegisterScreen()),
+                                  builder: (c) => const RegisterScreen()),
                             );
                           },
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            visualDensity: VisualDensity.compact,
-                          ),
                           child: Text(
-                            'Don\'t have an account? Register!',
-                            style: TextStyle(color: gold),
+                            AppData.trans('Sign up'), // TRANSLATED
+                            style: const TextStyle(
+                                color: gold, fontFamily: 'serif'),
                           ),
                         ),
                       ],
                     ),
                   ),
-
                   SizedBox(height: w * 0.12),
                 ],
               ),
@@ -276,11 +250,21 @@ class _LoginScreenState extends State<LoginScreen> {
           prefixIcon: Icon(icon, color: Colors.white70),
           filled: true,
           fillColor: fillColor,
-          contentPadding: const EdgeInsets.symmetric(vertical: 18),
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
             borderSide: BorderSide(
-                color: const Color(0xFF906224).withOpacity(0.60), width: 5),
+                color: const Color(0xFF906224).withOpacity(0.60), width: 1.5),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(30),
+            borderSide: BorderSide(
+                color: const Color(0xFF906224).withOpacity(0.40), width: 1.0),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(30),
+            borderSide: const BorderSide(color: Color(0xFFB37C1E), width: 2.0),
           ),
         ),
       ),
