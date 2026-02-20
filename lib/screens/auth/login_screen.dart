@@ -39,7 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (e) {
       // handle login error
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login failed: $e')),
+        SnackBar(content: Text('Login failed! Password or Email Invalid')),
       );
     }
   }
@@ -170,7 +170,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: ElevatedButton(
                       onPressed: () {
                         SoundService.playClick();
-                      _login;
+                      _login();
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: gold,
@@ -280,7 +280,7 @@ class _LoginScreenState extends State<LoginScreen> {
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: TextStyle(color: Colors.white.withOpacity(0.9)),
-          prefixIcon: Icon(icon, color: Colors.white70),
+          prefixIcon: Icon(icon, color: Color(0xFFB37C1E)),
           filled: true,
           fillColor: fillColor,
           contentPadding: const EdgeInsets.symmetric(vertical: 18),

@@ -78,7 +78,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       print("After register: ${FirebaseAuth.instance.currentUser}");
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message ?? 'Registration failed')),
+        SnackBar(content: Text('Registration failed, Servers Offline')),
       );
     }
     if (!mounted) return;
@@ -166,20 +166,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           controller: _nameController,
                           hint: 'Name',
                           icon: Icons.person_outline,
-                          fillColor: goldCard.withOpacity(0.9),
+                          fillColor: Colors.black.withOpacity(0.5),
                         ),
                         _inputField(
                           controller: _phoneController,
                           hint: 'Phone Number',
                           icon: Icons.phone_android_outlined,
-                          fillColor: goldCard.withOpacity(0.9),
+                          fillColor: Colors.black.withOpacity(0.5),
                           keyboard: TextInputType.phone,
                         ),
                         _inputField(
                           controller: _emailController,
                           hint: 'Email',
                           icon: Icons.email_outlined,
-                          fillColor: goldCard.withOpacity(0.9),
+                          fillColor: Colors.black.withOpacity(0.5),
                           keyboard: TextInputType.emailAddress,
                         ),
                         _inputField(
@@ -193,7 +193,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           controller: _confirmController,
                           hint: 'Confirm Password',
                           icon: Icons.lock_outline,
-                          fillColor: goldCard.withOpacity(0.9),
+                          fillColor: Colors.black.withOpacity(0.5),
                           obscure: true,
                         ),
                         const SizedBox(height: 30),
@@ -203,7 +203,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           child: ElevatedButton(
                             onPressed: () {
                               SoundService.playClick();
-                              _register;
+                              _register();
                             } ,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: gold,
@@ -243,26 +243,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
     bool obscure = false,
     TextInputType keyboard = TextInputType.text,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
       child: TextField(
         controller: controller,
         obscureText: obscure,
         keyboardType: keyboard,
+        autocorrect: false,
+        enableSuggestions: false,
+        textCapitalization: TextCapitalization.none,
         style: const TextStyle(color: Colors.white),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: const TextStyle(color: Colors.white70),
-          prefixIcon: Icon(icon, color: Colors.white),
+          hintStyle: TextStyle(color: Colors.white.withOpacity(0.9)),
+          prefixIcon: Icon(icon, color: gold),
           filled: true,
           fillColor: fillColor,
-          contentPadding:
-              const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+          contentPadding: const EdgeInsets.symmetric(vertical: 18),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
             borderSide: BorderSide(
-                color: Color.fromARGB(255, 80, 80, 80).withOpacity(0.60),
-                width: 5),
+                color: const Color(0xFF906224).withOpacity(0.60), width: 5),
           ),
         ),
       ),
