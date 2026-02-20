@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:luxury_restaurant_app/services/sound_service.dart';
 
 //edited to fill android screen
 class RegisterScreen extends StatefulWidget {
@@ -200,7 +201,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           width: double.infinity,
                           height: 55,
                           child: ElevatedButton(
-                            onPressed: _register,
+                            onPressed: () {
+                              SoundService.playClick();
+                              _register;
+                            } ,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: gold,
                               shape: RoundedRectangleBorder(
@@ -267,7 +271,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Widget _socialButton(String assetPath) {
     return IconButton(
-      onPressed: () {},
+      onPressed: () {
+        SoundService.playClick();
+      },
       icon: Image.asset(
         assetPath,
         width: 30,

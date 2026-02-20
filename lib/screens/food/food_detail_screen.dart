@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:luxury_restaurant_app/services/sound_service.dart';
 import '../../models/app_data.dart';
 import '../checkout/checkout_screen.dart';
 
@@ -51,6 +52,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: darkBg),
             onPressed: () {
+              SoundService.playClick();
               Navigator.of(context).pop(); // close dialog
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const CheckoutScreen()),
@@ -142,7 +144,10 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
               child: Row(
                 children: [
                   GestureDetector(
-                    onTap: () => Navigator.of(context).pop(),
+                    onTap: () {
+                      SoundService.playClick();
+                      Navigator.of(context).pop();
+                    },
                     child: const Icon(Icons.arrow_back_ios,
                         color: Colors.white, size: 28),
                   ),
