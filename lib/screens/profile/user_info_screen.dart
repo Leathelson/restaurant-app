@@ -1,152 +1,154 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import '../../models/app_data.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:luxury_restaurant_app/screens/profile/buildTextField.dart';
 
 class UserInfoScreen extends StatefulWidget {
   const UserInfoScreen({super.key});
 
   @override
-  _UserInfoScreenState createState() => _UserInfoScreenState();
+  State<UserInfoScreen> createState() => _UserInfoScreenState();
 }
 
 class _UserInfoScreenState extends State<UserInfoScreen> {
-  late TextEditingController nameController;
-  late TextEditingController emailController;
-  late TextEditingController passwordController;
-  late TextEditingController phoneController;
+  //user
+  final currentUser = FirebaseAuth.instance.currentUser!;
+  //all users
+  final usersCollection = FirebaseFirestore.instance.collection("users");
 
-  @override
-  void initState() {
-    super.initState();
-    nameController = TextEditingController(text: AppData.currentUser.name);
-    emailController = TextEditingController(text: AppData.currentUser.email);
-    passwordController = TextEditingController(text: ""); // hidden, not saved here
-    phoneController = TextEditingController(text: "+230 5123 4567"); // example
-  }
+  Future<void> editField(String field) async {
+    String newValue = "";
+    await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+                backgroundColor: Colors.white,
+                title: Text(
+                  "Edit $field",
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                content: TextField(
+                  autofocus: true,
+                  style: const TextStyle(color: Colors.black),
+                  decoration: InputDecoration(
+                    hintText: "Enter new $field",
+                    hintStyle: TextStyle(color: Colors.black54),
+                  ),
+                  onChanged: (value) {
+                    newValue = value;
+                  },
+                ),
+                actions: [
+                  //cancel button
+                  TextButton(
+                    child: Text('Cancel',
+                        style: TextStyle(color: Colors.red.shade900)),
+                    onPressed: () => Navigator.pop(context),
+                  ),
 
-  @override
-  void dispose() {
-    nameController.dispose();
-    emailController.dispose();
-    passwordController.dispose();
-    phoneController.dispose();
-    super.dispose();
-  }
+                  //save button
+                  TextButton(
+                    child: Text('Save',
+                        style: TextStyle(color: Colors.red.shade900)),
+                    onPressed: () => Navigator.of(context).pop(newValue),
+                  ),
+                ]));
 
-  void _saveProfile() {
-    setState(() {
-      AppData.currentUser.name = nameController.text;
-      AppData.currentUser.email = emailController.text;
-      // In real app: handle password securely + phone field
-    });
-
-    Navigator.pop(context);
+    //update Firestore
+    if (newValue.trim().length > 0) {
+      //only update if there is something in the textfield
+      await usersCollection.doc(currentUser.uid).update({field: newValue});
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          'Edit Profile',
-          style: TextStyle(
-            color: Colors.red.shade900,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.check, color: Colors.black),
-            onPressed: _saveProfile,
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            children: [
-              // Profile Picture
-              const Stack(
-                alignment: Alignment.bottomRight,
-                children: [
-                  CircleAvatar(
-                    radius: 60,
-                    backgroundImage: AssetImage("assets/images/profile.png"),
-                  ),
-                  CircleAvatar(
-                    radius: 18,
-                    backgroundColor: Colors.white,
-                    child: Icon(Icons.camera_alt, size: 20, color: Colors.grey),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-
-              // Name field
-              _buildTextField("Name", nameController, Colors.brown.shade600),
-
-              // Email field
-              _buildTextField("Email", emailController, const Color(0xFF2F2740)),
-
-              // Password field
-              _buildTextField("Password", passwordController, Colors.brown.shade600,
-                  obscure: true, hint: "********"),
-
-              // Phone field
-              _buildTextField("Phone Number", phoneController, Colors.brown.shade600,
-                  hint: "+ 230 5123 4567"),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField(
-    String label,
-    TextEditingController controller,
-    Color bgColor, {
-    bool obscure = false,
-    String? hint,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label,
-              style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                  color: Colors.red.shade900)),
-          const SizedBox(height: 6),
-          Container(
-            decoration: BoxDecoration(
-              color: bgColor,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: TextField(
-              controller: controller,
-              obscureText: obscure,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                hintText: hint,
-                hintStyle: const TextStyle(color: Colors.white70),
-                border: InputBorder.none,
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              ),
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          title: Text(
+            'Edit Profile',
+            style: TextStyle(
+              color: Colors.red.shade900,
+              fontWeight: FontWeight.bold,
             ),
           ),
-        ],
-      ),
-    );
+          centerTitle: true,
+        ),
+        body: StreamBuilder<DocumentSnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('users')
+                .doc(currentUser.uid)
+                .snapshots(),
+            builder: (context, snapshot) {
+              //get user data
+              if (snapshot.hasData) {
+                final userData = snapshot.data!.data() as Map<String, dynamic>;
+                return SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      children: [
+                        // Profile Picture
+                        const Stack(
+                          alignment: Alignment.bottomRight,
+                          children: [
+                            CircleAvatar(
+                              radius: 60,
+                              backgroundImage:
+                                  AssetImage("assets/images/profile.png"),
+                            ),
+                            CircleAvatar(
+                              radius: 18,
+                              backgroundColor: Colors.white,
+                              child: Icon(Icons.camera_alt,
+                                  size: 20, color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+
+                        // Name field
+                        MyTextBox(
+                          label: "Name",
+                          bgColor: Colors.brown.shade600,
+                          text: userData['Name'],
+                          onPressed: () => editField("Name"),
+                        ),
+
+                        // Email field
+                        MyTextBox(
+                          label: "Email",
+                          bgColor: const Color(0xFF2F2740),
+                          text: userData['Email'],
+                          onPressed: () => editField("Email"),
+                        ),
+
+                        // Phone field
+                        MyTextBox(
+                          label: "Phone Number",
+                          bgColor: Colors.brown.shade600,
+                          text: userData['Phone'],
+                          onPressed: () => editField("Phone"),
+                        ),
+
+                        Text(currentUser.email!,
+                            style: TextStyle(color: Colors.black54))
+                      ],
+                    ),
+                  ),
+                );
+              } else if (snapshot.hasError) {
+                return Center(
+                    child: Text("Error=${snapshot.error}",
+                        style: TextStyle(color: Colors.red.shade900)));
+              }
+
+              return const Center(child: CircularProgressIndicator());
+            }));
   }
 }

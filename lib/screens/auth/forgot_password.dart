@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:luxury_restaurant_app/services/sound_service.dart';
 
 class ForgotPassword extends StatefulWidget {
   const ForgotPassword({super.key});
@@ -100,7 +101,10 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                     child: IconButton(
                       icon: const Icon(Icons.arrow_back_ios,
                           color: Colors.white, size: 20),
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () {
+                        SoundService.playClick();
+                        Navigator.pop(context);
+                        },
                     ),
                   ),
 
@@ -205,7 +209,10 @@ class _ForgotPasswordState extends State<ForgotPassword> {
         ),
         const SizedBox(height: 40),
         TextButton(
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            SoundService.playClick();
+            Navigator.pop(context);
+          },
           child: Text("Back to Login",
               style: TextStyle(
                   color: gold, fontWeight: FontWeight.w600, fontSize: 16)),

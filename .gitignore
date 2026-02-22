@@ -94,6 +94,8 @@ android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
 lib/firebase_options.dart
 firebase-node/firebaseServiceKey.json
+firebase.json
 
 /macos/
 /windows/
+firebase.json

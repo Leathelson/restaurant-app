@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:luxury_restaurant_app/main.dart';
+import 'package:luxury_restaurant_app/main.dart'; // To access languageNotifier
 import '../../models/app_data.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -13,23 +13,31 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   bool pushNotifications = true;
 
+  // Consistency Colors
+  final Color gold = Colors.amber;
+  final Color darkBg = Colors.black87;
+
   void _changeLanguage() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Select Language'),
+        title: Text(AppData.trans('language'),
+            style: const TextStyle(fontFamily: 'serif')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
-          children: ['English', 'Spanish']
+          children: ['English', 'Spanish', 'French']
               .map(
                 (lang) => RadioListTile<String>(
-                  title: Text(lang),
+                  title:
+                      Text(lang, style: const TextStyle(fontFamily: 'serif')),
                   value: lang,
                   groupValue: AppData.selectedLanguage,
-                  activeColor: Colors.amber,
+                  activeColor: gold,
                   onChanged: (value) {
                     setState(() {
                       AppData.selectedLanguage = value!;
+                      // Trigger app-wide rebuild
+                      languageNotifier.value = value;
                     });
                     Navigator.pop(context);
                   },
@@ -42,35 +50,44 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _editProfile() {
-    final nameController = TextEditingController(
-      text: AppData.currentUser.name,
-    );
-    final emailController = TextEditingController(
-      text: AppData.currentUser.email,
-    );
+    final nameController =
+        TextEditingController(text: AppData.currentUser.name);
+    final emailController =
+        TextEditingController(text: AppData.currentUser.email);
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Edit Profile'),
+        title: Text(AppData.trans('edit_profile'),
+            style: const TextStyle(fontFamily: 'serif')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: nameController,
-              decoration: const InputDecoration(labelText: 'Name'),
+              decoration: InputDecoration(
+                labelText: 'Name',
+                labelStyle: TextStyle(color: gold),
+                focusedBorder:
+                    UnderlineInputBorder(borderSide: BorderSide(color: gold)),
+              ),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
+              decoration: InputDecoration(
+                labelText: 'Email',
+                labelStyle: TextStyle(color: gold),
+                focusedBorder:
+                    UnderlineInputBorder(borderSide: BorderSide(color: gold)),
+              ),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text('Cancel', style: TextStyle(color: Colors.grey[600])),
           ),
           TextButton(
             onPressed: () {
@@ -80,7 +97,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               });
               Navigator.pop(context);
             },
-            child: const Text('Save'),
+            child: Text('Save',
+                style: TextStyle(color: gold, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -91,23 +109,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Logout'),
-        content: Text('Are you sure you want to logout?'),
+        title: Text(AppData.trans('logout'),
+            style: const TextStyle(fontFamily: 'serif')),
+        content: const Text('Are you sure you want to logout?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel'),
+            child: Text('Cancel', style: TextStyle(color: Colors.grey[600])),
           ),
           TextButton(
             onPressed: () async {
               await FirebaseAuth.instance.signOut();
-              Navigator.pop(context); // just close the dialog },
-              Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (_) => AuthGate()),
-                (route) => false,
-              );
+              if (mounted) {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const AuthGate()),
+                  (route) => false,
+                );
+              }
             },
-            child: Text('Logout', style: TextStyle(color: Colors.red)),
+            // Removed red, using gold/amber for consistency
+            child: Text(AppData.trans('logout'),
+                style: TextStyle(color: gold, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -117,35 +139,42 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(
+        title: Text(AppData.trans('Settings'),
+            style: const TextStyle(
+                fontFamily: 'serif', fontWeight: FontWeight.bold)),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.language, color: Colors.amber),
-              title: const Text('Language'),
-              subtitle: Text(AppData.selectedLanguage),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: _changeLanguage,
-            ),
+          // Language Section
+          _buildSettingsCard(
+            icon: Icons.language,
+            title: AppData.trans('Select Language'),
+            subtitle: AppData.selectedLanguage,
+            onTap: _changeLanguage,
           ),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.edit, color: Colors.amber),
-              title: const Text('Edit Profile'),
-              subtitle: const Text('Update your personal information'),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: _editProfile,
-            ),
+
+          // Profile Section
+          _buildSettingsCard(
+            icon: Icons.person_outline,
+            title: AppData.trans('Edit Profile'),
+            subtitle: AppData.currentUser.name,
+            onTap: _editProfile,
           ),
+
+          // Notifications Section
           Card(
+            elevation: 2,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             child: SwitchListTile(
-              secondary: const Icon(Icons.notifications, color: Colors.amber),
-              title: const Text('Push Notifications'),
-              subtitle: const Text('Receive order updates and offers'),
+              secondary: Icon(Icons.notifications_none, color: gold),
+              title: Text(AppData.trans('Turn on notifications'),
+                  style: const TextStyle(
+                      fontFamily: 'serif', fontWeight: FontWeight.w600)),
               value: pushNotifications,
-              activeThumbColor: Colors.amber,
+              activeColor: gold,
               onChanged: (value) {
                 setState(() {
                   pushNotifications = value;
@@ -153,15 +182,43 @@ class _SettingsScreenState extends State<SettingsScreen> {
               },
             ),
           ),
-          const SizedBox(height: 24),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.logout, color: Colors.red),
-              title: const Text('Logout', style: TextStyle(color: Colors.red)),
-              onTap: _logout,
-            ),
+
+          const SizedBox(height: 32),
+
+          // Logout Section
+          _buildSettingsCard(
+            icon: Icons.logout,
+            title: AppData.trans('Logout'),
+            subtitle: 'Sign out of your account',
+            onTap: _logout,
+            isDestructive: false, // Set to false to maintain gold theme
           ),
         ],
+      ),
+    );
+  }
+
+  // Helper widget to keep UI consistent
+  Widget _buildSettingsCard({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+    bool isDestructive = false,
+  }) {
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: ListTile(
+        leading: Icon(icon, color: isDestructive ? Colors.red : gold),
+        title: Text(title,
+            style: const TextStyle(
+                fontFamily: 'serif', fontWeight: FontWeight.w600)),
+        subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
+        trailing:
+            const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
+        onTap: onTap,
       ),
     );
   }

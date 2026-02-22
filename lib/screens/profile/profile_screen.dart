@@ -207,11 +207,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 : null,
       ),
         child: InkWell(
-          onTap: () {
-            SoundService.playClick(); // Play click sound when tapped
+          onTap: (){
+            SoundService.playClick();
 
-            Future.delayed(const Duration(milliseconds: 150), () {
-              onTap(); // Navigate after a short delay to allow sound to play
+            Future.delayed(const Duration(milliseconds: 100), () {
+              onTap();
             });
           },
           borderRadius: BorderRadius.circular(12),

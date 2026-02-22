@@ -24,7 +24,8 @@ class FoodModel {
   });
 
   // Create FoodModel from Firebase Document
-  factory FoodModel.fromFirestore(Map<String, dynamic> data, String documentId) {
+  factory FoodModel.fromFirestore(
+      Map<String, dynamic> data, String documentId) {
     return FoodModel(
       id: documentId,
       name: data['Name'] ?? 'No Name',
@@ -34,7 +35,8 @@ class FoodModel {
       rating: (data['Rating'] ?? 0).toDouble(),
       category: data['Category'] ?? 'veg',
       price: (data['Price'] ?? 0).toDouble(),
-      isFavorite: data['IsFavorite'] ?? false, // Read from Firestore if available
+      isFavorite:
+          data['IsFavorite'] ?? false, // Read from Firestore if available
     );
   }
 
@@ -66,15 +68,15 @@ class FoodModel {
     required List<FoodModel> allProducts, // Pass your full product list
   }) async {
     final favoriteIds = await FavoritesService.getFavoriteIdsStream().first;
-    
+
     // Filter allProducts to only include favorited items
     return allProducts
         .where((product) => favoriteIds.contains(product.id))
-        .map((product) => product.copyWith(isFavorite: true)) // Mark as favorite
+        .map(
+            (product) => product.copyWith(isFavorite: true)) // Mark as favorite
         .toList();
   }
 
-  
   // Convert to Map for Firestore (if you need to write back)
   Map<String, dynamic> toMap() {
     return {
@@ -85,7 +87,8 @@ class FoodModel {
       'Price': price,
       'Image': image,
       'Category': category,
-      'IsFavorite': isFavorite, // Optionally include this if you want to store it in Firestore
+      'IsFavorite':
+          isFavorite, // Optionally include this if you want to store it in Firestore
     };
   }
 }
