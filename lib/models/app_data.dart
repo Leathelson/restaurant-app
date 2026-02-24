@@ -60,7 +60,7 @@ class AppData {
     loyaltyPoints: 150,
   );
 
-  static String selectedLanguage = 'en';
+  static String selectedLanguage = 'es';
 
   static final Map<String, Map<String, String>> translations = {
     'en': {
