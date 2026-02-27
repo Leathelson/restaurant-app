@@ -34,9 +34,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Color get gold => const Color(0xFFB37C1E);
   Color get goldCard => const Color(0xFF906224);
 
+  // Calculate card width based on orientation
+  double _getCardWidth(double screenWidth, bool isLandscape) {
+    if (isLandscape) {
+      return screenWidth * 0.28; // Show 3 cards in landscape
+    } else {
+      return screenWidth * 0.42; // Show 2 cards in portrait
+    }
+  }
+
+  // Calculate card height based on orientation
+  double _getCardHeight(bool isLandscape) {
+    return isLandscape ? 240 : 280;
+  }
+
   @override
   Widget build(BuildContext context) {
     final w = MediaQuery.of(context).size.width;
+    final h = MediaQuery.of(context).size.height;
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+    final cardWidth = _getCardWidth(w, isLandscape);
+    final cardHeight = _getCardHeight(isLandscape);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -47,7 +65,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           'Luxury Restaurant',
           style: TextStyle(
             color: titleColor,
-            fontSize: 22,
+            fontSize: isLandscape ? 20 : 22,
             fontWeight: FontWeight.w800,
           ),
         ),
@@ -83,7 +101,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ],
                   ),
                   child: CircleAvatar(
-                    radius: 18,
+                    radius: isLandscape ? 16 : 18,
                     backgroundImage: const AssetImage('assets/images/profile.png'),
                     backgroundColor: Colors.white,
                     child: Stack(
@@ -119,7 +137,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        padding: EdgeInsets.symmetric(
+          horizontal: isLandscape ? 24 : 16,
+          vertical: isLandscape ? 12 : 6,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -127,7 +148,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               children: [
                 Expanded(
                   child: Container(
-                    height: 48,
+                    height: isLandscape ? 44 : 48,
                     decoration: BoxDecoration(
                       color: Colors.grey[850],
                       borderRadius: BorderRadius.circular(28),
@@ -136,7 +157,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: InkWell(
                       onTap: () {
-                        SoundService.playClick(); // Play click sound when search bar is tapped
+                        SoundService.playClick();
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -144,15 +165,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           ),
                         );
                       },
-                      child: const Row(
+                      child: Row(
                         children: [
-                          Icon(Icons.search, color: Colors.white70),
+                          Icon(Icons.search, color: Colors.white70, size: isLandscape ? 18 : 20),
                           SizedBox(width: 8),
                           Text(
                             'Search',
                             style: TextStyle(
                               color: Colors.white70,
-                              fontSize: 16,
+                              fontSize: isLandscape ? 14 : 16,
                             ),
                           ),
                         ],
@@ -162,31 +183,31 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 14),
+            SizedBox(height: isLandscape ? 10 : 14),
             Padding(
               padding: const EdgeInsets.only(left: 4, top: 8, bottom: 6),
               child: Text(
                 'Choose Your Option',
                 style: TextStyle(
                   color: Colors.grey[600],
-                  fontSize: 13,
+                  fontSize: isLandscape ? 12 : 13,
                   fontWeight: FontWeight.w500,
                   letterSpacing: 0.3,
                 ),
               ),
             ),
-            const SizedBox(height: 6),
+            SizedBox(height: isLandscape ? 4 : 6),
             Wrap(
               spacing: 10,
               children: [
-                _categoryChip('Non-Veg', 0, Colors.black87),
-                _categoryChip('Veg', 1, Colors.red[800]!),
-                _categoryChip('Salad', 2, goldCard),
+                _categoryChip('Non-Veg', 0, Colors.black87, isLandscape),
+                _categoryChip('Veg', 1, Colors.red[800]!, isLandscape),
+                _categoryChip('Salad', 2, goldCard, isLandscape),
               ],
             ),
-            const SizedBox(height: 18),
+            SizedBox(height: isLandscape ? 14 : 18),
             SizedBox(
-              height: 280,
+              height: isLandscape ? 260 : 320,
               child: StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection('FoodItems')
@@ -216,7 +237,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   return ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: featuredItems.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 14),
+                    separatorBuilder: (_, __) => SizedBox(width: isLandscape ? 12 : 14),
                     itemBuilder: (context, index) {
                       final doc = featuredItems[index];
                       final data = doc.data() as Map<String, dynamic>;
@@ -233,40 +254,40 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             ),
                           );
                         },
-                        child: Container(
-                          width: w * 0.56,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(18),
-                            border: Border.all(color: gold.withOpacity(0.18)),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Colors.black12,
-                                blurRadius: 8,
-                                offset: Offset(0, 4),
-                              )
-                            ],
-                          ),
-                          child: SingleChildScrollView(
+                        child: SizedBox(
+                          width: cardWidth,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: gold.withOpacity(0.18)),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Colors.black12,
+                                  blurRadius: 8,
+                                  offset: Offset(0, 4),
+                                )
+                              ],
+                            ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 ClipRRect(
                                   borderRadius: const BorderRadius.vertical(
-                                    top: Radius.circular(18),
+                                    top: Radius.circular(16),
                                   ),
-                                  child: _buildFoodImage(data['Image']),
+                                  child: _buildFoodImage(data['Image'], isLandscape: isLandscape),
                                 ),
                                 Padding(
-                                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+                                  padding: EdgeInsets.fromLTRB(10, 10, 10, 6),
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         food.name,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontWeight: FontWeight.w700,
-                                          fontSize: 14,
+                                          fontSize: isLandscape ? 12 : 14,
                                         ),
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
@@ -276,13 +297,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                           food.shortdescription,
                                           style: TextStyle(
                                             color: Colors.grey.shade600,
-                                            fontSize: 11,
+                                            fontSize: isLandscape ? 10 : 11,
                                             height: 1.3,
                                           ),
                                           maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
                                         ),
-                                      const SizedBox(height: 8),
+                                      SizedBox(height: isLandscape ? 6 : 8),
                                       Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
@@ -292,6 +313,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                             style: TextStyle(
                                               color: gold,
                                               fontWeight: FontWeight.bold,
+                                              fontSize: isLandscape ? 12 : 14,
                                             ),
                                           ),
                                           Container(
@@ -305,7 +327,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                 )
                                               ],
                                             ),
-                                            padding: const EdgeInsets.all(3),
+                                            padding: const EdgeInsets.all(2),
                                             child: StreamBuilder<Set<String>>(
                                               stream: FavoritesService.getFavoriteIdsStream(),
                                               builder: (context, snapshot) {
@@ -317,7 +339,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                         ? Icons.favorite
                                                         : Icons.favorite_border,
                                                     color: isFavorite ? Colors.red : Colors.grey,
-                                                    size: 18,
+                                                    size: isLandscape ? 16 : 18,
                                                   ),
                                                   onPressed: () async {
                                                     SoundService.playClick();
@@ -356,7 +378,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 },
               ),
             ),
-            const SizedBox(height: 18),
+            SizedBox(height: isLandscape ? 14 : 18),
             Container(
               height: 4,
               width: 46,
@@ -365,19 +387,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: isLandscape ? 10 : 12),
             Text(
               'Favourites',
               style: TextStyle(
                 color: titleColor,
-                fontSize: 22,
+                fontSize: isLandscape ? 18 : 22,
                 fontWeight: FontWeight.w800,
                 fontFamily: 'serif',
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: isLandscape ? 10 : 12),
             SizedBox(
-              height: 96,
+              height: isLandscape ? 80 : 96,
               child: StreamBuilder<Set<String>>(
                 stream: FavoritesService.getFavoriteIdsStream(),
                 builder: (context, favSnapshot) {
@@ -424,11 +446,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           final data = doc[index].data() as Map<String, dynamic>;
                           final food = FoodModel.fromFirestore(data, doc[index].id);
                           return Container(
-                            width: w * 0.6,
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            width: isLandscape ? w * 0.35 : w * 0.6,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: isLandscape ? 8 : 12,
+                              vertical: isLandscape ? 6 : 10,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(28),
+                              borderRadius: BorderRadius.circular(20),
                               border: Border.all(color: gold.withOpacity(0.18)),
                               boxShadow: const [
                                 BoxShadow(
@@ -441,10 +466,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             child: Row(
                               children: [
                                 CircleAvatar(
-                                  radius: 26,
+                                  radius: isLandscape ? 22 : 26,
                                   backgroundImage: _getFoodImageProvider(food.image),
                                 ),
-                                const SizedBox(width: 12),
+                                SizedBox(width: isLandscape ? 8 : 12),
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -452,18 +477,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     children: [
                                       Text(
                                         food.name,
-                                        style: const TextStyle(fontWeight: FontWeight.w700),
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: isLandscape ? 12 : 14,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                      const SizedBox(height: 6),
+                                      SizedBox(height: isLandscape ? 4 : 6),
                                       Row(
                                         children: [
-                                          const Icon(Icons.star, size: 16, color: Colors.amber),
-                                          const SizedBox(width: 6),
+                                          Icon(
+                                            Icons.star,
+                                            size: isLandscape ? 14 : 16,
+                                            color: Colors.amber,
+                                          ),
+                                          SizedBox(width: 4),
                                           Text(
                                             food.rating.toStringAsFixed(1),
                                             style: TextStyle(
                                               color: Colors.grey[700],
-                                              fontSize: 12,
+                                              fontSize: isLandscape ? 11 : 12,
                                             ),
                                           )
                                         ],
@@ -487,19 +521,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildFoodImage(String? imagePath) {
+  Widget _buildFoodImage(String? imagePath, {required bool isLandscape}) {
+    final height = isLandscape ? 130.0 : 160.0;
     if (imagePath == null) {
       return Container(
-        height: 160,
+        height: height,
         width: double.infinity,
         color: Colors.grey[100],
-        child: const Icon(Icons.restaurant, size: 48, color: Colors.grey),
+        child: Icon(Icons.restaurant, size: isLandscape ? 40 : 48, color: Colors.grey),
       );
     }
     if (imagePath.startsWith('http')) {
       return Image.network(
         imagePath,
-        height: 160,
+        height: height,
         fit: BoxFit.cover,
         loadingBuilder: (ctx, child, progress) {
           return progress == null
@@ -509,11 +544,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
       );
     }
     return Container(
-      height: 160,
+      height: height,
       width: double.infinity,
       color: Colors.grey[50],
       child: ClipRRect(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
         child: _buildImageWidget(imagePath),
       ),
     );
@@ -559,13 +594,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return AssetImage(imagePath);
   }
 
-  Widget _categoryChip(String label, int idx, Color background) {
+  Widget _categoryChip(String label, int idx, Color background, bool isLandscape) {
     final isSelected = selectedCategory == idx;
     return GestureDetector(
       onTap: () => setState(() => selectedCategory = idx),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 220),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        padding: EdgeInsets.symmetric(
+          horizontal: isLandscape ? 12 : 14,
+          vertical: isLandscape ? 6 : 8,
+        ),
         decoration: BoxDecoration(
           color: isSelected ? background : Colors.transparent,
           borderRadius: BorderRadius.circular(24),
@@ -579,6 +617,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           style: TextStyle(
             color: isSelected ? Colors.white : Colors.black,
             fontWeight: FontWeight.w700,
+            fontSize: isLandscape ? 12 : 14,
           ),
         ),
       ),

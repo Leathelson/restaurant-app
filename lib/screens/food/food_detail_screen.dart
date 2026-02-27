@@ -138,116 +138,20 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
     final img = _imagePath();
     final title = _title();
     final desc = _desc();
+    final size = MediaQuery.of(context).size;
     final isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
+    final isTablet = size.width >= 600;
+    
 
     return Scaffold(
       backgroundColor: darkBg,
       body: SafeArea(
-        child: Column(
-          children: [
-            // Back button
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      SoundService.playClick();
-                      Navigator.pop(context);
-                    },
-                    child: const Icon(
-                      Icons.arrow_back_ios,
-                      color: Colors.white,
-                      size: 28,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            if (!isLandscape)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: Image.asset(
-                    img,
-                    height: 260,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.vertical(
-                    top: isLandscape
-                        ? Radius.zero
-                        : const Radius.circular(28),
-                  ),
-                ),
-                child: SingleChildScrollView(
-                  padding:
-                      const EdgeInsets.fromLTRB(18, 18, 18, 16),
-                  child: Column(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start,
-                    children: [
-                      _buildTopRow(),
-                      const SizedBox(height: 12),
-
-                      TTSText(
-                        text: title,
-                        style: const TextStyle(
-                          color: Color(0xFFB56A2E),
-                          fontSize: 22,
-                          fontWeight: FontWeight.w800,
-                        ),
-                        buttonColor: gold,
-                        buttonSize: 22,
-                      ),
-
-                      const SizedBox(height: 10),
-
-                      TTSText(
-                        text: desc,
-                        style: const TextStyle(
-                            fontSize: 13, height: 1.4),
-                        buttonColor: gold,
-                        buttonSize: 18,
-                        showButton: desc.isNotEmpty,
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      const Text(
-                        'Customisation',
-                        style: TextStyle(
-                            fontWeight: FontWeight.w700),
-                      ),
-
-                      const SizedBox(height: 8),
-
-                      _buildChips(),
-
-                      const SizedBox(height: 20),
-
-                      _buildBottomRow(),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
+      child: (isTablet && isLandscape)
+          ? _buildTabletLandscapeLayout(size)
+          : _buildPortraitLayout(size),
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildTopRow() {
@@ -311,6 +215,76 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
     );
   }
 
+  Widget _buildBackButton() {
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+    child: Row(
+      children: [
+        GestureDetector(
+          onTap: () {
+            SoundService.playClick();
+            Navigator.pop(context);
+          },
+          child: const Icon(
+            Icons.arrow_back_ios,
+            color: Colors.white,
+            size: 28,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+  Widget _buildPortraitLayout(Size size) {
+  final img = _imagePath();
+  final title = _title();
+  final desc = _desc();
+
+  final isTablet = size.width >= 600;
+
+  return Column(
+    children: [
+      _buildBackButton(),
+
+      Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: isTablet ? 40 : 16,
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(28),
+          child: Image.asset(
+            img,
+            height: isTablet ? size.height * 0.45 : 260,
+            width: double.infinity,
+            fit: BoxFit.cover,
+          ),
+        ),
+      ),
+
+      Expanded(
+        child: Container(
+          width: double.infinity,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius:
+                BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          child: SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(
+              isTablet ? 40 : 18,
+              24,
+              isTablet ? 40 : 18,
+              20,
+            ),
+            child: _buildContentColumn(title, desc),
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
   Widget _buildChips() {
     return SizedBox(
       height: 44,
@@ -345,6 +319,94 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
           );
         },
       ),
+    );
+  }
+
+  Widget _buildContentColumn(String title, String desc) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildTopRow(),
+        const SizedBox(height: 16),
+
+        TTSText(
+          text: title,
+          style: const TextStyle(
+            color: Color(0xFFB56A2E),
+            fontSize: 26,
+            fontWeight: FontWeight.w800,
+          ),
+          buttonColor: gold,
+        ),
+
+        const SizedBox(height: 14),
+
+        TTSText(
+          text: desc,
+          style: const TextStyle(
+            fontSize: 15,
+            height: 1.5,
+          ),
+          buttonColor: gold,
+          showButton: desc.isNotEmpty,
+        ),
+
+        const SizedBox(height: 24),
+
+        const Text(
+          'Customisation',
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: 16,
+          ),
+        ),
+
+        const SizedBox(height: 12),
+
+        _buildChips(),
+
+        const SizedBox(height: 30),
+
+        _buildBottomRow(),
+      ],
+    );
+  }
+
+    Widget _buildTabletLandscapeLayout(Size size) {
+    final img = _imagePath();
+    final title = _title();
+    final desc = _desc();
+
+    return Row(
+      children: [
+        // LEFT: BIG IMAGE
+        Expanded(
+          flex: 5,
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(28),
+              child: Image.asset(
+                img,
+                height: double.infinity,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+        ),
+
+        // RIGHT: CONTENT
+        Expanded(
+          flex: 5,
+          child: Container(
+            padding: const EdgeInsets.all(32),
+            color: Colors.white,
+            child: SingleChildScrollView(
+              child: _buildContentColumn(title, desc),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
