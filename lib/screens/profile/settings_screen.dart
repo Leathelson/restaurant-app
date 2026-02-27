@@ -14,7 +14,7 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   bool pushNotifications = true;
   bool ttsEnabled = false; // Persist this with SharedPreferences in production
-  final TTSService _ttsService = TTSService();
+  final TTSService _ttsService = TTSService.instance;
 
   // Consistency Colors
   final Color gold = Colors.amber;
@@ -23,36 +23,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void initState() {
     super.initState();
-    _loadTTSPreference(); // Implement persistence
-    _ttsService.init();
-  }
+      _ttsService.init().then((_) {
+    setState(() {
+      ttsEnabled = _ttsService.isEnabled;
+    });
+  });
 
-  @override
-  void dispose() {
-    _ttsService.dispose();
-    super.dispose();
-  }
-
-  Future<void> _loadTTSPreference() async {
-    // TODO: Load from SharedPreferences
-    // setState(() => ttsEnabled = prefs.getBool('tts_enabled') ?? false);
-  }
-
-  Future<void> _saveTTSPreference(bool value) async {
-    // TODO: Save to SharedPreferences
-    // await prefs.setBool('tts_enabled', value);
   }
 
   Future<void> _toggleTTS(bool value) async {
-    setState(() => ttsEnabled = value);
     await _ttsService.toggle(value);
-    await _saveTTSPreference(value);
-    
+
+    setState(() {
+      ttsEnabled = value;
+    });
+
     if (value && mounted) {
-      // Optional: Preview TTS
       await _ttsService.setLanguage(AppData.selectedLanguage);
-      await _ttsService.speak(AppData.trans('tts_preview_text') ?? 
-        "Text to speech enabled");
+      await _ttsService.speak(
+        AppData.trans('tts_preview_text') ??
+            "Text to speech enabled",
+      );
     }
   }
 
