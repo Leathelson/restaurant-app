@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:luxury_restaurant_app/services/favorites_service.dart';
 import 'package:luxury_restaurant_app/services/sound_service.dart';
+import 'package:luxury_restaurant_app/models/app_data.dart';
+import 'package:luxury_restaurant_app/main.dart'; // To access languageNotifier
 import '../../models/food_model.dart';
 import '../food/food_detail_screen.dart';
 import '../profile/profile_screen.dart';
@@ -55,14 +57,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
     final cardWidth = _getCardWidth(w, isLandscape);
     final cardHeight = _getCardHeight(isLandscape);
-
+  
+    
+  return ValueListenableBuilder<String>(
+  valueListenable: languageNotifier,
+  builder: (context, value, child) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         title: Text(
-          'Luxury Restaurant',
+          AppData.trans('Restaurant') ?? 'Luxury Restaurant',
           style: TextStyle(
             color: titleColor,
             fontSize: isLandscape ? 20 : 22,
@@ -170,7 +176,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           Icon(Icons.search, color: Colors.white70, size: isLandscape ? 18 : 20),
                           SizedBox(width: 8),
                           Text(
-                            'Search',
+                            AppData.trans('Search Food') ?? 'Search for food...',
                             style: TextStyle(
                               color: Colors.white70,
                               fontSize: isLandscape ? 14 : 16,
@@ -187,7 +193,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Padding(
               padding: const EdgeInsets.only(left: 4, top: 8, bottom: 6),
               child: Text(
-                'Choose Your Option',
+                AppData.trans( 'Choose_Your_Option') ?? 'Choose Your Option',
                 style: TextStyle(
                   color: Colors.grey[600],
                   fontSize: isLandscape ? 12 : 13,
@@ -200,9 +206,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Wrap(
               spacing: 10,
               children: [
-                _categoryChip('Non-Veg', 0, Colors.black87, isLandscape),
-                _categoryChip('Veg', 1, Colors.red[800]!, isLandscape),
-                _categoryChip('Salad', 2, goldCard, isLandscape),
+                _categoryChip(AppData.trans('Non Veg') ?? 'Non-Veg', 0, Colors.black87, isLandscape),
+                _categoryChip(AppData.trans('Veg') ?? 'Veg', 1, Colors.red[800]!, isLandscape),
+                _categoryChip(AppData.trans('Salad') ?? 'Salad', 2, goldCard, isLandscape),
               ],
             ),
             SizedBox(height: isLandscape ? 14 : 18),
@@ -389,7 +395,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             SizedBox(height: isLandscape ? 10 : 12),
             Text(
-              'Favourites',
+              AppData.trans('Favourites') ?? 'Your Favourites',
               style: TextStyle(
                 color: titleColor,
                 fontSize: isLandscape ? 18 : 22,
@@ -519,6 +525,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       ),
     );
+  }
+  );
   }
 
   Widget _buildFoodImage(String? imagePath, {required bool isLandscape}) {
