@@ -30,23 +30,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-  Color get titleColor => const Color(0xFFB56A2E);
-  Color get gold => const Color(0xFFB37C1E);
-  Color get goldCard => const Color(0xFF906224);
-
   @override
   Widget build(BuildContext context) {
     final w = MediaQuery.of(context).size.width;
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
+    final surfaceColor = colors.surface;
+    final goldLocal = colors.primary;
+    final goldCardLocal = colors.secondary;
+    final titleColorLocal = theme.appBarTheme.foregroundColor!;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: surfaceColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
         elevation: 0,
         title: Text(
           'Luxury Restaurant',
           style: TextStyle(
-            color: titleColor,
+            color: titleColorLocal,
             fontSize: 22,
             fontWeight: FontWeight.w800,
           ),
@@ -66,17 +68,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   );
                 },
                 borderRadius: BorderRadius.circular(24),
-                splashColor: gold.withOpacity(0.3),
-                highlightColor: gold.withOpacity(0.1),
+                splashColor: goldLocal.withOpacity(0.3),
+                highlightColor: goldLocal.withOpacity(0.1),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 150),
                   padding: const EdgeInsets.all(2),
                   decoration: BoxDecoration(
-                    border: Border.all(color: gold, width: 2),
+                    border: Border.all(color: goldLocal, width: 2),
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: gold.withOpacity(0.2),
+                        color: goldLocal.withOpacity(0.2),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -84,8 +86,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                   child: CircleAvatar(
                     radius: 18,
-                    backgroundImage: const AssetImage('assets/images/profile.png'),
-                    backgroundColor: Colors.white,
+                    backgroundImage:
+                        const AssetImage('assets/images/profile.png'),
+                    backgroundColor: surfaceColor,
                     child: Stack(
                       children: [
                         Positioned.fill(
@@ -103,9 +106,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             width: 10,
                             height: 10,
                             decoration: BoxDecoration(
-                              color: gold,
+                              color: goldLocal,
                               shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white, width: 1.5),
+                              border:
+                                  Border.all(color: Colors.white, width: 1.5),
                             ),
                           ),
                         ),
@@ -118,8 +122,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ],
       ),
+
+      
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -129,10 +135,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   child: Container(
                     height: 48,
                     decoration: BoxDecoration(
-                      color: Colors.grey[850],
-                      borderRadius: BorderRadius.circular(28),
-                      border: Border.all(color: gold, width: 2),
-                    ),
+                        color: colors.primary, // comes from theme.dart
+                        borderRadius: BorderRadius.circular(28),
+                        border: Border.all(color: colors.secondary, width: 2),
+                        boxShadow: [
+                          BoxShadow(
+                            color: colors.primary.withOpacity(0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
+                          )
+                        ]),
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: InkWell(
                       onTap: () {
@@ -178,9 +190,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Wrap(
               spacing: 10,
               children: [
-                _categoryChip('Non-Veg', 0, Colors.black87),
-                _categoryChip('Veg', 1, Colors.red[800]!),
-                _categoryChip('Salad', 2, goldCard),
+                _categoryChip(context, 'Non-Veg', 0, Colors.black87),
+                _categoryChip(context, 'Veg', 1, Colors.red[800]!),
+                _categoryChip(context, 'Salad', 2, goldCardLocal),
               ],
             ),
             const SizedBox(height: 18),
@@ -235,9 +247,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         child: Container(
                           width: w * 0.56,
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: surfaceColor,
                             borderRadius: BorderRadius.circular(18),
-                            border: Border.all(color: gold.withOpacity(0.18)),
+                            border:
+                                Border.all(color: goldLocal.withOpacity(0.18)),
                             boxShadow: const [
                               BoxShadow(
                                 color: Colors.black12,
@@ -257,9 +270,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   child: _buildFoodImage(data['Image']),
                                 ),
                                 Padding(
-                                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+                                  padding:
+                                      const EdgeInsets.fromLTRB(12, 12, 12, 8),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         food.name,
@@ -289,15 +304,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                           Text(
                                             'Rs ${food.price.toStringAsFixed(0)}',
                                             style: TextStyle(
-                                              color: gold,
+                                              color: goldLocal,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
                                           Container(
-                                            decoration: const BoxDecoration(
-                                              color: Colors.white,
+                                            decoration: BoxDecoration(
+                                              color: surfaceColor,
                                               shape: BoxShape.circle,
-                                              boxShadow: [
+                                              boxShadow: const [
                                                 BoxShadow(
                                                   color: Colors.black12,
                                                   blurRadius: 6,
@@ -306,36 +321,47 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                             ),
                                             padding: const EdgeInsets.all(3),
                                             child: StreamBuilder<Set<String>>(
-                                              stream: FavoritesService.getFavoriteIdsStream(),
+                                              stream: FavoritesService
+                                                  .getFavoriteIdsStream(),
                                               builder: (context, snapshot) {
-                                                final favoriteIds = snapshot.data ?? {};
-                                                final isFavorite = favoriteIds.contains(food.id);
+                                                final favoriteIds =
+                                                    snapshot.data ?? {};
+                                                final isFavorite = favoriteIds
+                                                    .contains(food.id);
                                                 return IconButton(
                                                   icon: Icon(
                                                     isFavorite
                                                         ? Icons.favorite
                                                         : Icons.favorite_border,
-                                                    color: isFavorite ? Colors.red : Colors.grey,
+                                                    color: isFavorite
+                                                        ? Colors.red
+                                                        : Colors.grey,
                                                     size: 18,
                                                   ),
                                                   onPressed: () async {
                                                     SoundService.playClick();
                                                     final isNowFavorite =
-                                                        await FavoritesService.toggleFavorite(
-                                                            food.id);
-                                                    ScaffoldMessenger.of(context).showSnackBar(
+                                                        await FavoritesService
+                                                            .toggleFavorite(
+                                                                food.id);
+                                                    ScaffoldMessenger.of(
+                                                            context)
+                                                        .showSnackBar(
                                                       SnackBar(
                                                         content: Text(
                                                           isNowFavorite
                                                               ? 'Added to favourites'
                                                               : 'Removed from favourites',
                                                         ),
-                                                        duration: const Duration(seconds: 1),
+                                                        duration:
+                                                            const Duration(
+                                                                seconds: 1),
                                                       ),
                                                     );
                                                   },
                                                   padding: EdgeInsets.zero,
-                                                  constraints: const BoxConstraints(),
+                                                  constraints:
+                                                      const BoxConstraints(),
                                                 );
                                               },
                                             ),
@@ -360,7 +386,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               height: 4,
               width: 46,
               decoration: BoxDecoration(
-                color: gold.withOpacity(0.9),
+                color: goldLocal.withOpacity(0.9),
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
@@ -368,7 +394,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Text(
               'Favourites',
               style: TextStyle(
-                color: titleColor,
+                color: titleColorLocal,
                 fontSize: 22,
                 fontWeight: FontWeight.w800,
                 fontFamily: 'serif',
@@ -393,26 +419,33 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   }
                   final favDocs = favSnapshot.data ?? {};
                   return StreamBuilder<QuerySnapshot>(
-                    stream: FirebaseFirestore.instance.collection('FoodItems').snapshots(),
+                    stream: FirebaseFirestore.instance
+                        .collection('FoodItems')
+                        .snapshots(),
                     builder: (context, productsSnapshot) {
-                      if (productsSnapshot.connectionState == ConnectionState.waiting) {
+                      if (productsSnapshot.connectionState ==
+                          ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
                       }
-                      if (productsSnapshot.hasError || !productsSnapshot.hasData) {
+                      if (productsSnapshot.hasError ||
+                          !productsSnapshot.hasData) {
                         return Center(
                           child: Text(
                             'Error loading products',
-                            style: TextStyle(color: Colors.red[700], fontSize: 12),
+                            style:
+                                TextStyle(color: Colors.red[700], fontSize: 12),
                           ),
                         );
                       }
                       final docs = productsSnapshot.data!.docs;
-                      final doc = docs.where((d) => favDocs.contains(d.id)).toList();
+                      final doc =
+                          docs.where((d) => favDocs.contains(d.id)).toList();
                       if (doc.isEmpty) {
                         return Center(
                           child: Text(
                             'No favorites yet. Tap the heart icon to add some!',
-                            style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                            style: TextStyle(
+                                color: Colors.grey[600], fontSize: 12),
                           ),
                         );
                       }
@@ -420,15 +453,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         scrollDirection: Axis.horizontal,
                         itemCount: doc.length,
                         itemBuilder: (context, index) {
-                          final data = doc[index].data() as Map<String, dynamic>;
-                          final food = FoodModel.fromFirestore(data, doc[index].id);
+                          final data =
+                              doc[index].data() as Map<String, dynamic>;
+                          final food =
+                              FoodModel.fromFirestore(data, doc[index].id);
                           return Container(
                             width: w * 0.6,
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 10),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: surfaceColor,
                               borderRadius: BorderRadius.circular(28),
-                              border: Border.all(color: gold.withOpacity(0.18)),
+                              border: Border.all(
+                                  color: goldLocal.withOpacity(0.18)),
                               boxShadow: const [
                                 BoxShadow(
                                   color: Colors.black12,
@@ -441,22 +478,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               children: [
                                 CircleAvatar(
                                   radius: 26,
-                                  backgroundImage: _getFoodImageProvider(food.image),
+                                  backgroundImage:
+                                      _getFoodImageProvider(food.image),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
                                         food.name,
-                                        style: const TextStyle(fontWeight: FontWeight.w700),
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.w700),
                                       ),
                                       const SizedBox(height: 6),
                                       Row(
                                         children: [
-                                          const Icon(Icons.star, size: 16, color: Colors.amber),
+                                          const Icon(Icons.star,
+                                              size: 16, color: Colors.amber),
                                           const SizedBox(width: 6),
                                           Text(
                                             food.rating.toStringAsFixed(1),
@@ -507,34 +548,37 @@ class _DashboardScreenState extends State<DashboardScreen> {
         },
       );
     }
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       height: 160,
       width: double.infinity,
-      color: Colors.grey[50],
+      color: isDark ? Colors.grey[800] : Colors.grey[50],
       child: ClipRRect(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
-        child: _buildImageWidget(imagePath),
+        child: _buildImageWidget(context, imagePath),
       ),
     );
   }
 
-  Widget _buildImageWidget(String path) {
+  Widget _buildImageWidget(BuildContext ctx, String path) {
     final isNetwork = path.startsWith('http');
+    final isDark = Theme.of(ctx).brightness == Brightness.dark;
+    final bg = isDark ? Colors.grey[900] : Colors.white;
     return Stack(
       fit: StackFit.expand,
       children: [
-        Container(color: Colors.white),
+        Container(color: bg),
         isNetwork
             ? Image.network(
                 path,
                 fit: BoxFit.contain,
                 alignment: Alignment.center,
-                loadingBuilder: (ctx, child, progress) {
+                loadingBuilder: (ctx2, child, progress) {
                   return progress == null
                       ? child
                       : const Center(child: CircularProgressIndicator());
                 },
-                errorBuilder: (ctx, err, stack) => const Center(
+                errorBuilder: (ctx2, err, stack) => const Center(
                   child: Icon(Icons.broken_image, color: Colors.grey, size: 50),
                 ),
               )
@@ -542,7 +586,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 path,
                 fit: BoxFit.contain,
                 alignment: Alignment.center,
-                errorBuilder: (ctx, err, stack) => const Center(
+                errorBuilder: (ctx2, err, stack) => const Center(
                   child: Icon(Icons.broken_image, color: Colors.grey, size: 50),
                 ),
               ),
@@ -558,8 +602,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return AssetImage(imagePath);
   }
 
-  Widget _categoryChip(String label, int idx, Color background) {
+  Widget _categoryChip(
+      BuildContext ctx, String label, int idx, Color background) {
     final isSelected = selectedCategory == idx;
+    final isDark = Theme.of(ctx).brightness == Brightness.dark;
+    final textColor =
+        isSelected ? Colors.white : (isDark ? Colors.white70 : Colors.black);
+    final borderColor = isSelected
+        ? Colors.transparent
+        : (isDark ? Colors.white70 : const Color(0xFFB37C1E));
     return GestureDetector(
       onTap: () => setState(() => selectedCategory = idx),
       child: AnimatedContainer(
@@ -569,14 +620,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
           color: isSelected ? background : Colors.transparent,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: isSelected ? Colors.transparent : gold,
+            color: borderColor,
             width: 2,
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? Colors.white : Colors.black,
+            color: textColor,
             fontWeight: FontWeight.w700,
           ),
         ),

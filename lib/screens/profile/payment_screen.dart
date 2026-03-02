@@ -20,6 +20,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Payment Methods'),
+        elevation: 0,
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
@@ -85,7 +86,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Add Payment Method'),
-        content: const Text('Payment method addition would be implemented here.'),
+        content:
+            const Text('Payment method addition would be implemented here.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),

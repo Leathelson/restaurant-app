@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:luxury_restaurant_app/theme/theme_provider.dart';
 import 'package:luxury_restaurant_app/main.dart'; // To access languageNotifier
 import '../../models/app_data.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,6 +14,9 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool pushNotifications = true;
+
+  // theme toggle state can be derived from global notifier
+  // removed global themeNotifier; we read provider when needed
 
   // Consistency Colors
   final Color gold = Colors.amber;
@@ -45,62 +50,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               )
               .toList(),
         ),
-      ),
-    );
-  }
-
-  void _editProfile() {
-    final nameController =
-        TextEditingController(text: AppData.currentUser.name);
-    final emailController =
-        TextEditingController(text: AppData.currentUser.email);
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(AppData.trans('edit_profile'),
-            style: const TextStyle(fontFamily: 'serif')),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: InputDecoration(
-                labelText: 'Name',
-                labelStyle: TextStyle(color: gold),
-                focusedBorder:
-                    UnderlineInputBorder(borderSide: BorderSide(color: gold)),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: emailController,
-              decoration: InputDecoration(
-                labelText: 'Email',
-                labelStyle: TextStyle(color: gold),
-                focusedBorder:
-                    UnderlineInputBorder(borderSide: BorderSide(color: gold)),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Cancel', style: TextStyle(color: Colors.grey[600])),
-          ),
-          TextButton(
-            onPressed: () {
-              setState(() {
-                AppData.currentUser.name = nameController.text;
-                AppData.currentUser.email = emailController.text;
-              });
-              Navigator.pop(context);
-            },
-            child: Text('Save',
-                style: TextStyle(color: gold, fontWeight: FontWeight.bold)),
-          ),
-        ],
       ),
     );
   }
@@ -155,12 +104,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onTap: _changeLanguage,
           ),
 
-          // Profile Section
-          _buildSettingsCard(
-            icon: Icons.person_outline,
-            title: AppData.trans('Edit Profile'),
-            subtitle: AppData.currentUser.name,
-            onTap: _editProfile,
+          // Dark mode toggle
+          Card(
+            elevation: 2,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: Consumer<ThemeProvider>(
+              builder: (context, themeProv, child) {
+                return SwitchListTile(
+                  secondary: Icon(Icons.dark_mode, color: gold),
+                  title: Text(AppData.trans('Dark Mode'),
+                      style: const TextStyle(
+                          fontFamily: 'serif', fontWeight: FontWeight.w600)),
+                  value: themeProv.mode! == ThemeMode.dark,
+                  activeColor: gold,
+                  onChanged: (value) {
+                    // toggling updates provider, which notifies listeners
+                    themeProv.mode = value ? ThemeMode.dark : ThemeMode.light;
+                  },
+                );
+              },
+            ),
           ),
 
           // Notifications Section
@@ -183,7 +147,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: 16),
 
           // Logout Section
           _buildSettingsCard(

@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/dashboard/dashboard_screen.dart';
+import 'package:luxury_restaurant_app/theme/theme.dart';
+import 'package:luxury_restaurant_app/theme/theme_provider.dart';
 // Only ONE import for AppData, hiding the User class to avoid conflicts
 import 'package:luxury_restaurant_app/models/app_data.dart' hide User;
 
 // 1. Define the global notifier with a fallback to 'en' to avoid null errors
 ValueNotifier<String> languageNotifier =
     ValueNotifier(AppData.selectedLanguage);
+
+// The old global themeNotifier has been replaced by [ThemeProvider].
+// A provider instance will be created in the widget tree.
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,25 +36,25 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 2. Wrap everything in the Notifier to rebuild on language change
-    return ValueListenableBuilder<String>(
-      valueListenable: languageNotifier,
-      builder: (context, currentLanguage, child) {
-        return MaterialApp(
-          // Uses the trans() method for the app title
-          title: AppData.trans('app_title'),
-          theme: ThemeData(
-            primarySwatch: Colors.amber,
-            fontFamily: 'serif',
-            appBarTheme: const AppBarTheme(
-              backgroundColor: Colors.black87,
-              foregroundColor: Colors.amber,
-            ),
-          ),
-          home: const AuthGate(),
-          debugShowCheckedModeBanner: false,
-        );
-      },
+    // 2. Provide our theme provider above the language listener so the
+    // whole tree can access it.
+    return ChangeNotifierProvider<ThemeProvider>(
+      create: (_) => ThemeProvider(),
+      child: ValueListenableBuilder<String>(
+        valueListenable: languageNotifier,
+        builder: (context, currentLanguage, child) {
+          // theme information comes from the provider now
+          final themeProv = Provider.of<ThemeProvider>(context);
+          return MaterialApp(
+            title: AppData.trans('app_title'),
+            theme: lightmode,
+            darkTheme: darkmode,
+            themeMode: themeProv.mode,
+            home: const AuthGate(),
+            debugShowCheckedModeBanner: false,
+          );
+        },
+      ),
     );
   }
 }

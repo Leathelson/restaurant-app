@@ -35,9 +35,9 @@ class MyTextBox extends StatelessWidget {
               ),
               IconButton(
                 onPressed: onPressed,
-                icon: Icon(
+                icon: const Icon(
                   Icons.settings,
-                  color: Colors.red.shade900,
+                  color: Color.fromARGB(255, 180, 124, 30),
                   size: 18,
                 ),
               ),
@@ -56,8 +56,10 @@ class MyTextBox extends StatelessWidget {
             ),
             child: Text(
               text,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: bgColor.computeLuminance() > 0.5
+                    ? Colors.black
+                    : Colors.white,
                 fontSize: 16,
               ),
             ),

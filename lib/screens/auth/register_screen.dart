@@ -198,7 +198,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             onPressed: () {
                               SoundService.playClick();
                               _register();
-                            } ,
+                            },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: gold,
                               shape: RoundedRectangleBorder(
@@ -254,11 +254,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
           prefixIcon: Icon(icon, color: gold),
           filled: true,
           fillColor: fillColor,
-          contentPadding: const EdgeInsets.symmetric(vertical: 18),
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
             borderSide: BorderSide(
-                color: const Color(0xFF906224).withOpacity(0.60), width: 5),
+                color: const Color(0xFF906224).withOpacity(0.60), width: 1.5),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(30),
+            borderSide: BorderSide(
+                color: const Color(0xFF906224).withOpacity(0.40), width: 1.0),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(30),
+            borderSide: const BorderSide(color: Color(0xFFB37C1E), width: 2.0),
           ),
         ),
       ),

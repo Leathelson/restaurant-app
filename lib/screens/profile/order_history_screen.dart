@@ -16,6 +16,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Order History'),
+        elevation: 0,
       ),
       body: Column(
         children: [
@@ -69,8 +70,8 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                       }
 
                       return Card(
-                        margin:
-                            const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 6),
                         child: ExpansionTile(
                           title: Text(
                             'Order #${order.id.substring(0, 8)}',
@@ -95,15 +96,18 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                                 ),
                                 title: Text(
                                   item.food.name,
-                                  style: const TextStyle(fontWeight: FontWeight.w600),
-                                  overflow: TextOverflow.ellipsis, // prevent overflow
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w600),
+                                  overflow:
+                                      TextOverflow.ellipsis, // prevent overflow
                                 ),
                                 subtitle: Text(
                                   'Quantity: ${item.quantity}',
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 trailing: ConstrainedBox(
-                                  constraints: const BoxConstraints(maxWidth: 80),
+                                  constraints:
+                                      const BoxConstraints(maxWidth: 80),
                                   child: Text(
                                     'Rs ${(item.food.price * item.quantity).toStringAsFixed(2)}',
                                     style: const TextStyle(

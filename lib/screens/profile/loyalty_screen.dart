@@ -7,7 +7,7 @@ class LoyaltyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Loyalty Program')),
+      appBar: AppBar(title: const Text('Loyalty Program'), elevation: 0),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -91,7 +91,8 @@ class LoyaltyScreen extends StatelessWidget {
         trailing: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('$points pts', style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text('$points pts',
+                style: const TextStyle(fontWeight: FontWeight.bold)),
             if (canRedeem)
               const Text(
                 'Available',
