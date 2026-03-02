@@ -96,7 +96,8 @@ class _CartScreenState extends State<CartScreen> {
                                     ),
                                     Text(
                                       '\$${cartItem.food.price}',
-                                      style: const TextStyle(color: Colors.amber),
+                                      style:
+                                          const TextStyle(color: Colors.amber),
                                     ),
                                   ],
                                 ),
@@ -107,9 +108,9 @@ class _CartScreenState extends State<CartScreen> {
                                     onPressed: () {
                                       SoundService.playClick;
                                       _updateQuantity(
-                                      index,
-                                      cartItem.quantity - 1,
-                                    );
+                                        index,
+                                        cartItem.quantity - 1,
+                                      );
                                     },
                                     icon: const Icon(Icons.remove),
                                     style: IconButton.styleFrom(
@@ -181,7 +182,8 @@ class _CartScreenState extends State<CartScreen> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => const CheckoutScreen(),
+                                      builder: (context) =>
+                                          const CheckoutScreen(),
                                     ),
                                   );
                                 }
@@ -191,9 +193,10 @@ class _CartScreenState extends State<CartScreen> {
                             foregroundColor: Colors.black,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                           ),
-                          child: const Text(
+                          child: Text(
                             'CHECKOUT',
                             style: TextStyle(
+                              color: Colors.white,
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                             ),

@@ -10,7 +10,7 @@ import 'settings_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
-  
+
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
@@ -46,11 +46,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           IconButton(
-                            icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                            icon: const Icon(Icons.arrow_back_ios,
+                                color: Colors.white),
                             onPressed: () => Navigator.pop(context),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.settings, color: Colors.white),
+                            icon:
+                                const Icon(Icons.settings, color: Colors.white),
                             onPressed: () => Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -64,21 +66,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
 
                 // Centered profile picture floating below the background
-                const Positioned(
+                Positioned(
                   bottom: -120, // moves the avatar down
                   left: 0,
                   right: 0,
                   child: Column(
                     children: [
-                      CircleAvatar(
+                      const CircleAvatar(
                         radius: 80,
-                        backgroundImage: AssetImage('assets/images/profile.png'),
+                        backgroundImage:
+                            AssetImage('assets/images/profile.png'),
                       ),
-                      SizedBox(height: 12),
+                      const SizedBox(height: 12),
                       Text(
                         'William Dafuk',
                         style: TextStyle(
-                          color: Colors.black,
+                          color: Theme.of(context).colorScheme.onSurface,
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                         ),
@@ -101,11 +104,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     context,
                     'User Info & Preferences',
                     Icons.person_outline,
-                    () => Navigator.push(context,
-                        MaterialPageRoute(builder: (_) => const UserInfoScreen())),
+                    () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => const UserInfoScreen())),
                     gold,
                     'user_info',
-
                   ),
                   _buildMenuOption(
                     context,
@@ -122,8 +126,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     context,
                     'Favourite & Recommendation',
                     Icons.favorite_border,
-                    () => Navigator.push(context,
-                        MaterialPageRoute(builder: (_) => const FavoritesScreen())),
+                    () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => const FavoritesScreen())),
                     gold,
                     'favorites',
                   ),
@@ -131,8 +137,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     context,
                     'Loyalty & Rewards',
                     Icons.card_giftcard,
-                    () => Navigator.push(context,
-                        MaterialPageRoute(builder: (_) => const LoyaltyScreen())),
+                    () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => const LoyaltyScreen())),
                     gold,
                     'loyalty',
                   ),
@@ -140,8 +148,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     context,
                     'Payment & Security',
                     Icons.payment,
-                    () => Navigator.push(context,
-                        MaterialPageRoute(builder: (_) => const PaymentScreen())),
+                    () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => const PaymentScreen())),
                     gold,
                     'payment',
                   ),
@@ -166,74 +176,76 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildMenuOption(
-  BuildContext context,
-  String title,
-  IconData icon,
-  VoidCallback onTap,
-  Color backgroundColor,
-  String hoverKey,
-) {
-  final isHovered = _hoveredOption == hoverKey;
+    BuildContext context,
+    String title,
+    IconData icon,
+    VoidCallback onTap,
+    Color backgroundColor,
+    String hoverKey,
+  ) {
+    final isHovered = _hoveredOption == hoverKey;
 
-  return Padding(
-    padding: const EdgeInsets.only(bottom: 12),
-    child: MouseRegion(
-      //  Use PARENT's setState (this), not inner setState
-      onEnter: (_) => setState(() => _hoveredOption = hoverKey),
-      onExit: (_) => setState(() => _hoveredOption = null),
-      child: Material(
-      color: isHovered ? purpleHighlight : backgroundColor,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: onTap,
-        splashColor: purpleHighlight.withOpacity(0.3),
-        highlightColor: purpleHighlight.withOpacity(1.0),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: isHovered
-                ? Border.all(color: purpleHighlight.withOpacity(0.5), width: 2)
-                : null,
-            boxShadow: isHovered
-                ? [
-                    BoxShadow(
-                      color: purpleHighlight.withOpacity(0.3),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    )
-                  ]
-                : null,
-      ),
-        child: InkWell(
-          onTap: (){
-            SoundService.playClick();
+    return Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: MouseRegion(
+            //  Use PARENT's setState (this), not inner setState
+            onEnter: (_) => setState(() => _hoveredOption = hoverKey),
+            onExit: (_) => setState(() => _hoveredOption = null),
+            child: Material(
+              color: isHovered ? purpleHighlight : backgroundColor,
+              borderRadius: BorderRadius.circular(12),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: onTap,
+                splashColor: purpleHighlight.withOpacity(0.3),
+                highlightColor: purpleHighlight.withOpacity(1.0),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 10),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: isHovered
+                        ? Border.all(
+                            color: purpleHighlight.withOpacity(0.5), width: 2)
+                        : null,
+                    boxShadow: isHovered
+                        ? [
+                            BoxShadow(
+                              color: purpleHighlight.withOpacity(0.3),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            )
+                          ]
+                        : null,
+                  ),
+                  child: InkWell(
+                    onTap: () {
+                      SoundService.playClick();
 
-            Future.delayed(const Duration(milliseconds: 100), () {
-              onTap();
-            });
-          },
-          borderRadius: BorderRadius.circular(12),
-          //  These create the PRESS color change automatically!
-          splashColor: purpleHighlight.withOpacity(0.3),  // Ripple effect
-          highlightColor: purpleHighlight.withOpacity(0.6), // Background tint when pressed
-          child: ListTile(
-            leading: Icon(icon, color: Colors.white, size: 24),
-            title: Text(
-              title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
+                      Future.delayed(const Duration(milliseconds: 100), () {
+                        onTap();
+                      });
+                    },
+                    borderRadius: BorderRadius.circular(12),
+                    //  These create the PRESS color change automatically!
+                    splashColor:
+                        purpleHighlight.withOpacity(0.3), // Ripple effect
+                    highlightColor: purpleHighlight
+                        .withOpacity(0.6), // Background tint when pressed
+                    child: ListTile(
+                      leading: Icon(icon, color: Colors.white, size: 24),
+                      title: Text(
+                        title,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      trailing: const Icon(Icons.arrow_forward_ios,
+                          color: Colors.white, size: 18),
+                    ),
+                  ),
+                ),
               ),
-            ),
-            trailing: const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 18),
-          ),
-        ),
-      ),
-    ),
-  )
-  )
-  );
-}
+            )));
+  }
 }

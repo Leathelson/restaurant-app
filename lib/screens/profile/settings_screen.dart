@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:luxury_restaurant_app/theme/theme_provider.dart';
 import 'package:luxury_restaurant_app/main.dart'; // To access languageNotifier
 import '../../models/app_data.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -16,6 +18,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool ttsEnabled = false; // Persist this with SharedPreferences in production
   final TTSService _ttsService = TTSService.instance;
 
+  // theme toggle state can be derived from global notifier
+  // removed global themeNotifier; we read provider when needed
+
   // Consistency Colors
   final Color gold = Colors.amber;
   final Color darkBg = Colors.black87;
@@ -23,12 +28,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void initState() {
     super.initState();
-      _ttsService.init().then((_) {
-    setState(() {
-      ttsEnabled = _ttsService.isEnabled;
+    _ttsService.init().then((_) {
+      setState(() {
+        ttsEnabled = _ttsService.isEnabled;
+      });
     });
-  });
-
   }
 
   Future<void> _toggleTTS(bool value) async {
@@ -41,12 +45,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (value && mounted) {
       await _ttsService.setLanguage(AppData.selectedLanguage);
       await _ttsService.speak(
-        AppData.trans('tts_preview_text') ??
-            "Text to speech enabled",
+        AppData.trans('tts_preview_text') ?? "Text to speech enabled",
       );
     }
   }
-
 
   void _changeLanguage() {
     showDialog(
@@ -76,62 +78,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               )
               .toList(),
         ),
-      ),
-    );
-  }
-
-  void _editProfile() {
-    final nameController =
-        TextEditingController(text: AppData.currentUser.name);
-    final emailController =
-        TextEditingController(text: AppData.currentUser.email);
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(AppData.trans('edit_profile'),
-            style: const TextStyle(fontFamily: 'serif')),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: InputDecoration(
-                labelText: 'Name',
-                labelStyle: TextStyle(color: gold),
-                focusedBorder:
-                    UnderlineInputBorder(borderSide: BorderSide(color: gold)),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: emailController,
-              decoration: InputDecoration(
-                labelText: 'Email',
-                labelStyle: TextStyle(color: gold),
-                focusedBorder:
-                    UnderlineInputBorder(borderSide: BorderSide(color: gold)),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Cancel', style: TextStyle(color: Colors.grey[600])),
-          ),
-          TextButton(
-            onPressed: () {
-              setState(() {
-                AppData.currentUser.name = nameController.text;
-                AppData.currentUser.email = emailController.text;
-              });
-              Navigator.pop(context);
-            },
-            child: Text('Save',
-                style: TextStyle(color: gold, fontWeight: FontWeight.bold)),
-          ),
-        ],
       ),
     );
   }
@@ -186,31 +132,47 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onTap: _changeLanguage,
           ),
 
+          // Dark mode toggle
           Card(
-          elevation: 2,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          child: SwitchListTile(
-            secondary: Icon(Icons.volume_up_outlined, color: gold),
-            title: Text(AppData.trans('Enable Text-to-Speech'),
-                style: const TextStyle(
-                    fontFamily: 'serif', fontWeight: FontWeight.w600)),
-            subtitle: Text(
-              AppData.trans('tts_subtitle') ?? 
-              'Uses your device\'s accessibility TTS settings',
-              style: const TextStyle(fontSize: 12),
+            elevation: 2,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: Consumer<ThemeProvider>(
+              builder: (context, themeProv, child) {
+                return SwitchListTile(
+                  secondary: Icon(Icons.dark_mode, color: gold),
+                  title: Text(AppData.trans('Dark Mode'),
+                      style: const TextStyle(
+                          fontFamily: 'serif', fontWeight: FontWeight.w600)),
+                  value: themeProv.mode! == ThemeMode.dark,
+                  activeColor: gold,
+                  onChanged: (value) {
+                    // toggling updates provider, which notifies listeners
+                    themeProv.mode = value ? ThemeMode.dark : ThemeMode.light;
+                  },
+                );
+              },
             ),
-            value: ttsEnabled,
-            activeColor: gold,
-            onChanged: _toggleTTS,
           ),
-        ),
 
-          // Profile Section
-          _buildSettingsCard(
-            icon: Icons.person_outline,
-            title: AppData.trans('Edit Profile'),
-            subtitle: AppData.currentUser.name,
-            onTap: _editProfile,
+          Card(
+            elevation: 2,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: SwitchListTile(
+              secondary: Icon(Icons.volume_up_outlined, color: gold),
+              title: Text(AppData.trans('Enable Text-to-Speech'),
+                  style: const TextStyle(
+                      fontFamily: 'serif', fontWeight: FontWeight.w600)),
+              subtitle: Text(
+                AppData.trans('tts_subtitle') ??
+                    'Uses your device\'s accessibility TTS settings',
+                style: const TextStyle(fontSize: 12),
+              ),
+              value: ttsEnabled,
+              activeColor: gold,
+              onChanged: _toggleTTS,
+            ),
           ),
 
           // Notifications Section
@@ -233,7 +195,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: 16),
 
           // Logout Section
           _buildSettingsCard(

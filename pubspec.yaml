@@ -19,6 +19,7 @@ dependencies:
   cloud_firestore: ^6.1.2
   web_socket_channel: ^3.0.3
   emailjs: ^4.0.0
+  provider:
   flutter_tts: ^3.8.3
 
 dev_dependencies:

@@ -23,43 +23,41 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
 
   Future<void> _loadFavorites() async {
     try {
-          // 1. Get all products from Firestore (cached)
-          final allProducts = await ProductRepository.getAllProducts();
-          
-          // 2. Filter to only favorites using our new method
-          final favorites = await FoodModel.getFavorites(allProducts: allProducts);
-          
-          setState(() {
-            _favorites = favorites;
-            _isLoading = false;
-          });
-        } catch (e) {
-          print('Error loading favorites: $e');
-          setState(() => _isLoading = false);
-        }
+      // 1. Get all products from Firestore (cached)
+      final allProducts = await ProductRepository.getAllProducts();
+
+      // 2. Filter to only favorites using our new method
+      final favorites = await FoodModel.getFavorites(allProducts: allProducts);
+
+      setState(() {
+        _favorites = favorites;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error loading favorites: $e');
+      setState(() => _isLoading = false);
+    }
   }
 
-Future<void> _toggleFavorite(FoodModel food) async {
-  // Toggle in Firestore
-  final isNowFavorite = await FavoritesService.toggleFavorite(food.id);
-  
-  // Optional: Show user feedback
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(isNowFavorite 
-          ? 'Added to favorites' 
-          : 'Removed from favorites'),
-      duration: const Duration(seconds: 1),
-    ),
-  );
-}
+  Future<void> _toggleFavorite(FoodModel food) async {
+    // Toggle in Firestore
+    final isNowFavorite = await FavoritesService.toggleFavorite(food.id);
+
+    // Optional: Show user feedback
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+            isNowFavorite ? 'Added to favorites' : 'Removed from favorites'),
+        duration: const Duration(seconds: 1),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Favorites'),
-        backgroundColor: Colors.white,
         elevation: 0,
         actions: [
           // Refresh button
@@ -71,7 +69,7 @@ Future<void> _toggleFavorite(FoodModel food) async {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          :_favorites.isEmpty
+          : _favorites.isEmpty
               ? _buildEmptyState()
               : _buildFavoritesList(),
     );
@@ -82,11 +80,13 @@ Future<void> _toggleFavorite(FoodModel food) async {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.favorite_border, size: 80, color: Color.fromARGB(255, 192, 177, 41)),
+          Icon(Icons.favorite_border,
+              size: 80, color: Color.fromARGB(255, 192, 177, 41)),
           const SizedBox(height: 16),
           Text(
             'No favorites yet',
-            style: TextStyle(fontSize: 18, color: Color.fromARGB(255, 110, 110, 110)),
+            style: TextStyle(
+                fontSize: 18, color: Color.fromARGB(255, 110, 110, 110)),
           ),
           const SizedBox(height: 8),
           Text(
@@ -98,8 +98,8 @@ Future<void> _toggleFavorite(FoodModel food) async {
       ),
     );
   }
-  
- Widget _buildFavoritesList() {
+
+  Widget _buildFavoritesList() {
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: _favorites.length,
@@ -148,13 +148,14 @@ Future<void> _toggleFavorite(FoodModel food) async {
   // Helper method to build images with proper error handling
   Widget _buildImage(String imagePath, {double? size, double? width}) {
     final displaySize = size ?? 120.0;
-    
+
     return Container(
       width: width ?? displaySize,
       height: displaySize,
       color: Colors.grey[200],
       child: ClipRRect(
-        borderRadius: size != null ? BorderRadius.circular(8) : BorderRadius.zero,
+        borderRadius:
+            size != null ? BorderRadius.circular(8) : BorderRadius.zero,
         child: Image.asset(
           imagePath,
           fit: BoxFit.cover,

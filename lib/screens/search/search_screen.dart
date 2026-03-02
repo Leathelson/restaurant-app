@@ -14,23 +14,56 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   final _searchController = TextEditingController();
   List<FoodModel> _searchResults = [];
-  final bool _isSearching = false;
-  final List<FoodModel> _allFood = [];
+  bool _isSearching = false;
 
-  void _performSearch(String query) {
+  Future<void> _performSearch(String query) async {
     setState(() {
-      if (query.isEmpty) {
-        _searchResults = [];
-      } else {
-        _searchResults = _allFood
-            .where(
-              (item) =>
-                  item.name.toLowerCase().contains(query.toLowerCase()) ||
-                  item.category.toLowerCase().contains(query.toLowerCase()),
-            )
-            .toList();
-      }
+      _isSearching = true;
     });
+
+    try {
+      if (query.isEmpty) {
+        setState(() {
+          _searchResults = [];
+          _isSearching = false;
+        });
+        return;
+      }
+
+      // Convert query to lowercase for case-insensitive search
+      final queryLower = query.toLowerCase();
+
+      // Get all food items from Firestore and filter locally
+      // (Firestore doesn't support case-insensitive contains queries)
+      final snapshot =
+          await FirebaseFirestore.instance.collection('FoodItems').get();
+
+      final results = <FoodModel>[];
+      for (var doc in snapshot.docs) {
+        final foodItem = FoodModel.fromFirestore(doc.data(), doc.id);
+
+        if (foodItem.name.toLowerCase().contains(queryLower) ||
+            foodItem.category.toLowerCase().contains(queryLower)) {
+          results.add(foodItem);
+        }
+      }
+
+      setState(() {
+        _searchResults = results;
+        _isSearching = false;
+      });
+    } catch (e) {
+      print('Error searching food items: $e');
+      setState(() {
+        _isSearching = false;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -58,71 +91,80 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
           ),
           Expanded(
-            child: _searchResults.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.search, size: 80, color: Colors.grey),
-                        const SizedBox(height: 16),
-                        Text(
-                          _searchController.text.isEmpty
-                              ? 'Start typing to search for dishes'
-                              : 'No results found',
-                          style: const TextStyle(fontSize: 16, color: Colors.grey),
-                        ),
-                      ],
-                    ),
+            child: _isSearching
+                ? const Center(
+                    child: CircularProgressIndicator(),
                   )
-                : ListView.builder(
-                    itemCount: _searchResults.length,
-                    itemBuilder: (context, index) {
-                      final item = _searchResults[index];
-                      return Card(
-                        margin: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 4,
-                        ),
-                        child: ListTile(
-                          leading: Container(
-                            width: 50,
-                            height: 50,
-                            decoration: BoxDecoration(
-                              color: Colors.grey[200],
-                              borderRadius: BorderRadius.circular(8),
+                : _searchResults.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.search,
+                                size: 80, color: Colors.grey),
+                            const SizedBox(height: 16),
+                            Text(
+                              _searchController.text.isEmpty
+                                  ? 'Start typing to search for dishes'
+                                  : 'No results found',
+                              style: const TextStyle(
+                                  fontSize: 16, color: Colors.grey),
                             ),
-                            child: Center(
-                              child: Text(
-                                item.image,
-                                style: const TextStyle(fontSize: 24),
-                              ),
-                            ),
-                          ),
-                          title: Text(
-                            item.name,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          subtitle: Text('${item.category} • \$${item.price}'),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.star, size: 16, color: Colors.amber),
-                              Text('${item.rating}'),
-                            ],
-                          ),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    FoodDetailScreen(foodItem: item),
-                              ),
-                            );
-                          },
+                          ],
                         ),
-                      );
-                    },
-                  ),
+                      )
+                    : ListView.builder(
+                        itemCount: _searchResults.length,
+                        itemBuilder: (context, index) {
+                          final item = _searchResults[index];
+                          return Card(
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 4,
+                            ),
+                            child: ListTile(
+                              leading: Container(
+                                width: 50,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[200],
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    item.image,
+                                    style: const TextStyle(fontSize: 24),
+                                  ),
+                                ),
+                              ),
+                              title: Text(
+                                item.name,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              subtitle:
+                                  Text('${item.category} • \$${item.price}'),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.star,
+                                      size: 16, color: Colors.amber),
+                                  Text('${item.rating}'),
+                                ],
+                              ),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        FoodDetailScreen(foodItem: item),
+                                  ),
+                                );
+                              },
+                            ),
+                          );
+                        },
+                      ),
           ),
         ],
       ),

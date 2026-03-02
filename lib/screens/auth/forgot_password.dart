@@ -104,7 +104,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                       onPressed: () {
                         SoundService.playClick();
                         Navigator.pop(context);
-                        },
+                      },
                     ),
                   ),
 
@@ -233,20 +233,24 @@ class _ForgotPasswordState extends State<ForgotPassword> {
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
-        prefixIcon: Icon(icon, color: Colors.white70),
+        prefixIcon: Icon(icon, color: gold),
         filled: true,
         fillColor: Colors.black.withOpacity(0.6),
         contentPadding:
             const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
-        // Normal State: Thin Black
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+          borderSide: BorderSide(
+              color: const Color(0xFF906224).withOpacity(0.60), width: 1.5),
+        ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(30),
-          borderSide: const BorderSide(color: Colors.black, width: 1.2),
+          borderSide: BorderSide(
+              color: const Color(0xFF906224).withOpacity(0.40), width: 1.0),
         ),
-        // Focus State: Thin Purple
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(30),
-          borderSide: BorderSide(color: purpleAccent, width: 1.5),
+          borderSide: const BorderSide(color: Color(0xFFB37C1E), width: 2.0),
         ),
       ),
     );

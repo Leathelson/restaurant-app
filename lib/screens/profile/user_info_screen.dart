@@ -22,20 +22,24 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
     await showDialog(
         context: context,
         builder: (context) => AlertDialog(
-                backgroundColor: Colors.white,
                 title: Text(
                   "Edit $field",
-                  style: const TextStyle(
-                    color: Colors.black,
+                  style: TextStyle(
+                    color: Theme.of(context).appBarTheme.foregroundColor,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 content: TextField(
                   autofocus: true,
-                  style: const TextStyle(color: Colors.black),
+                  style: TextStyle(
+                      color: Theme.of(context).appBarTheme.foregroundColor),
                   decoration: InputDecoration(
                     hintText: "Enter new $field",
-                    hintStyle: TextStyle(color: Colors.black54),
+                    hintStyle: TextStyle(
+                        color: Theme.of(context)
+                            .appBarTheme
+                            .foregroundColor
+                            ?.withOpacity(0.6)),
                   ),
                   onChanged: (value) {
                     newValue = value;
@@ -45,14 +49,18 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                   //cancel button
                   TextButton(
                     child: Text('Cancel',
-                        style: TextStyle(color: Colors.red.shade900)),
+                        style: TextStyle(
+                            color:
+                                Theme.of(context).appBarTheme.foregroundColor)),
                     onPressed: () => Navigator.pop(context),
                   ),
 
                   //save button
                   TextButton(
                     child: Text('Save',
-                        style: TextStyle(color: Colors.red.shade900)),
+                        style: TextStyle(
+                            color:
+                                Theme.of(context).appBarTheme.foregroundColor)),
                     onPressed: () => Navigator.of(context).pop(newValue),
                   ),
                 ]));
@@ -68,12 +76,11 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.white,
           elevation: 0,
           title: Text(
             'Edit Profile',
             style: TextStyle(
-              color: Colors.red.shade900,
+              color: Theme.of(context).appBarTheme.foregroundColor,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -115,7 +122,7 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                         // Name field
                         MyTextBox(
                           label: "Name",
-                          bgColor: Colors.brown.shade600,
+                          bgColor: Theme.of(context).colorScheme.primary,
                           text: userData['Name'],
                           onPressed: () => editField("Name"),
                         ),
@@ -123,7 +130,7 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                         // Email field
                         MyTextBox(
                           label: "Email",
-                          bgColor: const Color(0xFF2F2740),
+                          bgColor: Theme.of(context).colorScheme.secondary,
                           text: userData['Email'],
                           onPressed: () => editField("Email"),
                         ),
@@ -131,13 +138,17 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                         // Phone field
                         MyTextBox(
                           label: "Phone Number",
-                          bgColor: Colors.brown.shade600,
+                          bgColor: Theme.of(context).colorScheme.primary,
                           text: userData['Phone'],
                           onPressed: () => editField("Phone"),
                         ),
 
                         Text(currentUser.email!,
-                            style: TextStyle(color: Colors.black54))
+                            style: TextStyle(
+                                color: Theme.of(context)
+                                    .appBarTheme
+                                    .foregroundColor
+                                    ?.withOpacity(0.6)))
                       ],
                     ),
                   ),
@@ -145,7 +156,10 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
               } else if (snapshot.hasError) {
                 return Center(
                     child: Text("Error=${snapshot.error}",
-                        style: TextStyle(color: Colors.red.shade900)));
+                        style: TextStyle(
+                            color: Theme.of(context)
+                                .appBarTheme
+                                .foregroundColor)));
               }
 
               return const Center(child: CircularProgressIndicator());
