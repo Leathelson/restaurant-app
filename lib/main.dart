@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/sound_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
@@ -9,6 +10,7 @@ import 'package:luxury_restaurant_app/theme/theme.dart';
 import 'package:luxury_restaurant_app/theme/theme_provider.dart';
 // Only ONE import for AppData, hiding the User class to avoid conflicts
 import 'package:luxury_restaurant_app/models/app_data.dart' hide User;
+import 'package:luxury_restaurant_app/services/flutter_tts_service.dart';
 
 // 1. Define the global notifier with a fallback to 'en' to avoid null errors
 ValueNotifier<String> languageNotifier =
@@ -22,8 +24,11 @@ void main() async {
 
   // Ensure AppData has a default language before the UI builds
   if (AppData.selectedLanguage.isEmpty) {
-    AppData.selectedLanguage = 'en';
+    AppData.selectedLanguage = 'English';
+    languageNotifier.value = 'English';
   }
+
+  await TTSService.instance.init();
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,

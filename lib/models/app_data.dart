@@ -59,13 +59,15 @@ class AppData {
     email: "guest@example.com",
     loyaltyPoints: 150,
   );
+  
 
-  static String selectedLanguage = 'en';
+  static String selectedLanguage = 'English';
 
   static final Map<String, Map<String, String>> translations = {
-    'en': {
+    'English': {
       'Restaurant': 'Luxury Restaurant',
       'Search Food': 'Search for food...',
+      'Choose_Your_Option': 'Choose Your Option',
       'Non Veg': 'Non-Veg',
       'Veg': 'Veg',
       'Salad': 'Salad',
@@ -83,21 +85,21 @@ class AppData {
       'login': 'Login',
       'register': 'Sign Up',
     },
-    'es': {
-      'Restaurant': 'Restaurante de Lujo',
-      'Search Food': 'Buscar comida...',
-      'Non Veg': 'No-Vegetariano',
-      'Veg': 'Vegetariano',
-      'Salad': 'Ensalada',
-      'Favourites': 'Sus Favoritos',
-      'No items': 'No se encontraron artículos',
-      'No favourites yet': 'Aún no hay favoritos',
+    'Spanish': {
+      'restaurant': 'Restaurante de Lujo',
+      'search food': 'Buscar comida...',
+      'choose_your_option': 'Elige tu opción',
+      'non veg': 'No-Vegetariano',
+      'veg': 'Vegetariano',
+      'salad': 'Ensalada',
+      'favourites': 'Sus Favoritos',
+      'no items': 'No se encontraron artículos',
+      'no favourites yet': 'Aún no hay favoritos',
       'app_title': 'Restaurante de Lujo',
       'search_hint': 'Buscar comida...',
       'cat_non_veg': 'No-Vegetariano',
       'cat_veg': 'Vegetariano',
       'cat_salad': 'Ensalada',
-      'favourites': 'Sus Favoritos',
       'no_items': 'No se encontraron artículos',
       'no_fav_yet': 'Aún no hay favoritos',
       'login': 'Iniciar Sesión',
@@ -107,7 +109,7 @@ class AppData {
       'east coast citrus garlic': 'Ajo Cítrico del Atlántico',
       'wagyu a5 steak': 'Corte de Wagyu A5 de Kobe',
     },
-    'fr': {
+    'French': {
       'Restaurant': 'Restaurant de Luxe',
       'Search Food': 'Rechercher...',
       'Non Veg': 'Non-Végé',

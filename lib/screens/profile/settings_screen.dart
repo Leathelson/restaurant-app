@@ -4,6 +4,7 @@ import 'package:luxury_restaurant_app/theme/theme_provider.dart';
 import 'package:luxury_restaurant_app/main.dart'; // To access languageNotifier
 import '../../models/app_data.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../services/flutter_tts_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -14,6 +15,8 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool pushNotifications = true;
+  bool ttsEnabled = false; // Persist this with SharedPreferences in production
+  final TTSService _ttsService = TTSService.instance;
 
   // theme toggle state can be derived from global notifier
   // removed global themeNotifier; we read provider when needed
@@ -21,6 +24,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
   // Consistency Colors
   final Color gold = Colors.amber;
   final Color darkBg = Colors.black87;
+
+  @override
+  void initState() {
+    super.initState();
+    _ttsService.init().then((_) {
+      setState(() {
+        ttsEnabled = _ttsService.isEnabled;
+      });
+    });
+  }
+
+  Future<void> _toggleTTS(bool value) async {
+    await _ttsService.toggle(value);
+
+    setState(() {
+      ttsEnabled = value;
+    });
+
+    if (value && mounted) {
+      await _ttsService.setLanguage(AppData.selectedLanguage);
+      await _ttsService.speak(
+        AppData.trans('tts_preview_text') ?? "Text to speech enabled",
+      );
+    }
+  }
 
   void _changeLanguage() {
     showDialog(
@@ -124,6 +152,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   },
                 );
               },
+            ),
+          ),
+
+          Card(
+            elevation: 2,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: SwitchListTile(
+              secondary: Icon(Icons.volume_up_outlined, color: gold),
+              title: Text(AppData.trans('Enable Text-to-Speech'),
+                  style: const TextStyle(
+                      fontFamily: 'serif', fontWeight: FontWeight.w600)),
+              subtitle: Text(
+                AppData.trans('tts_subtitle') ??
+                    'Uses your device\'s accessibility TTS settings',
+                style: const TextStyle(fontSize: 12),
+              ),
+              value: ttsEnabled,
+              activeColor: gold,
+              onChanged: _toggleTTS,
             ),
           ),
 
