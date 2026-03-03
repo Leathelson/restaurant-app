@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart';
 
@@ -11,14 +12,17 @@ import 'package:luxury_restaurant_app/models/food_model.dart';
 // Screen & Service imports
 import 'package:luxury_restaurant_app/services/favorites_service.dart';
 import 'package:luxury_restaurant_app/screens/auth/login_screen.dart';
-import 'package:luxury_restaurant_app/screens/auth/register_screen.dart';
-import 'package:luxury_restaurant_app/screens/profile/profile_screen.dart';
-import 'package:luxury_restaurant_app/screens/search/search_screen.dart';
 import 'package:luxury_restaurant_app/screens/food/food_detail_screen.dart';
+import 'package:luxury_restaurant_app/services/flutter_tts_service.dart';
+import 'package:luxury_restaurant_app/theme/theme_provider.dart';
+import 'package:luxury_restaurant_app/theme/theme.dart';
 
 // 1. GLOBAL NOTIFIER: Controls the language state app-wide
 final ValueNotifier<String> languageNotifier = ValueNotifier(
     AppData.selectedLanguage.isEmpty ? 'en' : AppData.selectedLanguage);
+
+// The old global themeNotifier has been replaced by [ThemeProvider].
+// A provider instance will be created in the widget tree.
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,6 +32,8 @@ void main() async {
     AppData.selectedLanguage = 'en';
   }
 
+  await TTSService.instance.init();
+
   runApp(const MyApp());
 }
 
@@ -36,33 +42,25 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<String>(
-      valueListenable: languageNotifier,
-      builder: (context, lang, child) {
-        // IMPORTANT: Sync the AppData static variable before the build starts
-        AppData.selectedLanguage = lang;
-
-        return MaterialApp(
-          /// THE FIX: The ValueKey forces Flutter to destroy the old UI and
-          /// rebuild EVERYTHING from scratch when the language string changes.
-          key: ValueKey('luxury_app_v2_$lang'),
-
-          title: 'Luxury Restaurant',
-          debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-            primarySwatch: Colors.amber,
-            fontFamily: 'serif',
-          ),
-          home: const AuthGate(),
-          routes: {
-            '/dashboard': (context) => const DashboardScreen(),
-            '/profile': (context) => const ProfileScreen(),
-            '/login': (context) => const LoginScreen(),
-            '/register': (context) => const RegisterScreen(),
-            '/search': (context) => const SearchScreen(),
-          },
-        );
-      },
+    // 2. Provide our theme provider above the language listener so the
+    // whole tree can access it.
+    return ChangeNotifierProvider<ThemeProvider>(
+      create: (_) => ThemeProvider(),
+      child: ValueListenableBuilder<String>(
+        valueListenable: languageNotifier,
+        builder: (context, currentLanguage, child) {
+          // theme information comes from the provider now
+          final themeProv = Provider.of<ThemeProvider>(context);
+          return MaterialApp(
+            title: AppData.trans('app_title'),
+            theme: lightmode,
+            darkTheme: darkmode,
+            themeMode: themeProv.mode,
+            home: const AuthGate(),
+            debugShowCheckedModeBanner: false,
+          );
+        },
+      ),
     );
   }
 }

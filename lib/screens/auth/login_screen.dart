@@ -4,6 +4,7 @@ import 'package:luxury_restaurant_app/screens/auth/forgot_password.dart';
 import 'package:luxury_restaurant_app/models/app_data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'register_screen.dart';
+import '../../services/sound_service.dart';
 // REMOVED: import '../../pages/home.dart';
 import 'package:luxury_restaurant_app/main.dart'; // To access DashboardScreen and languageNotifier
 
@@ -160,7 +161,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   _inputField(
                     controller: _emailController,
                     focusNode: _emailFocus,
-                    hint: AppData.trans('email_hint'),
+                    hint: AppData.trans('Email_hint'),
                     icon: Icons.email_outlined,
                     fillColor: Colors.black.withOpacity(0.75),
                     keyboard: TextInputType.emailAddress,
@@ -168,7 +169,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   _inputField(
                     controller: _passwordController,
                     focusNode: _passFocus,
-                    hint: AppData.trans('password_hint'),
+                    hint: AppData.trans('Password_hint'),
                     icon: Icons.lock_outline,
                     fillColor: Colors.black.withOpacity(0.75),
                     obscure: true,
@@ -212,7 +213,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     width: double.infinity,
                     height: 56,
                     child: ElevatedButton(
-                      onPressed: _isLoading ? null : _login,
+                      onPressed: () {
+                        SoundService.playClick();
+                        _login();
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: gold,
                         shape: RoundedRectangleBorder(
@@ -235,27 +239,46 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 18),
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 8, horizontal: 40),
                     decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.35),
-                        borderRadius: BorderRadius.circular(12)),
+                      color: Colors.black.withOpacity(0.35),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.white.withOpacity(0.06)),
+                    ),
                     child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         TextButton(
-                          onPressed: () => Navigator.push(
+                          onPressed: () {
+                            SoundService.playClick();
+                            Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (c) => const ForgotPassword())),
-                          child: Text(AppData.trans('forgot_password'),
-                              style: const TextStyle(color: gold)),
+                                  builder: (c) => const ForgotPassword()),
+                            );
+                          },
+                          child: Text(
+                            AppData.trans('Forgot Password?'), // TRANSLATED
+                            style: const TextStyle(
+                                color: gold, fontFamily: 'serif'),
+                          ),
                         ),
+                        const SizedBox(height: 4),
                         TextButton(
-                          onPressed: () => Navigator.push(
+                          onPressed: () {
+                            SoundService.playClick();
+                            Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (c) => const RegisterScreen())),
-                          child: Text(AppData.trans('sign_up'),
-                              style: const TextStyle(color: gold)),
+                                  builder: (c) => const RegisterScreen()),
+                            );
+                          },
+                          child: Text(
+                            AppData.trans('Sign up'), // TRANSLATED
+                            style: const TextStyle(
+                                color: gold, fontFamily: 'serif'),
+                          ),
                         ),
                       ],
                     ),
@@ -288,8 +311,8 @@ class _LoginScreenState extends State<LoginScreen> {
         cursorColor: gold,
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
-          prefixIcon: Icon(icon, color: Colors.white70),
+          hintStyle: TextStyle(color: Colors.white.withOpacity(0.9)),
+          prefixIcon: Icon(icon, color: Color(0xFFB37C1E)),
           filled: true,
           fillColor: fillColor,
           enabledBorder: OutlineInputBorder(

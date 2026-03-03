@@ -4,6 +4,7 @@ import '../../models/food_model.dart';
 import '../reservation/reservation_screen.dart';
 // FIX: Using the correct file path while targeting the LuxuryDashboard class
 import 'package:luxury_restaurant_app/screens/dashboard/dashboard_screen.dart';
+import 'package:flutter/material.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
@@ -13,9 +14,6 @@ class CheckoutScreen extends StatefulWidget {
 }
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
-  Color get gold => const Color(0xFFB37C1E);
-  Color get darkBg => const Color(0xFF2F2740);
-
   double get subtotal {
     return AppData.cart.fold<double>(
       0.0,
@@ -40,10 +38,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final goldLocal =
+        isDark ? const Color(0xFFBCA46B) : const Color(0xFFB37C1E);
+    final darkBgLocal = const Color(0xFF2F2740);
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
@@ -51,11 +54,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         ),
         title: Row(
           children: [
-            Icon(Icons.shopping_cart_outlined, color: gold),
+            Icon(Icons.shopping_cart_outlined, color: goldLocal),
             const SizedBox(width: 8),
             Text(
               'My Cart List',
-              style: TextStyle(color: gold, fontWeight: FontWeight.w700),
+              style: TextStyle(color: goldLocal, fontWeight: FontWeight.w700),
             ),
           ],
         ),
@@ -73,7 +76,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       final item = AppData.cart[index];
                       return Container(
                         decoration: BoxDecoration(
-                          border: Border.all(color: gold.withOpacity(0.3)),
+                          border: Border.all(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withOpacity(0.3)),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(
@@ -113,7 +120,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                     Text(
                                       'Rs ${_fmt(item.food.price)}',
                                       style: TextStyle(
-                                          color: gold,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
                                           fontWeight: FontWeight.w700),
                                     ),
                                   ],
@@ -146,8 +155,23 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     },
                   ),
           ),
+
+          // Discount code
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: 'Do you have any discount code?',
+                hintStyle:
+                    TextStyle(color: isDark ? Colors.white70 : Colors.black54),
+                border: const UnderlineInputBorder(),
+              ),
+            ),
+          ),
+
+          // Summary and checkout button
           Container(
-            color: darkBg,
+            color: darkBgLocal,
             padding: const EdgeInsets.all(16),
             child: SafeArea(
               child: Column(
@@ -167,15 +191,18 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     child: ElevatedButton(
                       onPressed: _placeOrder,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: gold,
+                        backgroundColor: goldLocal,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12)),
                       ),
-                      child: const Text('Checkout',
-                          style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white)),
+                      child: const Text(
+                        'Checkout',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                   ),
                 ],

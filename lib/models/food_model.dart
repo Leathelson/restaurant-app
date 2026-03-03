@@ -1,4 +1,5 @@
 import '../services/favorites_service.dart';
+import 'app_data.dart';
 
 class FoodModel {
   final String id;
@@ -28,12 +29,25 @@ class FoodModel {
   // Create FoodModel from Firebase Document
   factory FoodModel.fromFirestore(
       Map<String, dynamic> data, String documentId) {
+    bool isSpanish = AppData.selectedLanguage == 'Spanish';
+
+    String shortDesc;
+    String longDesc;
+
+    if (isSpanish) {
+      shortDesc = data['ShortDescSpanish'] ?? data['ShortDesc'] ?? '';
+      longDesc = data['LongDescSpanish'] ?? data['LongDesc'] ?? '';
+    } else {
+      shortDesc = data['ShortDesc'] ?? '';
+      longDesc = data['LongDesc'] ?? '';
+    }
+
     return FoodModel(
       id: documentId,
       name: data['Name'] ?? 'No Name',
       image: data['Image'] ?? '',
-      shortdescription: data['ShortDesc'] ?? 'No Short Description',
-      longdescription: data['LongDesc'] ?? 'No Long Description',
+      shortdescription: shortDesc,
+      longdescription: longDesc,
       rating: (data['Rating'] ?? 0).toDouble(),
       category: data['Category'] ?? 'veg',
       price: (data['Price'] ?? 0).toDouble(),
@@ -73,9 +87,11 @@ class FoodModel {
   }) async {
     final favoriteIds = await FavoritesService.getFavoriteIdsStream().first;
 
+    // Filter allProducts to only include favorited items
     return allProducts
         .where((product) => favoriteIds.contains(product.id))
-        .map((product) => product.copyWith(isFavorite: true))
+        .map(
+            (product) => product.copyWith(isFavorite: true)) // Mark as favorite
         .toList();
   }
 

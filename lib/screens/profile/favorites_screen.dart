@@ -62,7 +62,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
@@ -82,7 +81,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
         ],
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator(color: goldColor))
+          ? const Center(child: CircularProgressIndicator())
           : _favorites.isEmpty
               ? _buildEmptyState()
               : _buildFavoritesList(),
@@ -95,8 +94,8 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.favorite_border,
-              size: 60, color: goldColor.withOpacity(0.3)),
-          const SizedBox(height: 15),
+              size: 80, color: Color.fromARGB(255, 192, 177, 41)),
+          const SizedBox(height: 16),
           Text(
             AppData.trans('no_fav_yet'),
             style: TextStyle(color: maroonColor.withOpacity(0.6), fontSize: 16),
@@ -197,17 +196,34 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     );
   }
 
-  Widget _buildImage(String imagePath, {double? size}) {
+  // Helper method to build images with proper error handling
+  Widget _buildImage(String imagePath, {double? size, double? width}) {
+    final displaySize = size ?? 120.0;
+
     return Container(
-      width: size,
-      height: size,
-      color: Colors.grey[50],
-      child: Image.asset(
-        imagePath,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return Icon(Icons.restaurant, color: Colors.grey[300], size: 20);
-        },
+      width: width ?? displaySize,
+      height: displaySize,
+      color: Colors.grey[200],
+      child: ClipRRect(
+        borderRadius:
+            size != null ? BorderRadius.circular(8) : BorderRadius.zero,
+        child: Image.asset(
+          imagePath,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            // Show placeholder icon if image fails to load
+            return Container(
+              color: Colors.grey[300],
+              child: Center(
+                child: Icon(
+                  Icons.restaurant,
+                  size: displaySize * 0.4,
+                  color: Colors.grey[400],
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
   }

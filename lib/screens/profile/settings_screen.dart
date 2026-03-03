@@ -1,192 +1,72 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart' as auth;
-import 'package:luxury_restaurant_app/models/app_data.dart';
-import 'package:luxury_restaurant_app/main.dart'; // IMPORTANT for languageNotifier
+import 'package:provider/provider.dart';
+import 'package:luxury_restaurant_app/theme/theme_provider.dart';
+import 'package:luxury_restaurant_app/main.dart'; // To access languageNotifier
+import '../../models/app_data.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../../services/flutter_tts_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
+  _SettingsScreenState createState() => _SettingsScreenState();
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  static const Color _maroon = Color(0xFF63210B);
-  static const Color _gold = Color(0xFFB37C1E);
-  static const Color _darkPurple = Color(0xFF34495E);
-
-  bool _notificationsEnabled = true;
-  bool _darkMode = true;
+  bool pushNotifications = true;
+  bool ttsEnabled = false;
+  final TTSService _ttsService = TTSService.instance;
 
   @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<String>(
-      valueListenable: languageNotifier,
-      builder: (context, lang, child) {
-        return Scaffold(
-          backgroundColor: Colors.white,
-          appBar: AppBar(
-            backgroundColor: Colors.white,
-            elevation: 0,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-              onPressed: () => Navigator.pop(context),
-            ),
-            title: Text(
-              AppData.trans('settings'),
-              style: const TextStyle(
-                  color: _maroon, fontWeight: FontWeight.bold, fontSize: 24),
-            ),
-            centerTitle: true,
-          ),
-          body: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            children: [
-              _buildMainSettingsCard(),
-              const SizedBox(height: 20),
-              _buildMenuPill(
-                title: AppData.trans('languages'),
-                icon: Icons.translate,
-                color: _gold,
-                onTap: () => _showLanguageDialog(),
-              ),
-              const SizedBox(height: 15),
-              _buildMenuPill(
-                title: AppData.trans('log_out'),
-                icon: Icons.logout,
-                color: _gold,
-                onTap: () => _handleLogout(),
-              ),
-            ],
-          ),
-        );
-      },
-    );
+  void initState() {
+    super.initState();
+    _ttsService.init().then((_) {
+      setState(() {
+        ttsEnabled = _ttsService.isEnabled;
+      });
+    });
   }
 
-  Widget _buildMainSettingsCard() {
-    return Container(
-      padding: const EdgeInsets.all(22),
-      decoration: BoxDecoration(
-          color: _darkPurple, borderRadius: BorderRadius.circular(35)),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(AppData.trans('general_settings'),
-                  style: const TextStyle(color: Colors.white, fontSize: 18)),
-              const Icon(Icons.keyboard_arrow_up, color: Colors.white),
-            ],
-          ),
-          const SizedBox(height: 15),
-          Row(
-            children: [
-              const CircleAvatar(
-                  radius: 28,
-                  backgroundImage: AssetImage('assets/images/profile.png')),
-              const SizedBox(width: 15),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('William Dafuq',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16)),
-                  Text(AppData.trans('edit_profile'),
-                      style: const TextStyle(color: Colors.grey, fontSize: 13)),
-                ],
-              )
-            ],
-          ),
-          const Divider(color: Colors.white24, height: 35),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(AppData.trans('account_settings'),
-                style: const TextStyle(color: Colors.white, fontSize: 18)),
-          ),
-          _buildToggleRow(
-              AppData.trans('push_notification'),
-              _notificationsEnabled,
-              (v) => setState(() => _notificationsEnabled = v)),
-          _buildToggleRow(AppData.trans('dark_mode'), _darkMode,
-              (v) => setState(() => _darkMode = v)),
-        ],
-      ),
-    );
+  Future<void> _toggleTTS(bool value) async {
+    await _ttsService.toggle(value);
+    setState(() {
+      ttsEnabled = value;
+    });
+    if (value && mounted) {
+      await _ttsService.setLanguage(AppData.selectedLanguage);
+      await _ttsService.speak(
+        AppData.trans('tts_preview_text') ?? "Text to speech enabled",
+      );
+    }
   }
 
-  Widget _buildToggleRow(String title, bool value, Function(bool) onChanged) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(title,
-              style: const TextStyle(color: Colors.white, fontSize: 13)),
-          Switch(
-              value: value,
-              onChanged: onChanged,
-              activeColor: _gold,
-              activeTrackColor: _gold.withOpacity(0.4)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMenuPill(
-      {required String title,
-      required IconData icon,
-      required Color color,
-      required VoidCallback onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 75,
-        padding: const EdgeInsets.symmetric(horizontal: 25),
-        decoration: BoxDecoration(
-            color: color, borderRadius: BorderRadius.circular(40)),
-        child: Row(
-          children: [
-            Icon(icon, color: Colors.white, size: 28),
-            const SizedBox(width: 20),
-            Text(title,
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500)),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _handleLogout() {
+  void _logout() async {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(AppData.trans('log_out'),
-            style:
-                const TextStyle(color: _maroon, fontWeight: FontWeight.bold)),
-        content: Text(AppData.trans('logout_confirm')),
+        title: Text(AppData.trans('logout'),
+            style: const TextStyle(fontFamily: 'serif')),
+        content: const Text('Are you sure you want to logout?'),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(AppData.trans('cancel'),
-                  style: const TextStyle(color: Colors.grey))),
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel', style: TextStyle(color: Colors.grey[600])),
+          ),
           TextButton(
             onPressed: () async {
-              await auth.FirebaseAuth.instance.signOut();
-              if (!mounted) return;
-              Navigator.pushNamedAndRemoveUntil(
-                  context, '/login', (route) => false);
+              await FirebaseAuth.instance.signOut();
+              if (mounted) {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const AuthGate()),
+                  (route) => false,
+                );
+              }
             },
-            child: Text(AppData.trans('log_out'),
-                style: const TextStyle(
-                    color: Colors.red, fontWeight: FontWeight.bold)),
+            child: Text(AppData.trans('logout'),
+                style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -197,10 +77,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).cardColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(AppData.trans('languages'),
-            style: const TextStyle(color: _maroon)),
+            style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -217,14 +97,151 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return ListTile(
       title: Text(name),
       trailing: AppData.selectedLanguage == code
-          ? const Icon(Icons.check, color: _gold)
+          ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary)
           : null,
       onTap: () {
-        languageNotifier.value = code; // This triggers the main.dart rebuild
+        languageNotifier.value = code;
         AppData.selectedLanguage = code;
         Navigator.pop(context);
         setState(() {});
       },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(AppData.trans('Settings'),
+            style: const TextStyle(
+                fontFamily: 'serif', fontWeight: FontWeight.bold)),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          // Language Section
+          Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: ListTile(
+              leading: Icon(Icons.language,
+                  color: Theme.of(context).colorScheme.primary),
+              title: Text(AppData.trans('Select Language'),
+                  style: const TextStyle(
+                      fontFamily: 'serif', fontWeight: FontWeight.w600)),
+              subtitle: Text(AppData.selectedLanguage),
+              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              onTap: _showLanguageDialog,
+            ),
+          ),
+
+          // Dark mode toggle
+          Card(
+            elevation: 2,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: Consumer<ThemeProvider>(
+              builder: (context, themeProv, child) {
+                return SwitchListTile(
+                  secondary: Icon(Icons.dark_mode,
+                      color: Theme.of(context).colorScheme.primary),
+                  title: Text(AppData.trans('Dark Mode'),
+                      style: const TextStyle(
+                          fontFamily: 'serif', fontWeight: FontWeight.w600)),
+                  value: themeProv.mode! == ThemeMode.dark,
+                  activeColor: Theme.of(context).colorScheme.primary,
+                  onChanged: (value) {
+                    themeProv.mode = value ? ThemeMode.dark : ThemeMode.light;
+                  },
+                );
+              },
+            ),
+          ),
+
+          // TTS toggle
+          Card(
+            elevation: 2,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: SwitchListTile(
+              secondary: Icon(Icons.volume_up_outlined,
+                  color: Theme.of(context).colorScheme.primary),
+              title: Text(AppData.trans('Enable Text-to-Speech'),
+                  style: const TextStyle(
+                      fontFamily: 'serif', fontWeight: FontWeight.w600)),
+              subtitle: Text(
+                AppData.trans('tts_subtitle') ??
+                    'Uses your device\'s accessibility TTS settings',
+                style: const TextStyle(fontSize: 12),
+              ),
+              value: ttsEnabled,
+              activeColor: Theme.of(context).colorScheme.primary,
+              onChanged: _toggleTTS,
+            ),
+          ),
+
+          // Notifications toggle
+          Card(
+            elevation: 2,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: SwitchListTile(
+              secondary: Icon(Icons.notifications_none,
+                  color: Theme.of(context).colorScheme.primary),
+              title: Text(AppData.trans('Turn on notifications'),
+                  style: const TextStyle(
+                      fontFamily: 'serif', fontWeight: FontWeight.w600)),
+              value: pushNotifications,
+              activeColor: Theme.of(context).colorScheme.primary,
+              onChanged: (value) {
+                setState(() {
+                  pushNotifications = value;
+                });
+              },
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Logout Section
+          _buildSettingsCard(
+            icon: Icons.logout,
+            title: AppData.trans('Logout'),
+            subtitle: 'Sign out of your account',
+            onTap: _logout,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Helper widget
+  Widget _buildSettingsCard({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+    bool isDestructive = false,
+  }) {
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: ListTile(
+        leading: Icon(icon,
+            color: isDestructive
+                ? Colors.red
+                : Theme.of(context).colorScheme.primary),
+        title: Text(title,
+            style: const TextStyle(
+                fontFamily: 'serif', fontWeight: FontWeight.w600)),
+        subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
+        trailing:
+            const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
+        onTap: onTap,
+      ),
     );
   }
 }

@@ -797,17 +797,14 @@ class AppData {
       text.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '').trim();
 
   static String trans(String key) {
-    Map<String, String> map;
+    final Map<String, String> map = selectedLanguage == 'es'
+        ? _es
+        : selectedLanguage == 'fr'
+            ? _fr
+            : _en;
 
-    if (selectedLanguage == 'es') {
-      map = _es; // Make sure your Spanish map is named _es
-    } else if (selectedLanguage == 'fr') {
-      map = _fr;
-    } else {
-      map = _en;
-    }
+    final normalizedKey = key.toLowerCase().trim();
 
-    // Attempt to find translation (normalized for database strings)
-    return map[key.toLowerCase().trim()] ?? map[key] ?? key;
+    return map[normalizedKey] ?? map[key] ?? key;
   }
 }

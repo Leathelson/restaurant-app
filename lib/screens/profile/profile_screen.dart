@@ -58,7 +58,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             onPressed: () => Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (_) => SettingsScreen()),
+                                  builder: (_) => const SettingsScreen()),
                             ),
                           ),
                         ],
@@ -67,9 +67,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
 
-                // Centered profile picture
+                // Centered profile picture floating below the background
                 Positioned(
-                  bottom: -120,
+                  bottom: -120, // moves the avatar down
                   left: 0,
                   right: 0,
                   child: Column(
@@ -80,11 +80,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             AssetImage('assets/images/profile.png'),
                       ),
                       const SizedBox(height: 12),
-                      // KEEPING THE NAME UNTRANSLATED AS REQUESTED
-                      const Text(
+                      Text(
                         'William Dafuk',
                         style: TextStyle(
-                          color: Colors.black,
+                          color: Theme.of(context).colorScheme.onSurface,
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                         ),
