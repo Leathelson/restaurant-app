@@ -1,12 +1,11 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:luxury_restaurant_app/screens/auth/forgot_password.dart';
-import 'package:luxury_restaurant_app/models/app_data.dart'; // REQUIRED for translations
+import 'package:luxury_restaurant_app/models/app_data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'register_screen.dart';
-import 'dart:async';
-import '../../services/sound_service.dart';
+// REMOVED: import '../../pages/home.dart';
+import 'package:luxury_restaurant_app/main.dart'; // To access DashboardScreen and languageNotifier
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -18,9 +17,25 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final bool _remember = false;
+  final FocusNode _emailFocus = FocusNode();
+  final FocusNode _passFocus = FocusNode();
+
+  bool _remember = false;
+  bool _isLoading = false;
+
+  static const Color gold = Color(0xFFB37C1E);
 
   Future<void> _login() async {
+    if (_emailController.text.trim().isEmpty ||
+        _passwordController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppData.trans('enter_credentials_error'))),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: _emailController.text.trim(),
@@ -28,18 +43,42 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       final prefs = await SharedPreferences.getInstance();
-
       if (_remember) {
-        await prefs.setString('email', _emailController.text);
-        await prefs.setString('password', _passwordController.text);
-      } else {
-        await prefs.remove('email');
-        await prefs.remove('password');
+        await prefs.setString('Email', _emailController.text.trim());
+        await prefs.setString('Password', _passwordController.text.trim());
       }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${AppData.trans('login_failed')}: $e')),
+
+      if (!mounted) return;
+
+      // FIX: Redirect to DashboardScreen instead of the blank HomePage
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const DashboardScreen()),
       );
+    } on FirebaseAuthException catch (e) {
+      String errorMessage = _getFriendlyErrorMessage(e.code);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(errorMessage)));
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("${AppData.trans('error')}: $e")));
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  String _getFriendlyErrorMessage(String code) {
+    switch (code) {
+      case 'user-not-found':
+        return AppData.trans('user_not_found');
+      case 'wrong-password':
+        return AppData.trans('wrong_password');
+      case 'invalid-credential':
+        return AppData.trans('invalid_credential_msg');
+      default:
+        return AppData.trans('login_failed');
     }
   }
 
@@ -47,23 +86,21 @@ class _LoginScreenState extends State<LoginScreen> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _emailFocus.dispose();
+    _passFocus.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    const gold = Color(0xFFB37C1E);
-    final w = MediaQuery.of(context).size.width;
-
     return Scaffold(
+      backgroundColor: Colors.black,
       resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
           Positioned.fill(
-            child: Image.asset(
-              'assets/images/glassesandshi.jpg',
-              fit: BoxFit.cover,
-            ),
+            child: Image.asset('assets/images/glassesandshi.jpg',
+                fit: BoxFit.cover),
           ),
           Positioned.fill(
             child: Container(
@@ -71,7 +108,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 gradient: LinearGradient(
                   colors: [
                     Colors.black.withOpacity(0),
-                    Colors.black.withOpacity(0.9),
+                    Colors.black.withOpacity(0.9)
                   ],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
@@ -86,13 +123,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: <Widget>[
                   const SizedBox(height: 8),
                   Text(
-                    AppData.trans('Login'), // TRANSLATED: 'Log In'
+                    AppData.trans('login_title'),
                     style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
-                      fontFamily: 'serif',
-                    ),
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        fontFamily: 'serif'),
                   ),
                   const SizedBox(height: 8),
                   Row(
@@ -112,167 +148,157 @@ class _LoginScreenState extends State<LoginScreen> {
                         color: Colors.white.withOpacity(0.06),
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: Colors.white.withOpacity(0.16),
-                          width: 1.4,
-                        ),
+                            color: Colors.white.withOpacity(0.16), width: 1.4),
                       ),
                       child: Center(
-                        child: Image.asset(
-                          'assets/images/emblem.png',
-                          width: 120,
-                          height: 120,
-                          fit: BoxFit.contain,
-                          errorBuilder: (_, __, ___) => const Icon(
-                            Icons.local_dining,
-                            color: Colors.white70,
-                            size: 64,
-                          ),
-                        ),
+                        child: Image.asset('assets/images/emblem.png',
+                            width: 120, height: 120, fit: BoxFit.contain),
                       ),
                     ),
                   ),
                   const SizedBox(height: 28),
                   _inputField(
                     controller: _emailController,
-                    hint: AppData.trans('email'), // TRANSLATED: "Email"
+                    focusNode: _emailFocus,
+                    hint: AppData.trans('email_hint'),
                     icon: Icons.email_outlined,
-                    fillColor: Colors.black.withOpacity(0.55),
+                    fillColor: Colors.black.withOpacity(0.75),
                     keyboard: TextInputType.emailAddress,
                   ),
                   _inputField(
                     controller: _passwordController,
-                    hint: AppData.trans('password'), // TRANSLATED: "Password"
+                    focusNode: _passFocus,
+                    hint: AppData.trans('password_hint'),
                     icon: Icons.lock_outline,
-                    fillColor: Colors.black.withOpacity(0.55),
+                    fillColor: Colors.black.withOpacity(0.75),
                     obscure: true,
+                  ),
+                  Row(
+                    children: [
+                      Theme(
+                        data: ThemeData(
+                          unselectedWidgetColor: Colors.white,
+                          checkboxTheme: CheckboxThemeData(
+                            side:
+                                const BorderSide(color: Colors.white, width: 2),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(4)),
+                          ),
+                        ),
+                        child: SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: Checkbox(
+                            value: _remember,
+                            activeColor: gold,
+                            checkColor: Colors.white,
+                            onChanged: (val) =>
+                                setState(() => _remember = val ?? false),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        AppData.trans('remember_me'),
+                        style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 14,
+                            fontFamily: 'serif'),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 18),
                   SizedBox(
                     width: double.infinity,
                     height: 56,
                     child: ElevatedButton(
-                      onPressed: () {
-                        SoundService.playClick();
-                      _login;
-                      },
+                      onPressed: _isLoading ? null : _login,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: gold,
-                        foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(28),
-                        ),
-                        elevation: 8,
+                            borderRadius: BorderRadius.circular(28)),
                       ),
-                      child: Text(
-                        AppData.trans('Login'), // TRANSLATED: 'Log In'
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.6,
-                          fontFamily: 'serif',
-                        ),
-                      ),
+                      child: _isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                  color: Colors.white, strokeWidth: 2))
+                          : Text(AppData.trans('login_button'),
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  fontFamily: 'serif')),
                     ),
                   ),
                   const SizedBox(height: 18),
                   Container(
                     width: double.infinity,
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 8, horizontal: 40),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.35),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.white.withOpacity(0.06)),
-                    ),
+                        color: Colors.black.withOpacity(0.35),
+                        borderRadius: BorderRadius.circular(12)),
                     child: Column(
-                      mainAxisSize: MainAxisSize.min,
                       children: [
                         TextButton(
-                          onPressed: () {
-                            SoundService.playClick();
-                            Navigator.pop(context);
-                            Navigator.push(
+                          onPressed: () => Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (c) => const ForgotPassword()),
-                            );
-                          },
-                          child: Text(
-                            AppData.trans('Forgot Password?'), // TRANSLATED
-                            style: const TextStyle(
-                                color: gold, fontFamily: 'serif'),
-                          ),
+                                  builder: (c) => const ForgotPassword())),
+                          child: Text(AppData.trans('forgot_password'),
+                              style: const TextStyle(color: gold)),
                         ),
-                        const SizedBox(height: 4),
                         TextButton(
-                          onPressed: () {
-                            SoundService.playClick();
-                            Navigator.push(
+                          onPressed: () => Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (c) => const RegisterScreen()),
-                            );
-                          },
-                          child: Text(
-                            AppData.trans('Sign up'), // TRANSLATED
-                            style: const TextStyle(
-                                color: gold, fontFamily: 'serif'),
-                          ),
+                                  builder: (c) => const RegisterScreen())),
+                          child: Text(AppData.trans('sign_up'),
+                              style: const TextStyle(color: gold)),
                         ),
                       ],
                     ),
                   ),
-                  SizedBox(height: w * 0.12),
                 ],
               ),
             ),
           ),
         ],
       ),
-      backgroundColor: Colors.transparent,
     );
   }
 
-  Widget _inputField({
-    required TextEditingController controller,
-    required String hint,
-    required IconData icon,
-    required Color fillColor,
-    bool obscure = false,
-    TextInputType keyboard = TextInputType.text,
-  }) {
+  Widget _inputField(
+      {required TextEditingController controller,
+      required FocusNode focusNode,
+      required String hint,
+      required IconData icon,
+      required Color fillColor,
+      bool obscure = false,
+      TextInputType keyboard = TextInputType.text}) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: TextField(
         controller: controller,
+        focusNode: focusNode,
         obscureText: obscure,
         keyboardType: keyboard,
-        autocorrect: false,
-        enableSuggestions: false,
-        textCapitalization: TextCapitalization.none,
         style: const TextStyle(color: Colors.white),
+        cursorColor: gold,
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: TextStyle(color: Colors.white.withOpacity(0.9)),
+          hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
           prefixIcon: Icon(icon, color: Colors.white70),
           filled: true,
           fillColor: fillColor,
-          contentPadding:
-              const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(30),
-            borderSide: BorderSide(
-                color: const Color(0xFF906224).withOpacity(0.60), width: 1.5),
-          ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(30),
-            borderSide: BorderSide(
-                color: const Color(0xFF906224).withOpacity(0.40), width: 1.0),
-          ),
+              borderRadius: BorderRadius.circular(30),
+              borderSide: const BorderSide(color: gold, width: 0.5)),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(30),
-            borderSide: const BorderSide(color: Color(0xFFB37C1E), width: 2.0),
-          ),
+              borderRadius: BorderRadius.circular(30),
+              borderSide: const BorderSide(color: gold, width: 1.0)),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(30)),
         ),
       ),
     );
@@ -281,13 +307,8 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _socialButton(String assetPath) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 6),
-      child: IconButton(
-        onPressed: () {
-          SoundService.playClick();
-        },
-        icon: Image.asset(assetPath, width: 28, height: 28),
-        splashRadius: 20,
-      ),
+      child:
+          IconButton(onPressed: () {}, icon: Image.asset(assetPath, width: 28)),
     );
   }
 }

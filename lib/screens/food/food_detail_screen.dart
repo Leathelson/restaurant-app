@@ -1,530 +1,321 @@
 import 'package:flutter/material.dart';
+import 'package:luxury_restaurant_app/models/food_model.dart';
+import 'package:luxury_restaurant_app/models/app_data.dart';
 import 'package:luxury_restaurant_app/services/sound_service.dart';
-import '../../models/app_data.dart';
-import '../checkout/checkout_screen.dart';
+import '../cart/cart_screen.dart';
 
 class FoodDetailScreen extends StatefulWidget {
-  final dynamic
-      foodItem; // expects your AppData.foodItems element (adjust type if you have a Food class)
-
+  final FoodModel foodItem;
   const FoodDetailScreen({super.key, required this.foodItem});
 
-
   @override
-  _FoodDetailScreenState createState() => _FoodDetailScreenState();
+  State<FoodDetailScreen> createState() => _FoodDetailScreenState();
 }
 
-//customisation options - you can replace these with actual options from your data model if needed
-String selectedOption = 'Regular';
-
-final Map<String, double> customizationOptions = {
-  'Regular': 0,
-  'Extra Sauce': 150,
-  'Cheese Topping': 200,
-};
-
 class _FoodDetailScreenState extends State<FoodDetailScreen> {
-  int qty = 1;
+  static const Color _gold = Color(0xFFD4AF37);
+  static const Color _goldDark = Color(0xFFB8860B);
+  static const Color _maroon = Color(0xFF800000);
+  static const Color _darkSlate = Color(0xFF2C3E50);
 
-  Color get gold => const Color(0xFFB37C1E);
-  Color get darkBg => const Color(0xFF2F2740);
+  int _quantity = 1;
+  final Set<String> _selectedExtras = {'Regular'};
 
-  void _addToCart() {
-    // Attempt to create a CartItem - adjust constructor if your model differs.
-    try {
-      final cartItem = CartItem(food: widget.foodItem, quantity: qty);
-      AppData.cart.add(cartItem);
-    } catch (e) {
-      // If your app uses a different cart model, update this accordingly.
-      // As a fallback add a simple map (may break other code expecting CartItem).
-      AppData.cart.add(CartItem(food: widget.foodItem, quantity: qty));
-    }
+  // These keys MUST exist in your AppData Spanish/English maps
+  final Map<String, int> _extras = {
+    'Regular': 0,
+    'Extra Sauce': 150,
+    'Extra Cheese': 200
+  };
 
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        content: const Text('Item added to cart'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Continue'),
+  double get _currentUnitPrice {
+    double extraTotal =
+        _selectedExtras.fold(0, (sum, key) => sum + (_extras[key] ?? 0));
+    return widget.foodItem.price + extraTotal;
+  }
+
+  void _handleAddToCart() {
+    SoundService.playClick();
+    setState(() {
+      AppData.cart.add(CartItem(
+        food: widget.foodItem,
+        quantity: _quantity,
+        unitPrice: _currentUnitPrice,
+        selectedExtras: _selectedExtras.toList(),
+      ));
+    });
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => const CartScreen()));
+  }
+
+  // Helper to fetch translation and clean whitespace
+  String tr(String key) => AppData.trans(key.trim());
+
+  String _capitalizeFirst(String text) {
+    if (text.isEmpty) return text;
+    // We translate the key FIRST, then capitalize
+    String translated = tr(text);
+    return translated[0].toUpperCase() + translated.substring(1).toLowerCase();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final imgPath =
+        'assets/images/FoodItems/${widget.foodItem.image.split('/').last}';
+    final detail = AppData.getDishDetail(widget.foodItem.name);
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      bottomNavigationBar: _buildBottomActionPanel(),
+      body: Stack(
+        children: [
+          // Header Image
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: screenHeight * 0.45,
+            child: Image.asset(imgPath, fit: BoxFit.cover),
           ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: darkBg),
-            onPressed: () {
-              SoundService.playClick();
-              Navigator.of(context).pop(); // close dialog
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const CheckoutScreen()),
-              );
-            },
-            child: const Text('Go To Cart'),
+          Positioned.fill(
+            child: SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
+              child: Column(
+                children: [
+                  SizedBox(height: screenHeight * 0.32),
+                  Container(
+                    width: double.infinity,
+                    constraints: BoxConstraints(minHeight: screenHeight * 0.68),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(40)),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(25, 30, 25, 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                    tr(widget.foodItem.name).toUpperCase(),
+                                    style: const TextStyle(
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.w900,
+                                        fontFamily: 'serif',
+                                        color: _darkSlate)),
+                              ),
+                              _buildStepper(),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          // FIX: Wrapped longdescription in tr()
+                          Text(tr(widget.foodItem.longdescription),
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  fontFamily: 'serif',
+                                  color: Colors.grey[800],
+                                  height: 1.5)),
+                          const SizedBox(height: 20),
+                          if (detail != null)
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                    child: _buildInfo(
+                                        Icons.restaurant,
+                                        'lbl_ingredients',
+                                        detail.ingredientKeys
+                                            .map((e) => tr(e))
+                                            .join(', '),
+                                        _goldDark)),
+                                const SizedBox(width: 15),
+                                Expanded(
+                                    child: _buildInfo(
+                                        Icons.warning_amber,
+                                        'lbl_allergens',
+                                        detail.allergenKeys
+                                            .map((e) => tr(e))
+                                            .join(', '),
+                                        _maroon)),
+                              ],
+                            ),
+                          const SizedBox(height: 25),
+                          // FIX: Translated 'CUSTOMISATION' header
+                          Text(tr('lbl_customisation').toUpperCase(),
+                              style: const TextStyle(
+                                  fontSize: 13,
+                                  fontFamily: 'serif',
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1.1)),
+                          ..._extras.keys.map((name) =>
+                              _buildSelectionRow(name, _extras[name]!)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // Back Button
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 10,
+            left: 20,
+            child: GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                width: 42,
+                height: 42,
+                decoration: const BoxDecoration(
+                    color: Colors.black45, shape: BoxShape.circle),
+                child: Center(
+                  child: Transform.translate(
+                    offset: const Offset(-1, 0),
+                    child: const Icon(Icons.arrow_back_ios_new,
+                        color: Colors.white, size: 18),
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  String _imagePath() {
-    // Support several possible field names used in your app_data items
-    final item = widget.foodItem;
-    if (item == null) return 'assets/images/food1.png';
-    if (item is Map) {
-      return (item['image'] ??
-          item['img'] ??
-          item['imagePath'] ??
-          'assets/images/food1.png') as String;
-    }
-    try {
-      // try common property names
-      final img = (item.image ?? item.img ?? item.imagePath) as String?;
-      return img ?? 'assets/images/food1.png';
-    } catch (_) {
-      return 'assets/images/food1.png';
-    }
+  Widget _buildInfo(IconData icon, String titleKey, String items, Color color) {
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Row(children: [
+        Icon(icon, size: 14, color: color),
+        const SizedBox(width: 5),
+        Text(tr(titleKey).toUpperCase(),
+            style: TextStyle(
+                fontSize: 10,
+                fontFamily: 'serif',
+                fontWeight: FontWeight.bold,
+                color: color))
+      ]),
+      Text(items,
+          style: const TextStyle(
+              fontSize: 12, fontFamily: 'serif', color: Colors.grey)),
+    ]);
   }
 
-  String _title() {
-    final item = widget.foodItem;
-    if (item == null) return 'Delicious Dish';
-    if (item is Map) return item['name'] ?? 'Delicious Dish';
-    try {
-      return item.name ?? 'Delicious Dish';
-    } catch (_) {
-      return 'Delicious Dish';
-    }
-  }
-
-  String _desc() {
-    final item = widget.foodItem;
-    if (item == null) return '';
-    if (item is Map) return item['longdesc'] ?? '';
-    try {
-      return item.longdescription?? '';
-    } catch (_) {
-      return '';
-    }
-  }
-
-  double _price() {
-    final item = widget.foodItem;
-    if (item == null) return 0;
-    if (item is Map) {
-      return (item['price'] is num) ? (item['price'] as num).toDouble() : 0;
-    }
-    try {
-      return (item.price is num) ? (item.price as num).toDouble() : 0;
-    } catch (_) {
-      return 0;
-    }
-  }
-
-//calculate total price based on base price, quantity, and any selected customisation options
-  double get totalPrice {
-  final base = _price();
-  final extra = customizationOptions[selectedOption] ?? 0;
-  return (base + extra) * qty;
-}
-
-  @override
-  Widget build(BuildContext context) {
-    final img = _imagePath();
-    final title = _title();
-    final desc = _desc();
-    final price = _price();
-
-    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
-
-    return Scaffold(
-      backgroundColor: darkBg,
-      body: SafeArea(
-        child: Column(
+  Widget _buildSelectionRow(String name, int price) {
+    bool isSelected = _selectedExtras.contains(name);
+    return InkWell(
+      onTap: () => setState(() {
+        if (name == 'Regular') {
+          _selectedExtras.clear();
+          _selectedExtras.add('Regular');
+        } else {
+          _selectedExtras.remove('Regular');
+          isSelected ? _selectedExtras.remove(name) : _selectedExtras.add(name);
+          if (_selectedExtras.isEmpty) _selectedExtras.add('Regular');
+        }
+      }),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
           children: [
-            // top area with back button and image rounded
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      SoundService.playClick();
-                      Navigator.of(context).pop();
-                    },
-                    child: const Icon(Icons.arrow_back_ios,
-                        color: Colors.white, size: 28),
-                  ),
-                ],
-              ),
-            ),
-
-            // image card
-            if (!isLandscape) ...[
-              Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: Image.asset(
-                  img,
-                  height: 260,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            ],
-            
-
-            // white detail panel
-            // ✅ White detail panel - Scrollable in landscape
-Expanded(
-  child: Container(
-    width: double.infinity,
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.vertical(
-        top: isLandscape ? Radius.zero : const Radius.circular(28),
-      ),
-    ),
-    child: isLandscape
-        ? // ✅ Landscape: Scrollable content
-        SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Rating + quantity row
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Rating pill
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(22),
-                        border: Border.all(
-                            color: gold.withOpacity(0.9), width: 2),
-                      ),
-                      child: const Row(
-                        children: [
-                          Icon(Icons.star, color: Colors.amber, size: 18),
-                          SizedBox(width: 8),
-                          Text('4.0',
-                              style: TextStyle(fontWeight: FontWeight.w700)),
-                        ],
-                      ),
-                    ),
-
-                    // Qty pill
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6),
-                      decoration: BoxDecoration(
-                        color: gold,
-                        borderRadius: BorderRadius.circular(22),
-                      ),
-                      child: Row(
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.remove, color: Colors.white),
-                            onPressed: () => setState(() {
-                              if (qty > 1) qty--;
-                            }),
-                            splashRadius: 18,
-                          ),
-                          Text('$qty',
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w700)),
-                          IconButton(
-                            icon: const Icon(Icons.add, color: Colors.white),
-                            onPressed: () => setState(() => qty++),
-                            splashRadius: 18,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 12),
-
-                // Title
-                Text(
-                  title,
+            Icon(isSelected ? Icons.check_circle : Icons.circle_outlined,
+                color: isSelected ? _gold : Colors.grey[300], size: 18),
+            const SizedBox(width: 10),
+            // FIX: name is now translated inside _capitalizeFirst
+            Text(_capitalizeFirst(name),
+                style: TextStyle(
+                    fontSize: 14,
+                    fontFamily: 'serif',
+                    color: isSelected ? _darkSlate : Colors.grey[700])),
+            const Spacer(),
+            if (price > 0)
+              Text('+Rs $price',
                   style: const TextStyle(
-                    color: Color(0xFFB56A2E),
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
+                      fontSize: 13,
+                      fontFamily: 'serif',
+                      fontWeight: FontWeight.bold,
+                      color: _goldDark)),
+          ],
+        ),
+      ),
+    );
+  }
 
-                const SizedBox(height: 10),
+  Widget _buildStepper() {
+    return Container(
+      decoration: BoxDecoration(
+          color: const Color(0xFFB8860B),
+          borderRadius: BorderRadius.circular(20)),
+      child: Row(children: [
+        IconButton(
+            onPressed: () => setState(() => _quantity > 1 ? _quantity-- : null),
+            icon: const Icon(Icons.remove, color: Colors.white, size: 16)),
+        Text('$_quantity',
+            style: const TextStyle(
+                color: Colors.white,
+                fontFamily: 'serif',
+                fontWeight: FontWeight.bold)),
+        IconButton(
+            onPressed: () => setState(() => _quantity++),
+            icon: const Icon(Icons.add, color: Colors.white, size: 16)),
+      ]),
+    );
+  }
 
-                // Description
-                Text(
-                  desc,
-                  style: const TextStyle(fontSize: 13, height: 1.4),
-                ),
-
-                const SizedBox(height: 12),
-
-                // Customisation header
-                Text(
-                  'Customisation',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    color: Colors.black87,
-                  ),
-                ),
-
-                const SizedBox(height: 6),
-
-                // ✅ Horizontal scrollable chips
-                SizedBox(
-                  height: 44,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: customizationOptions.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 10),
-                    itemBuilder: (context, index) {
-                      final entry = customizationOptions.entries.elementAt(index);
-                      final isSelected = selectedOption == entry.key;
-
-                      return ChoiceChip(
-                        label: Text(
-                          entry.value == 0
-                              ? entry.key
-                              : '${entry.key} (+Rs ${entry.value.toStringAsFixed(0)})',
-                        ),
-                        selected: isSelected,
-                        selectedColor: gold.withOpacity(0.9),
-                        labelStyle: TextStyle(
-                          color: isSelected ? Colors.white : Colors.black,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        onSelected: (_) {
-                          setState(() => selectedOption = entry.key);
-                        },
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      );
-                    },
-                  ),
-                ),
-
-                const SizedBox(height: 12),
-
-                // Total price + add to cart button
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Total Price',
-                            style: TextStyle(color: Colors.black54)),
-                        const SizedBox(height: 6),
-                        Text(
-                          'Rs ${(totalPrice).toStringAsFixed(0)}',
-                          style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w800,
-                              color: gold),
-                        ),
-                      ],
-                    ),
-                    ElevatedButton.icon(
-                      onPressed: _addToCart,
-                      icon: const Icon(Icons.shopping_cart_outlined),
-                      label: const Text('Add To Cart'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: darkBg,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 18, vertical: 14),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16)),
-                      ),
-                    )
-                  ],
-                ),
-              ],
-            ),
-          )
-        : // ✅ Portrait: Original scrollable layout
-          Padding(
-              padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
-              child: Column(
+  Widget _buildBottomActionPanel() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(25, 12, 25, 25),
+      decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(35)),
+          boxShadow: [
+            BoxShadow(
+                color: Colors.black12, blurRadius: 10, offset: Offset(0, -4))
+          ]),
+      child: SafeArea(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Rating + quantity row
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Rating pill
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(22),
-                          border: Border.all(
-                              color: gold.withOpacity(0.9), width: 2),
-                        ),
-                        child: const Row(
-                          children: [
-                            Icon(Icons.star, color: Colors.amber, size: 18),
-                            SizedBox(width: 8),
-                            Text('4.0',
-                                style: TextStyle(fontWeight: FontWeight.w700)),
-                          ],
-                        ),
-                      ),
-
-                      // Qty pill
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6),
-                        decoration: BoxDecoration(
-                          color: gold,
-                          borderRadius: BorderRadius.circular(22),
-                        ),
-                        child: Row(
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.remove, color: Colors.white),
-                              onPressed: () => setState(() {
-                                if (qty > 1) qty--;
-                              }),
-                              splashRadius: 18,
-                            ),
-                            Text('$qty',
-                                style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w700)),
-                            IconButton(
-                              icon: const Icon(Icons.add, color: Colors.white),
-                              onPressed: () => setState(() => qty++),
-                              splashRadius: 18,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // Title
+                  // FIX: Translated 'TOTAL PRICE' label
+                  Text(tr('lbl_total_price').toUpperCase(),
+                      style: const TextStyle(
+                          fontSize: 10,
+                          color: Colors.grey,
+                          fontFamily: 'serif',
+                          fontWeight: FontWeight.bold)),
                   Text(
-                    title,
+                      'Rs ${(_currentUnitPrice * _quantity).toStringAsFixed(0)}',
+                      style: const TextStyle(
+                          fontSize: 22,
+                          fontFamily: 'serif',
+                          fontWeight: FontWeight.w900,
+                          color: _goldDark)),
+                ]),
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.5,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: _darkSlate,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15)),
+                    padding: const EdgeInsets.symmetric(vertical: 16)),
+                onPressed: _handleAddToCart,
+                // FIX: Translated 'ADD TO CART' button
+                child: Text(tr('lbl_add_to_cart').toUpperCase(),
                     style: const TextStyle(
-                      color: Color(0xFFB56A2E),
-                      fontSize: 22,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  // Description - Scrollable in portrait
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: Text(
-                        desc,
-                        style: const TextStyle(fontSize: 13, height: 1.4),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // Customisation header
-                  Text(
-                    'Customisation',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      color: Colors.black87,
-                    ),
-                  ),
-
-                  const SizedBox(height: 6),
-
-                  // Horizontal scrollable chips
-                  SizedBox(
-                    height: 44,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: customizationOptions.length,
-                      separatorBuilder: (_, __) => const SizedBox(width: 10),
-                      itemBuilder: (context, index) {
-                        final entry = customizationOptions.entries.elementAt(index);
-                        final isSelected = selectedOption == entry.key;
-
-                        return ChoiceChip(
-                          label: Text(
-                            entry.value == 0
-                                ? entry.key
-                                : '${entry.key} (+Rs ${entry.value.toStringAsFixed(0)})',
-                          ),
-                          selected: isSelected,
-                          selectedColor: gold.withOpacity(0.9),
-                          labelStyle: TextStyle(
-                            color: isSelected ? Colors.white : Colors.black,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          onSelected: (_) {
-                            setState(() => selectedOption = entry.key);
-                          },
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        );
-                      },
-                    ),
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  // Total price + add to cart button
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('Total Price',
-                              style: TextStyle(color: Colors.black54)),
-                          const SizedBox(height: 6),
-                          Text(
-                            'Rs ${(totalPrice).toStringAsFixed(0)}',
-                            style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w800,
-                                color: gold),
-                          ),
-                        ],
-                      ),
-                      ElevatedButton.icon(
-                        onPressed: _addToCart,
-                        icon: const Icon(Icons.shopping_cart_outlined),
-                        label: const Text('Add To Cart'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: darkBg,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 18, vertical: 14),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16)),
-                        ),
-                      )
-                    ],
-                  ),
-                ],
+                        color: Colors.white,
+                        fontFamily: 'serif',
+                        fontWeight: FontWeight.bold)),
               ),
             ),
-            ),
-          ),
           ],
         ),
       ),

@@ -3,6 +3,7 @@ import '../food/food_detail_screen.dart';
 import '../../models/food_model.dart';
 import '../../services/product_repository.dart';
 import '../../services/favorites_service.dart';
+import '../../models/app_data.dart';
 
 class FavoritesScreen extends StatefulWidget {
   const FavoritesScreen({super.key});
@@ -15,6 +16,10 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   List<FoodModel> _favorites = [];
   bool _isLoading = true;
 
+  // Grand Atelier Theme Colors
+  final Color maroonColor = const Color(0xFF63210B);
+  final Color goldColor = const Color(0xFFA67117);
+
   @override
   void initState() {
     super.initState();
@@ -23,113 +28,160 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
 
   Future<void> _loadFavorites() async {
     try {
-          // 1. Get all products from Firestore (cached)
-          final allProducts = await ProductRepository.getAllProducts();
-          
-          // 2. Filter to only favorites using our new method
-          final favorites = await FoodModel.getFavorites(allProducts: allProducts);
-          
-          setState(() {
-            _favorites = favorites;
-            _isLoading = false;
-          });
-        } catch (e) {
-          print('Error loading favorites: $e');
-          setState(() => _isLoading = false);
-        }
+      final allProducts = await ProductRepository.getAllProducts();
+      final favorites = await FoodModel.getFavorites(allProducts: allProducts);
+
+      if (mounted) {
+        setState(() {
+          _favorites = favorites;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
-Future<void> _toggleFavorite(FoodModel food) async {
-  // Toggle in Firestore
-  final isNowFavorite = await FavoritesService.toggleFavorite(food.id);
-  
-  // Optional: Show user feedback
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(isNowFavorite 
-          ? 'Added to favorites' 
-          : 'Removed from favorites'),
-      duration: const Duration(seconds: 1),
-    ),
-  );
-}
+  Future<void> _toggleFavorite(FoodModel food) async {
+    final isNowFavorite = await FavoritesService.toggleFavorite(food.id);
+    _loadFavorites(); // Instant UI refresh
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: maroonColor,
+        content: Text(AppData.trans(
+            isNowFavorite ? 'Added to favorites' : 'Removed from favorites')),
+        duration: const Duration(seconds: 1),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Favorites'),
         backgroundColor: Colors.white,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          AppData.trans('Favourites'),
+          style: TextStyle(
+              color: maroonColor, fontWeight: FontWeight.bold, fontSize: 20),
+        ),
+        centerTitle: true,
         actions: [
-          // Refresh button
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: Icon(Icons.refresh, color: goldColor, size: 22),
             onPressed: _loadFavorites,
           ),
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          :_favorites.isEmpty
+          ? Center(child: CircularProgressIndicator(color: goldColor))
+          : _favorites.isEmpty
               ? _buildEmptyState()
               : _buildFavoritesList(),
     );
   }
 
   Widget _buildEmptyState() {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.favorite_border, size: 80, color: Color.fromARGB(255, 192, 177, 41)),
-          const SizedBox(height: 16),
+          Icon(Icons.favorite_border,
+              size: 60, color: goldColor.withOpacity(0.3)),
+          const SizedBox(height: 15),
           Text(
-            'No favorites yet',
-            style: TextStyle(fontSize: 18, color: Color.fromARGB(255, 110, 110, 110)),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Tap the heart icon on any dish to add it here!',
-            style: TextStyle(color: Color.fromARGB(255, 155, 155, 155)),
+            AppData.trans('no_fav_yet'),
+            style: TextStyle(color: maroonColor.withOpacity(0.6), fontSize: 16),
             textAlign: TextAlign.center,
           ),
         ],
       ),
     );
   }
-  
- Widget _buildFavoritesList() {
+
+  Widget _buildFavoritesList() {
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       itemCount: _favorites.length,
       itemBuilder: (context, index) {
         final item = _favorites[index];
-        return Card(
-          margin: const EdgeInsets.only(bottom: 8),
+
+        // --- Category Key Logic ---
+        // database "Non Veg" -> becomes "non_veg"
+        String categoryKey =
+            item.category.trim().toLowerCase().replaceAll(' ', '_');
+        // "non_veg" -> becomes "cat_non_veg" to match your AppData
+        String fullTranslationKey = 'cat_$categoryKey';
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: goldColor, width: 1.2),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
           child: ListTile(
-            leading: _buildImage(item.image, size: 50),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+            leading: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: _buildImage(item.image, size: 55),
+            ),
             title: Text(
-              item.name,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              AppData.trans(item.name.trim()),
+              style: TextStyle(
+                color: maroonColor,
+                fontWeight: FontWeight.bold,
+                fontSize: 15,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            subtitle: Text(
-              '${item.category} • Rs ${item.price.toStringAsFixed(0)}',
-            ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.star, size: 16, color: Colors.amber),
-                Text(item.rating.toStringAsFixed(1)),
-                const SizedBox(width: 8),
-                IconButton(
-                  icon: Icon(
-                    item.isFavorite ? Icons.favorite : Icons.favorite_border,
-                    color: item.isFavorite ? Colors.red : Colors.grey,
+            subtitle: Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    AppData.trans(fullTranslationKey),
+                    style: TextStyle(
+                        color: goldColor,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500),
                   ),
-                  onPressed: () => _toggleFavorite(item),
-                ),
-              ],
+                  Text(
+                    'Rs ${item.price.toStringAsFixed(0)}',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            trailing: IconButton(
+              icon: Icon(
+                item.isFavorite ? Icons.favorite : Icons.favorite_border,
+                color: item.isFavorite ? Colors.red : Colors.grey,
+                size: 22,
+              ),
+              onPressed: () => _toggleFavorite(item),
             ),
             onTap: () {
               Navigator.push(
@@ -145,33 +197,17 @@ Future<void> _toggleFavorite(FoodModel food) async {
     );
   }
 
-  // Helper method to build images with proper error handling
-  Widget _buildImage(String imagePath, {double? size, double? width}) {
-    final displaySize = size ?? 120.0;
-    
+  Widget _buildImage(String imagePath, {double? size}) {
     return Container(
-      width: width ?? displaySize,
-      height: displaySize,
-      color: Colors.grey[200],
-      child: ClipRRect(
-        borderRadius: size != null ? BorderRadius.circular(8) : BorderRadius.zero,
-        child: Image.asset(
-          imagePath,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            // Show placeholder icon if image fails to load
-            return Container(
-              color: Colors.grey[300],
-              child: Center(
-                child: Icon(
-                  Icons.restaurant,
-                  size: displaySize * 0.4,
-                  color: Colors.grey[400],
-                ),
-              ),
-            );
-          },
-        ),
+      width: size,
+      height: size,
+      color: Colors.grey[50],
+      child: Image.asset(
+        imagePath,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Icon(Icons.restaurant, color: Colors.grey[300], size: 20);
+        },
       ),
     );
   }

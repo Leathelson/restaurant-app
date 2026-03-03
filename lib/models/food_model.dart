@@ -10,6 +10,7 @@ class FoodModel {
   final String category;
   final double price;
   bool isFavorite;
+  final String imagePath; // Added this field
 
   FoodModel({
     required this.id,
@@ -20,11 +21,13 @@ class FoodModel {
     required this.rating,
     required this.category,
     required this.price,
+    required this.imagePath, // Added to constructor
     this.isFavorite = false,
   });
 
   // Create FoodModel from Firebase Document
-  factory FoodModel.fromFirestore(Map<String, dynamic> data, String documentId) {
+  factory FoodModel.fromFirestore(
+      Map<String, dynamic> data, String documentId) {
     return FoodModel(
       id: documentId,
       name: data['Name'] ?? 'No Name',
@@ -34,7 +37,8 @@ class FoodModel {
       rating: (data['Rating'] ?? 0).toDouble(),
       category: data['Category'] ?? 'veg',
       price: (data['Price'] ?? 0).toDouble(),
-      isFavorite: data['IsFavorite'] ?? false, // Read from Firestore if available
+      imagePath: data['ImagePath'] ?? '', // Map from Firestore if exists
+      isFavorite: data['IsFavorite'] ?? false,
     );
   }
 
@@ -48,6 +52,7 @@ class FoodModel {
     String? category,
     double? price,
     bool? isFavorite,
+    String? imagePath, // Added to copyWith
   }) {
     return FoodModel(
       id: id ?? this.id,
@@ -59,23 +64,22 @@ class FoodModel {
       category: category ?? this.category,
       price: price ?? this.price,
       isFavorite: isFavorite ?? this.isFavorite,
+      imagePath: imagePath ?? this.imagePath, // Map to new instance
     );
   }
 
   static Future<List<FoodModel>> getFavorites({
-    required List<FoodModel> allProducts, // Pass your full product list
+    required List<FoodModel> allProducts,
   }) async {
     final favoriteIds = await FavoritesService.getFavoriteIdsStream().first;
-    
-    // Filter allProducts to only include favorited items
+
     return allProducts
         .where((product) => favoriteIds.contains(product.id))
-        .map((product) => product.copyWith(isFavorite: true)) // Mark as favorite
+        .map((product) => product.copyWith(isFavorite: true))
         .toList();
   }
 
-  
-  // Convert to Map for Firestore (if you need to write back)
+  // Convert to Map for Firestore
   Map<String, dynamic> toMap() {
     return {
       'Name': name,
@@ -85,7 +89,8 @@ class FoodModel {
       'Price': price,
       'Image': image,
       'Category': category,
-      'IsFavorite': isFavorite, // Optionally include this if you want to store it in Firestore
+      'ImagePath': imagePath, // Added to persistence map
+      'IsFavorite': isFavorite,
     };
   }
 }

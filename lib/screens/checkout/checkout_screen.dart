@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../models/app_data.dart';
+import '../../models/food_model.dart';
 import '../reservation/reservation_screen.dart';
-import '../dashboard/dashboard_screen.dart';
+// FIX: Using the correct file path while targeting the LuxuryDashboard class
+import 'package:luxury_restaurant_app/screens/dashboard/dashboard_screen.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
@@ -21,8 +23,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-  double get tax => 100; // Fixed tax amount as shown in screenshot
+  double get tax => 100;
   double get total => subtotal + tax;
+
+  String _fmt(double v) => v.toStringAsFixed(0);
 
   void _updateQuantity(int index, bool increase) {
     setState(() {
@@ -42,7 +46,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
         title: Row(
@@ -58,156 +62,104 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       ),
       body: Column(
         children: [
-          // Cart items list
           Expanded(
-            child: ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemCount: AppData.cart.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                final item = AppData.cart[index];
-                return Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: gold.withOpacity(0.3)),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      // Food image
-                      ClipRRect(
-                        borderRadius: const BorderRadius.horizontal(
-                            left: Radius.circular(12)),
-                        child: Image.asset(
-                          item.food.image,
-                          width: 80,
-                          height: 80,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                item.food.name,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 16,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Rs ${item.food.price}',
-                                style: TextStyle(
-                                  color: gold,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      // Quantity controls
-                      Container(
+            child: AppData.cart.isEmpty
+                ? const Center(child: Text("Your cart is empty"))
+                : ListView.separated(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: AppData.cart.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final item = AppData.cart[index];
+                      return Container(
                         decoration: BoxDecoration(
                           border: Border.all(color: gold.withOpacity(0.3)),
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        margin: const EdgeInsets.only(right: 12),
                         child: Row(
                           children: [
-                            IconButton(
-                              icon: const Icon(Icons.remove, size: 20),
-                              onPressed: () => _updateQuantity(index, false),
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(
-                                  minWidth: 32, minHeight: 32),
+                            ClipRRect(
+                              borderRadius: const BorderRadius.horizontal(
+                                  left: Radius.circular(12)),
+                              child: Image.asset(
+                                item.food.image,
+                                width: 80,
+                                height: 80,
+                                fit: BoxFit.cover,
+                                // FIX: Changed variables to (_, __, ___) to avoid duplicate declaration
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Container(
+                                        width: 80,
+                                        height: 80,
+                                        color: Colors.grey[200],
+                                        child: const Icon(Icons.fastfood,
+                                            color: Colors.grey)),
+                              ),
                             ),
-                            Text(
-                              'x${item.quantity}',
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.w600),
+                            Expanded(
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 12),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      item.food.name,
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 16),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Rs ${_fmt(item.food.price)}',
+                                      style: TextStyle(
+                                          color: gold,
+                                          fontWeight: FontWeight.w700),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
-                            IconButton(
-                              icon: const Icon(Icons.add, size: 20),
-                              onPressed: () => _updateQuantity(index, true),
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(
-                                  minWidth: 32, minHeight: 32),
+                            Container(
+                              margin: const EdgeInsets.only(right: 12),
+                              child: Row(
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.remove, size: 20),
+                                    onPressed: () =>
+                                        _updateQuantity(index, false),
+                                  ),
+                                  Text('x${item.quantity}',
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold)),
+                                  IconButton(
+                                    icon: const Icon(Icons.add, size: 20),
+                                    onPressed: () =>
+                                        _updateQuantity(index, true),
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
-                      ),
-                    ],
+                      );
+                    },
                   ),
-                );
-              },
-            ),
           ),
-
-          // Discount code
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Do you have any discount code?',
-                hintStyle: TextStyle(color: Colors.black54),
-                border: UnderlineInputBorder(),
-              ),
-            ),
-          ),
-
-          // Summary and checkout button
           Container(
             color: darkBg,
             padding: const EdgeInsets.all(16),
             child: SafeArea(
               child: Column(
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('Subtotal',
-                          style: TextStyle(color: Colors.white70)),
-                      Text('Rs$subtotal',
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600)),
-                    ],
-                  ),
+                  _summaryRow('Subtotal', 'Rs ${_fmt(subtotal)}'),
                   const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('Tax',
-                          style: TextStyle(color: Colors.white70)),
-                      Text('Rs$tax',
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600)),
-                    ],
-                  ),
+                  _summaryRow('Tax', 'Rs ${_fmt(tax)}'),
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 8),
                     child: Divider(color: Colors.white24),
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('Total',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600)),
-                      Text('Rs$total',
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700)),
-                    ],
-                  ),
+                  _summaryRow('Total', 'Rs ${_fmt(total)}', isTotal: true),
                   const SizedBox(height: 16),
                   SizedBox(
                     width: double.infinity,
@@ -217,16 +169,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: gold,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                            borderRadius: BorderRadius.circular(12)),
                       ),
-                      child: const Text(
-                        'Checkout',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                      child: const Text('Checkout',
+                          style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white)),
                     ),
                   ),
                 ],
@@ -238,7 +187,22 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-  // ...existing code for _placeOrder and _reserveTable methods...
+  Widget _summaryRow(String label, String value, {bool isTotal = false}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label,
+            style: TextStyle(
+                color: isTotal ? Colors.white : Colors.white70,
+                fontWeight: isTotal ? FontWeight.bold : FontWeight.normal)),
+        Text(value,
+            style: TextStyle(
+                color: Colors.white,
+                fontWeight: isTotal ? FontWeight.bold : FontWeight.w600)),
+      ],
+    );
+  }
+
   void _placeOrder() {
     if (AppData.cart.isEmpty) return;
 
@@ -257,6 +221,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) => AlertDialog(
         title: const Text('Order Placed!'),
         content: const Text('Your order has been placed successfully.'),
@@ -271,9 +236,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
+              // FIX: Removed 'const' because products: [] is a dynamic list
               Navigator.pushAndRemoveUntil(
                 context,
-                MaterialPageRoute(builder: (_) => const DashboardScreen()),
+                MaterialPageRoute(
+                    builder: (_) => LuxuryDashboard(products: [])),
                 (route) => false,
               );
             },

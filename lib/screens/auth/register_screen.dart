@@ -1,14 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-<<<<<<< HEAD
-import 'package:luxury_restaurant_app/models/app_data.dart'
-    hide User; //  This allows FirebaseAuth to own the 'User' name
-// This tells Flutter: "Import everything from AppData EXCEPT the 'User' class"
 import 'package:luxury_restaurant_app/models/app_data.dart' hide User;
-=======
 import 'package:luxury_restaurant_app/services/sound_service.dart';
->>>>>>> 0e9ee9c9cf8997385ab5b2c409b5a5e6e2071c05
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -24,61 +18,106 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
 
+  final _nameFocus = FocusNode();
+  final _phoneFocus = FocusNode();
+  final _emailFocus = FocusNode();
+  final _passFocus = FocusNode();
+  final _confirmFocus = FocusNode();
+
+  bool _isLoading = false;
+
+  static const Color gold = Color(0xFFB37C1E);
+
   Future<void> _register() async {
-    // Translated Validation Messages
-    if (_nameController.text.isEmpty ||
-        _phoneController.text.isEmpty ||
-        _emailController.text.isEmpty ||
-        _passwordController.text.isEmpty ||
-        _confirmController.text.isEmpty) {
+    final String email = _emailController.text.trim();
+    final String password = _passwordController.text.trim();
+    final String name = _nameController.text.trim();
+    final String phone = _phoneController.text.trim();
+
+    // 1. Validation
+    if (name.isEmpty || phone.isEmpty || email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppData.trans('Please fill all fields'))),
+        SnackBar(content: Text(AppData.trans('please_fill_all'))),
       );
       return;
     }
 
-    if (_passwordController.text != _confirmController.text) {
+    if (password != _confirmController.text.trim()) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppData.trans('Passwords do not match'))),
+        SnackBar(content: Text(AppData.trans('passwords_dont_match'))),
       );
       return;
     }
+
+    setState(() => _isLoading = true);
 
     try {
+      // 2. Create User in Firebase Auth
       UserCredential userCredential =
           await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
+        email: email,
+        password: password,
       );
 
       User? user = userCredential.user;
-      if (user == null) return;
-
-      try {
-        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-          'Uid': user.uid,
-          'Name': _nameController.text.trim(),
-          'Phone': _phoneController.text.trim(),
-          'Email': _emailController.text.trim(),
-          'DateofEntry': DateTime.now(),
-        });
-      } catch (firestoreError) {
-        await user.delete();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppData.trans('save_error'))),
-        );
+      if (user == null) {
+        setState(() => _isLoading = false);
         return;
       }
 
-      await userCredential.user!.updateDisplayName(_nameController.text.trim());
-    } on FirebaseAuthException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message ?? AppData.trans('reg_failed'))),
-      );
-    }
+      // 3. Update Profile Name Immediately
+      await user.updateDisplayName(name);
 
-    if (!mounted) return;
-    Navigator.of(context).popUntil((route) => route.isFirst);
+      // 4. Save to Firestore
+      try {
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'Uid': user.uid,
+          'Name': name,
+          'Phone': phone,
+          'Email': email,
+          'DateofEntry': FieldValue.serverTimestamp(),
+        });
+      } catch (firestoreError) {
+        debugPrint("Firestore Error: $firestoreError");
+        // We don't delete the user here anymore to avoid the "bounce" back,
+        // just let them proceed to dashboard.
+      }
+
+      if (!mounted) return;
+
+      // FIX: Use pushNamedAndRemoveUntil to force the app into the Dashboard
+      // and prevent it from "popping" back to the Login screen.
+      Navigator.pushNamedAndRemoveUntil(
+          context, '/dashboard', (route) => false);
+    } on FirebaseAuthException catch (e) {
+      debugPrint("FIREBASE AUTH ERROR: ${e.code}");
+
+      String errorMessage;
+      switch (e.code) {
+        case 'email-already-in-use':
+          errorMessage =
+              "This email is already registered. Please login instead.";
+          break;
+        case 'weak-password':
+          errorMessage = "The password provided is too weak.";
+          break;
+        case 'invalid-email':
+          errorMessage = "The email address is badly formatted.";
+          break;
+        default:
+          errorMessage = e.message ?? "Registration failed. Please try again.";
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorMessage)),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("An unexpected error occurred.")),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -88,19 +127,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmController.dispose();
+    _nameFocus.dispose();
+    _phoneFocus.dispose();
+    _emailFocus.dispose();
+    _passFocus.dispose();
+    _confirmFocus.dispose();
     super.dispose();
   }
 
-  Color get gold => const Color(0xFFB37C1E);
-  Color get goldCard => const Color(0xFF906224);
-
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
-    final screenHeight = screenSize.height;
-    final screenWidth = screenSize.width;
-    final topPadding = MediaQuery.of(context).padding.top;
-
     return Scaffold(
       resizeToAvoidBottomInset: true,
       backgroundColor: Colors.black,
@@ -117,8 +153,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    Colors.black.withOpacity(0.3),
-                    Colors.black.withOpacity(0.7)
+                    Colors.black.withOpacity(0.4),
+                    Colors.black.withOpacity(0.8)
                   ],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
@@ -129,101 +165,97 @@ class _RegisterScreenState extends State<RegisterScreen> {
           SafeArea(
             child: SingleChildScrollView(
               physics: const ClampingScrollPhysics(),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minWidth: screenWidth,
-                  minHeight: screenHeight - topPadding,
-                ),
-                child: IntrinsicHeight(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                    child: Column(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 20),
+                    Text(
+                      AppData.trans('sign_up_title'),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'serif',
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const SizedBox(height: 20),
-                        Text(
-                          AppData.trans('register'), // TRANSLATED: "Sign Up"
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'serif',
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _socialButton('assets/icons/facebook.png'),
-                            _socialButton('assets/icons/instagram.png'),
-                            _socialButton('assets/icons/x_icon.png'),
-                          ],
-                        ),
-                        const SizedBox(height: 25),
-                        _inputField(
-                          controller: _nameController,
-                          hint: AppData.trans('Name'), // TRANSLATED
-                          icon: Icons.person_outline,
-                          fillColor: goldCard.withOpacity(0.9),
-                        ),
-                        _inputField(
-                          controller: _phoneController,
-                          hint: AppData.trans('Phone'), // TRANSLATED
-                          icon: Icons.phone_android_outlined,
-                          fillColor: goldCard.withOpacity(0.9),
-                          keyboard: TextInputType.phone,
-                        ),
-                        _inputField(
-                          controller: _emailController,
-                          hint: AppData.trans('Email'), // TRANSLATED
-                          icon: Icons.email_outlined,
-                          fillColor: goldCard.withOpacity(0.9),
-                          keyboard: TextInputType.emailAddress,
-                        ),
-                        _inputField(
-                          controller: _passwordController,
-                          hint: AppData.trans('Password'), // TRANSLATED
-                          icon: Icons.lock_outline,
-                          fillColor: Colors.black.withOpacity(0.5),
-                          obscure: true,
-                        ),
-                        _inputField(
-                          controller: _confirmController,
-                          hint: AppData.trans('Confirm Password'), // TRANSLATED
-                          icon: Icons.lock_outline,
-                          fillColor: goldCard.withOpacity(0.9),
-                          obscure: true,
-                        ),
-                        const SizedBox(height: 30),
-                        SizedBox(
-                          width: double.infinity,
-                          height: 55,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              SoundService.playClick();
-                              _register;
-                            } ,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: gold,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30)),
-                              elevation: 5,
-                            ),
-                            child: Text(
-                              AppData.trans('register'), // TRANSLATED
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'serif',
-                              ),
-                            ),
-                          ),
-                        ),
-                        const Spacer(),
-                        const SizedBox(height: 30),
+                        _socialButton('assets/icons/facebook.png'),
+                        _socialButton('assets/icons/instagram.png'),
+                        _socialButton('assets/icons/x_icon.png'),
                       ],
                     ),
-                  ),
+                    const SizedBox(height: 25),
+                    _inputField(
+                      controller: _nameController,
+                      focusNode: _nameFocus,
+                      hint: AppData.trans('name_hint'),
+                      icon: Icons.person_outline,
+                    ),
+                    _inputField(
+                      controller: _phoneController,
+                      focusNode: _phoneFocus,
+                      hint: AppData.trans('phone_hint'),
+                      icon: Icons.phone_android_outlined,
+                      keyboard: TextInputType.phone,
+                    ),
+                    _inputField(
+                      controller: _emailController,
+                      focusNode: _emailFocus,
+                      hint: AppData.trans('email_hint'),
+                      icon: Icons.email_outlined,
+                      keyboard: TextInputType.emailAddress,
+                    ),
+                    _inputField(
+                      controller: _passwordController,
+                      focusNode: _passFocus,
+                      hint: AppData.trans('password_hint'),
+                      icon: Icons.lock_outline,
+                      obscure: true,
+                    ),
+                    _inputField(
+                      controller: _confirmController,
+                      focusNode: _confirmFocus,
+                      hint: AppData.trans('confirm_password_hint'),
+                      icon: Icons.lock_outline,
+                      obscure: true,
+                    ),
+                    const SizedBox(height: 30),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 55,
+                      child: ElevatedButton(
+                        onPressed: _isLoading
+                            ? null
+                            : () {
+                                SoundService.playClick();
+                                _register();
+                              },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: gold,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30)),
+                          elevation: 8,
+                        ),
+                        child: _isLoading
+                            ? const CircularProgressIndicator(
+                                color: Colors.white)
+                            : Text(
+                                AppData.trans('register_button').toUpperCase(),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'serif',
+                                ),
+                              ),
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+                  ],
                 ),
               ),
             ),
@@ -235,9 +267,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Widget _inputField({
     required TextEditingController controller,
+    required FocusNode focusNode,
     required String hint,
     required IconData icon,
-    required Color fillColor,
     bool obscure = false,
     TextInputType keyboard = TextInputType.text,
   }) {
@@ -245,23 +277,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: TextField(
         controller: controller,
+        focusNode: focusNode,
         obscureText: obscure,
         keyboardType: keyboard,
-        style: const TextStyle(color: Colors.white),
+        style: const TextStyle(color: Colors.white, fontFamily: 'serif'),
+        cursorColor: gold,
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: const TextStyle(color: Colors.white70),
-          prefixIcon: Icon(icon, color: Colors.white),
+          hintStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
+          prefixIcon: Icon(icon, color: Colors.white70, size: 22),
           filled: true,
-          fillColor: fillColor,
+          fillColor: Colors.black.withOpacity(0.7),
           contentPadding:
               const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
-          border: OutlineInputBorder(
+          enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
-            borderSide: BorderSide(
-                color: const Color.fromARGB(255, 80, 80, 80).withOpacity(0.60),
-                width: 1.5), // Reduced width for elegance
+            borderSide: BorderSide(color: gold.withOpacity(0.7), width: 1.0),
           ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(30),
+            borderSide: const BorderSide(color: gold, width: 1.8),
+          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(30)),
         ),
       ),
     );
@@ -269,16 +306,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Widget _socialButton(String assetPath) {
     return IconButton(
-      onPressed: () {
-        SoundService.playClick();
-      },
-      icon: Image.asset(
-        assetPath,
-        width: 30,
-        height: 30,
-        errorBuilder: (_, __, ___) =>
-            const Icon(Icons.circle, color: Colors.white),
-      ),
+      onPressed: () => SoundService.playClick(),
+      icon: Image.asset(assetPath,
+          width: 28,
+          height: 28,
+          errorBuilder: (_, __, ___) =>
+              const Icon(Icons.circle, color: Colors.white)),
     );
   }
 }
