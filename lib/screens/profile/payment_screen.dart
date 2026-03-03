@@ -257,6 +257,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
     );
   }
 
+  
+
   Widget _rowText(String l, String v) => Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

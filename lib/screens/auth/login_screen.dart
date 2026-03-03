@@ -4,8 +4,8 @@ import 'package:luxury_restaurant_app/screens/auth/forgot_password.dart';
 import 'package:luxury_restaurant_app/models/app_data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'register_screen.dart';
+import 'package:luxury_restaurant_app/screens/dashboard/dashboard_screen.dart';
 import '../../services/sound_service.dart';
-// REMOVED: import '../../pages/home.dart';
 import 'package:luxury_restaurant_app/main.dart'; // To access DashboardScreen and languageNotifier
 
 class LoginScreen extends StatefulWidget {

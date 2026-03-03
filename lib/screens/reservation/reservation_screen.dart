@@ -50,7 +50,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => LuxuryDashboard(products: []),
+                    builder: (_) => DashboardScreen()
                 ),
                 (route) => false,
               );

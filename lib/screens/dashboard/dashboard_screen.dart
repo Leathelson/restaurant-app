@@ -9,16 +9,14 @@ import '../food/food_detail_screen.dart';
 import '../profile/profile_screen.dart';
 import '../search/search_screen.dart';
 
-class LuxuryDashboard extends StatefulWidget {
-  final List<FoodModel> products;
-
-  const LuxuryDashboard({super.key, required this.products});
+class DashboardScreen extends StatefulWidget {
+  const DashboardScreen({super.key});
 
   @override
-  State<LuxuryDashboard> createState() => _LuxuryDashboardState();
+  _DashboardScreenState createState() => _DashboardScreenState();
 }
 
-class _LuxuryDashboardState extends State<LuxuryDashboard> {
+class _DashboardScreenState extends State<DashboardScreen> {
   int selectedCategory = 0;
 
   String get _categoryFilter {

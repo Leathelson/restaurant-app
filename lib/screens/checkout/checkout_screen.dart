@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:luxury_restaurant_app/screens/profile/payment_screen.dart';
 import '../../models/app_data.dart';
 import '../../models/food_model.dart';
 import '../reservation/reservation_screen.dart';
 // FIX: Using the correct file path while targeting the LuxuryDashboard class
 import 'package:luxury_restaurant_app/screens/dashboard/dashboard_screen.dart';
 import 'package:flutter/material.dart';
+
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
@@ -189,7 +191,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     width: double.infinity,
                     height: 54,
                     child: ElevatedButton(
-                      onPressed: _placeOrder,
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const PaymentScreen()),
+                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: goldLocal,
                         shape: RoundedRectangleBorder(
@@ -227,54 +232,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 color: Colors.white,
                 fontWeight: isTotal ? FontWeight.bold : FontWeight.w600)),
       ],
-    );
-  }
-
-  void _placeOrder() {
-    if (AppData.cart.isEmpty) return;
-
-    final newOrder = Order(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      items: List.from(AppData.cart),
-      total: total,
-      date: DateTime.now(),
-      status: 'Processing',
-    );
-
-    setState(() {
-      AppData.orders.add(newOrder);
-      AppData.cart.clear();
-    });
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('Order Placed!'),
-        content: const Text('Your order has been placed successfully.'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _reserveTable();
-            },
-            child: const Text('Reserve a Table'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // FIX: Removed 'const' because products: [] is a dynamic list
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                    builder: (_) => LuxuryDashboard(products: [])),
-                (route) => false,
-              );
-            },
-            child: const Text('Back to Home'),
-          ),
-        ],
-      ),
     );
   }
 
