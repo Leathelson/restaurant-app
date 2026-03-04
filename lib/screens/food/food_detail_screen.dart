@@ -21,9 +21,9 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
   String selectedOption = 'Regular';
 
   final Map<String, double> customizationOptions = {
-    'Regular': 0,
-    'Extra Sauce': 150,
-    'Cheese Topping': 200,
+    'regular': 0,
+    'extra_sauce': 150,
+    'cheese_topping': 200,
   };
 
   final TTSService _tts = TTSService.instance;
@@ -59,11 +59,11 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        content: const Text('Item added to cart'),
+        content: Text(AppData.trans('item_added_to_cart')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Continue'),
+            child: Text(AppData.trans('continue') ?? 'Continue'),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -77,7 +77,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
               );
             },
             child: Text(
-              'Go To Cart',
+              AppData.trans('go_to_cart') ?? 'Go To Cart',
               style: TextStyle(color: Theme.of(context).colorScheme.surface),
             ),
           ),
@@ -105,7 +105,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
     final item = widget.foodItem;
     if (item is Map) return item['name'] ?? 'Delicious Dish';
     try {
-      return item.name ?? 'Delicious Dish';
+      return AppData.translateOrFallback(item.name, item.name);
     } catch (_) {
       return 'Delicious Dish';
     }
@@ -324,13 +324,13 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                                       final entry = customizationOptions.entries
                                           .elementAt(index);
                                       final isSelected =
-                                          selectedOption == entry.key;
+                                          selectedOption == AppData.trans(entry.key);
 
                                       return ChoiceChip(
                                         label: Text(
                                           entry.value == 0
-                                              ? entry.key
-                                              : '${entry.key} (+Rs ${entry.value.toStringAsFixed(0)})',
+                                              ? AppData.trans(entry.key)
+                                              : '${AppData.trans(entry.key)} (+Rs ${entry.value.toStringAsFixed(0)})',
                                         ),
                                         selected: isSelected,
                                         selectedColor:
@@ -342,7 +342,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                                         ),
                                         onSelected: (_) {
                                           setState(
-                                              () => selectedOption = entry.key);
+                                              () => selectedOption = AppData.trans(entry.key));
                                         },
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 12, vertical: 4),
@@ -364,7 +364,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        Text('Total Price',
+                                        Text(AppData.trans('total_price'),
                                             style: TextStyle(
                                                 color: colors.onSurface)),
                                         const SizedBox(height: 6),
@@ -521,13 +521,13 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                                       final entry = customizationOptions.entries
                                           .elementAt(index);
                                       final isSelected =
-                                          selectedOption == entry.key;
+                                          selectedOption == AppData.trans(entry.key);
 
                                       return ChoiceChip(
                                         label: Text(
                                           entry.value == 0
-                                              ? entry.key
-                                              : '${entry.key} (+Rs ${entry.value.toStringAsFixed(0)})',
+                                              ? AppData.trans(entry.key)
+                                              : '${AppData.trans(entry.key)} (+Rs ${entry.value.toStringAsFixed(0)})',
                                         ),
                                         selected: isSelected,
                                         selectedColor: colors.primary,
@@ -537,7 +537,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                                         ),
                                         onSelected: (_) {
                                           setState(
-                                              () => selectedOption = entry.key);
+                                              () => selectedOption = AppData.trans(entry.key));
                                         },
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 12, vertical: 4),
@@ -559,7 +559,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        Text('Total Price',
+                                        Text(AppData.trans('total_price'),
                                             style: TextStyle(
                                                 color: colors.onSurface)),
                                         const SizedBox(height: 6),
@@ -579,7 +579,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                                         color: colors.onSurface,
                                       ),
                                       label: Text(
-                                        'Add To Cart',
+                                        AppData.trans('add_to_cart'),
                                         style:
                                             TextStyle(color: colors.onSurface),
                                       ),
@@ -729,13 +729,13 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
         separatorBuilder: (_, __) => const SizedBox(width: 10),
         itemBuilder: (context, index) {
           final entry = customizationOptions.entries.elementAt(index);
-          final isSelected = selectedOption == entry.key;
+          final isSelected = selectedOption == AppData.trans(entry.key);
 
           return ChoiceChip(
             label: Text(
               entry.value == 0
-                  ? entry.key
-                  : '${entry.key} (+Rs ${entry.value.toStringAsFixed(0)})',
+                  ? AppData.trans(entry.key)
+                  : '${AppData.trans(entry.key)} (+Rs ${entry.value.toStringAsFixed(0)})',
             ),
             selected: isSelected,
             selectedColor:
@@ -744,7 +744,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
               color: isSelected ? Colors.white : Colors.black,
             ),
             onSelected: (_) {
-              setState(() => selectedOption = entry.key);
+              setState(() => selectedOption = AppData.trans(entry.key));
             },
           );
         },
@@ -778,8 +778,8 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
           showButton: desc.isNotEmpty,
         ),
         const SizedBox(height: 24),
-        const Text(
-          'Customisation',
+        Text(
+          AppData.trans('customisation') ?? 'Customisation',
           style: TextStyle(
             fontWeight: FontWeight.w700,
             fontSize: 16,
@@ -838,7 +838,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Total Price', style: TextStyle(color: Colors.black54)),
+            Text(AppData.trans('total_price'), style: TextStyle(color: Colors.black54)),
             const SizedBox(height: 6),
             Text(
               'Rs ${totalPrice.toStringAsFixed(0)}',
@@ -852,7 +852,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
         ElevatedButton.icon(
           onPressed: _addToCart,
           icon: const Icon(Icons.shopping_cart_outlined),
-          label: const Text('Add To Cart'),
+          label: Text(AppData.trans('add_to_cart')),
           style: ElevatedButton.styleFrom(
             backgroundColor: Theme.of(context).colorScheme.surface,
             shape: RoundedRectangleBorder(

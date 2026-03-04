@@ -29,7 +29,7 @@ class FoodModel {
   // Create FoodModel from Firebase Document
   factory FoodModel.fromFirestore(
       Map<String, dynamic> data, String documentId) {
-    bool isSpanish = AppData.selectedLanguage == 'Spanish';
+    bool isSpanish = AppData.selectedLanguage == 'es';
 
     String shortDesc;
     String longDesc;

@@ -90,6 +90,16 @@ class AppData {
 
   static String selectedLanguage = 'en';
 
+  //parser for languageuage code to language name
+
+  static String translateOrFallback(String key, String fallback) {
+  final translated = trans(key);
+  if (translated.isEmpty || translated == key) {
+    return fallback;
+  }
+  return translated;
+}
+
   static final Map<String, DishDetail> dishDetails = {
     'grilled sirloin steak': const DishDetail(
       ingredientKeys: [
@@ -152,7 +162,12 @@ class AppData {
 
   static const Map<String, String> _en = {
     'Favourites': 'Favourites',
+    'register': 'Register',
+    'tts_preview_text': 'Text to speech enabled',
+    'Choose_Your_Option': 'Choose Your Option',
+    'continue': 'Continue',
     'no_fav_yet': 'Your palate awaits its first favourite.',
+    'go_to_cart': 'Go To Cart',
     'Added to favorites': 'Added to favorites',
     'Removed from favorites': 'Removed from favorites',
     'cat_non_veg': 'Non-Veg',
@@ -161,13 +176,15 @@ class AppData {
     'cat_dessert': 'Desserts',
     'app_title': 'The Grand Atelier',
     'search_hint': 'Discover Culinary Delights',
-    'search_food': 'Search dishes...',
+    'Search Food': 'Search Food',
     'favourites_title': 'Your Curated Selection',
     'no_items_found': 'No items available.',
     'no_results': 'No results found.',
     'cat_nonveg': 'Non Vegetarian',
     'settings': 'Settings',
+    'Sign out of your account': 'Sign out of your account',
     'language': 'Language',
+    'Enable Text-to-Speech' : 'Enable Text-to-Speech',
     'Order History': 'Order History',
     'All': 'All',
     'Completed': 'Completed',
@@ -187,7 +204,7 @@ class AppData {
     'November': 'November',
     'December': 'December',
     'select language': 'Select Language',
-    'notifications': 'Turn on Notifications',
+    'Turn on notifications': 'Turn on Notifications',
     'edit profile': 'Edit Profile',
     'logout': 'Log Out',
     'sign_out_desc': 'Sign out of your account',
@@ -225,12 +242,12 @@ class AppData {
     'lbl_allergens': 'Allergens',
     'lbl_quantity': 'Quantity',
     'lbl_total': 'Total',
-    'lbl_add_to_cart': 'Add to Cart',
-    'lbl_customisation': 'Customization',
-    'lbl_total_price': 'Total Price',
-    'Regular': 'Regular',
-    'Extra Sauce': 'Extra Sauce',
-    'Extra Cheese': 'Extra Cheese',
+    'add_to_cart': 'Add To Cart',
+    'customisation': 'Customisation',
+    'total_price': 'Total Price',
+    'regular': 'Regular',
+    'extra_sauce': 'Extra Sauce',
+    'cheese_topping': 'Cheese Topping',
     'CHECKOUT': 'CHECKOUT',
     'ORDER SUMMARY': 'ORDER SUMMARY',
     'Subtotal': 'Subtotal',
@@ -268,8 +285,8 @@ class AppData {
     'Favourite & Recommendation': 'Favourite & Recommendation',
     'Loyalty & Rewards': 'Loyalty & Rewards',
     'Payment & Security': 'Payment & Security',
-    'grilled sirloin steak': 'Herb-Crusted Aged Sirloin',
-    'beluga caviar': 'Reserve Beluga Caviar Imperial',
+    'grilled sirloin steak': 'Grilled Sirloin Steak',
+    'beluga caviar': 'Beluga Caviar',
     'east coast citrus-garlic': 'Citrus-Infused East Coast Oysters',
     'wagyu a5 steak': 'Miyazaki A5 Wagyu Ribeye',
     'prime aged beef sirloin grilled to perfection with aromatic herbs':
@@ -301,7 +318,7 @@ class AppData {
     'edit_profile': 'Edit Profile',
     'account_settings': 'Account Settings',
     'push_notification': 'Push Notification',
-    'dark_mode': 'Dark Mode',
+    'Dark Mode': 'Dark Mode',
     'languages': 'Languages',
     'log_out': 'Log Out',
     'logout_confirm': 'Are you sure you want to log out?',
@@ -358,11 +375,15 @@ class AppData {
 
   static const Map<String, String> _es = {
     'app_title': 'El Palacio Gastronómico',
+    'tts_preview_text': 'Texto a voz habilitado',
+    'Choose_Your_Option': 'Elige tu opción',
+    'item_added_to_cart': 'Artículo añadido al carrito',
     'search_hint': 'Buscar platillos...',
-    'search_food': 'Buscar platillos...',
+    'Search Food': 'Buscar platillos',
     'cat_non_veg': 'No vegetariano',
     'cat_veg': 'Vegetariano',
     'cat_salad': 'Ensaladas',
+    'Enable Text-to-Speech': 'Habilitar texto a voz',
     'favourites_title': 'Mis favoritos',
     'no_fav_yet': 'Aún no tienes favoritos.',
     'no_items_found': 'No hay platos disponibles.',
@@ -381,7 +402,7 @@ class AppData {
     'Confirm': 'Confirmar',
     'Cancel': 'Cancelar',
     'Please log in first': 'Por favor, inicie sesión primero',
-    'Beluga Caviar': 'Caviar Beluga',
+    'beluga caviar': 'Caviar Beluga',
     'forgot_password_title': 'Recuperar Contraseña',
     'forgot_password_subtitle':
         'Introduce tu correo para restablecer tu contraseña',
@@ -400,6 +421,8 @@ class AppData {
     'Order History': 'Historial de Pedidos',
     'All': 'Todos',
     'Completed': 'Completado',
+    'continue': 'Continuar',
+    'go_to_cart': 'Ir al carrito',
     'Cancelled': 'Cancelado',
     'Upcoming': 'Próximos',
     'No orders yet': 'Aún no hay pedidos',
@@ -440,19 +463,20 @@ class AppData {
     'settings': 'Ajustes',
     'language': 'Idioma',
     'select language': 'Seleccionar idioma',
-    'notifications': 'Activar notificaciones',
+    'Turn on notifications': 'Activar notificaciones',
     'edit profile': 'Editar perfil',
     'logout': 'Cerrar sesión',
     'sign_out_desc': 'Cerrar sesión en su cuenta',
     'lbl_description': 'Sobre este plato',
     'lbl_ingredients': 'Ingredientes',
     'Rewards': 'Recompensas',
+    'Sign out of your account': 'Cerrar sesión en su cuenta',
     'POINT': 'Punto',
     'general_settings': 'Ajustes Generales',
     'edit_profile': 'Editar Perfil',
     'account_settings': 'Ajustes de Cuenta',
     'push_notification': 'Notificación Push',
-    'dark_mode': 'Modo Oscuro',
+    'Dark Mode': 'Modo Oscuro',
     'languages': 'Idiomas',
     'log_out': 'Cerrar Sesión',
     'logout_confirm': 'Está seguro de que desea cerrar sesión?',
@@ -472,14 +496,13 @@ class AppData {
     'Payment & Security': 'Pago y Seguridad',
     'lbl_quantity': 'Cantidad',
     'lbl_total': 'Total',
-    'lbl_add_to_cart': 'Añadir al carrito',
-    'lbl_customisation': 'Personalización',
-    'lbl_total_price': 'Precio Total',
-    'Regular': 'Normal',
-    'Extra Sauce': 'Extra de salsa',
-    'Extra Cheese': 'Extra de queso',
-    'grilled sirloin steak': 'Solomillo Añejo a las Finas Hierbas',
-    'beluga caviar': 'Caviar Beluga Imperial',
+    'add_to_cart': 'Añadir al carrito',
+    'customisation': 'Personalización',
+    'total_price': 'Precio total',
+    'regular': 'Normal',
+    'extra_sauce': 'Extra de salsa',
+    'cheese_topping': 'Queso adicional',
+    'grilled sirloin steak': 'Filete solomillo parrilla',
     'east coast citrus-garlic': 'Ostras al Ajillo con Toque Cítrico',
     'wagyu a5 steak': 'Corte Wagyu A5 de Primera',
     'PAYMENT SUCCESSFUL': 'PAGO EXITOSO',
@@ -711,7 +734,7 @@ class AppData {
     'edit_profile': 'Modifier le Profil',
     'account_settings': 'Paramètres du Compte',
     'push_notification': 'Notification Push',
-    'dark_mode': 'Mode Sombre',
+    'Dark Mode': 'Mode Sombre',
     'languages': 'Langues',
     'log_out': 'Déconnexion',
     'logout_confirm': 'Êtes-vous sûr de vouloir vous déconnecter ?',
@@ -808,3 +831,6 @@ class AppData {
     return map[normalizedKey] ?? map[key] ?? key;
   }
 }
+
+
+

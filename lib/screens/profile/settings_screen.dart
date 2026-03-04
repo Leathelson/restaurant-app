@@ -209,7 +209,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _buildSettingsCard(
             icon: Icons.logout,
             title: AppData.trans('Logout'),
-            subtitle: 'Sign out of your account',
+            subtitle: AppData.trans('Sign out of your account'),
             onTap: _logout,
           ),
         ],

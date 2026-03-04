@@ -237,11 +237,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Wrap(
                     spacing: 10,
                     children: [
-                      _categoryChip(AppData.trans('Non Veg') ?? 'Non-Veg', 0,
+                      _categoryChip(AppData.trans('cat_non_veg') ?? 'Non-Veg', 0,
                           Colors.black87, isLandscape),
-                      _categoryChip(AppData.trans('Veg') ?? 'Veg', 1,
+                      _categoryChip(AppData.trans('cat_veg') ?? 'Veg', 1,
                           Colors.red[800]!, isLandscape),
-                      _categoryChip(AppData.trans('Salad') ?? 'Salad', 2,
+                      _categoryChip(AppData.trans('cat_salad') ?? 'Salad', 2,
                           colors.primary, isLandscape),
                     ],
                   ),
@@ -334,7 +334,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                               CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              food.name,
+                                              AppData.translateOrFallback(food.name, food.name),
                                               style: TextStyle(
                                                 fontWeight: FontWeight.w700,
                                                 fontSize: isLandscape ? 12 : 14,
@@ -570,7 +570,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                               MainAxisAlignment.center,
                                           children: [
                                             Text(
-                                              food.name,
+                                              AppData.translateOrFallback(food.name, food.name),
                                               style: TextStyle(
                                                 fontWeight: FontWeight.w700,
                                                 fontSize: isLandscape ? 12 : 14,
