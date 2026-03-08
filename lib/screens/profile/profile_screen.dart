@@ -8,6 +8,7 @@ import 'loyalty_screen.dart';
 import 'payment_screen.dart';
 import 'reservations_screen.dart';
 import 'settings_screen.dart';
+import 'chatbot_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -164,6 +165,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             builder: (_) => const ReservationsScreen())),
                     gold,
                     'reservations',
+                  ),
+                  _buildMenuOption(
+                    context,
+                    AppData.trans('Food Assistant'),
+                    Icons.smart_toy,
+                    () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => const ChatBotScreen())),
+                    gold,
+                    'chatbot',
                   ),
                 ],
               ),

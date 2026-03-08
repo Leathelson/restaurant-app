@@ -21,6 +21,7 @@ dependencies:
   emailjs: ^4.0.0
   provider:
   flutter_tts: ^3.8.3
+  google_generative_ai: ^0.4.7
 
 dev_dependencies:
   flutter_test:
