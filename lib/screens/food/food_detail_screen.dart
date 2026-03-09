@@ -741,7 +741,8 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
             selectedColor:
                 Theme.of(context).colorScheme.primary.withOpacity(0.9),
             labelStyle: TextStyle(
-              color: isSelected ? Colors.white : Colors.black,
+              color: Theme.of(context).colorScheme.onSurface,
+              fontWeight: FontWeight.w600,
             ),
             onSelected: (_) {
               setState(() => selectedOption = AppData.trans(entry.key));
@@ -821,7 +822,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
           flex: 5,
           child: Container(
             padding: const EdgeInsets.all(32),
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surface,
             child: SingleChildScrollView(
               child: _buildContentColumn(title, desc),
             ),
@@ -838,7 +839,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(AppData.trans('total_price'), style: TextStyle(color: Colors.black54)),
+            Text(AppData.trans('total_price'), style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
             const SizedBox(height: 6),
             Text(
               'Rs ${totalPrice.toStringAsFixed(0)}',
